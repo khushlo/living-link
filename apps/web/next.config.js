@@ -28,6 +28,7 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "frame-src https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.vercel.app",
               "connect-src 'self' https://api.clerk.com https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.vercel.app",
+              "worker-src 'self' blob:",
             ].join("; "),
           },
         ],
