@@ -1,0 +1,18 @@
+{
+  "name": "@livinglink/ai",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "openai": "^4.77.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
