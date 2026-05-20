@@ -2,7 +2,9 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAI() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 const SYSTEM_PROMPT = `You are the LivingLink Assistant, a compassionate and knowledgeable guide for the living kidney donation journey.
 
@@ -43,7 +45,7 @@ export async function POST(req: NextRequest) {
       { role: "user", content: message },
     ];
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: process.env.OPENAI_MODEL || "gpt-4o",
       messages,
       max_tokens: 300,
