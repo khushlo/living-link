@@ -25,8 +25,7 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
     }
   });
 
-  // Clerk proxy required headers
-  headers.set("authorization", `Bearer ${PUBLISHABLE_KEY}`);
+  // Only send publishable key — no Bearer token for frontend Clerk endpoints
   headers.set("x-publishable-key", PUBLISHABLE_KEY);
   headers.set("x-clerk-proxy-url", PROXY_URL);
 
