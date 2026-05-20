@@ -25,7 +25,11 @@ const clerkProxyUrl =
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider proxyUrl={clerkProxyUrl}>
+    <ClerkProvider
+      proxyUrl={clerkProxyUrl}
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+    >
       <html lang="en" suppressHydrationWarning>
         <body className={inter.className} suppressHydrationWarning>
           {/* Section 508: Skip navigation */}

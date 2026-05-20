@@ -2,39 +2,46 @@ import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-// Decode the Clerk frontend API URL from the publishable key
-function getClerkFAPI(): string {
-  const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
-  const b64 = key.replace(/^pk_(live|test)_/, "");
-  try {
-    const decoded = Buffer.from(b64, "base64").toString("utf-8").replace(/\$$/, "");
-    return `https://${decoded}`;
-  } catch {
-    return "https://api.clerk.com";
-  }
-}
+// All Clerk API calls proxy through api.clerk.com
+const CLERK_API_URL = "https://api.clerk.com";
 
 async function handler(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
-  const clerkFAPI = getClerkFAPI();
   const pathStr = path.join("/");
   const search = req.nextUrl.search;
-  const url = `${clerkFAPI}/${pathStr}${search}`;
+  const url = `${CLERK_API_URL}/${pathStr}${search}`;
 
-  const headers = new Headers(req.headers);
-  headers.delete("host");
+  const headers = new Headers();
+  // Forward relevant headers
+  req.headers.forEach((value, key) => {
+    if (![
+      "host", "connection", "transfer-encoding",
+      "content-length", "expect"
+    ].includes(key.toLowerCase())) {
+      headers.set(key, value);
+    }
+  });
+  headers.set("x-clerk-proxy-url", process.env.NEXT_PUBLIC_APP_URL + "/api/clerk");
+
+  const body = req.method !== "GET" && req.method !== "HEAD"
+    ? await req.text()
+    : undefined;
 
   const response = await fetch(url, {
     method: req.method,
     headers,
-    body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
-    // @ts-expect-error duplex needed for streaming body
-    duplex: "half",
+    body,
   });
 
-  return new Response(response.body, {
+  const resHeaders = new Headers(response.headers);
+  // Don't forward encoding headers — Next.js handles that
+  resHeaders.delete("content-encoding");
+  resHeaders.delete("transfer-encoding");
+
+  const text = await response.text();
+  return new Response(text, {
     status: response.status,
-    headers: response.headers,
+    headers: resHeaders,
   });
 }
 
