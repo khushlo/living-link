@@ -5,6 +5,7 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": [
+        "DATABASE_URL",
         "OPENAI_API_KEY",
         "CLERK_SECRET_KEY",
         "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
