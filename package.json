@@ -11,8 +11,8 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
-    "db:push": "cd apps/api && npx prisma db push",
-    "db:studio": "cd apps/api && npx prisma studio",
+    "db:push": "cd apps/web && npx prisma db push",
+    "db:studio": "cd apps/web && npx prisma studio",
     "db:seed": "cd apps/api && npx prisma db seed"
   },
   "devDependencies": {
