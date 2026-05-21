@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     if (!user?.donorProfile) return NextResponse.json({ error: "Donor profile not found" }, { status: 404 });
 
     const record = await prisma.financialRecord.create({
-      data: { donorProfileId: user.donorProfile.id, ...parsed.data },
+      data: { donorProfileId: user.donorProfile.id, ...parsed.data } as any,
     });
     return NextResponse.json(record, { status: 201 });
   } catch {

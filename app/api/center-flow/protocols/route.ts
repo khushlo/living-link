@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         focusArea: parsed.data.focusArea as any,
         centerId: (user?.center as any)?.centerId ?? null,
         isPublished: false,
-      },
+      } as any,
     });
     return NextResponse.json(protocol, { status: 201 });
   } catch {
