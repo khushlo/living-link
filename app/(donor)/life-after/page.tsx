@@ -171,6 +171,20 @@ export default function LifeAfterPage() {
           </div>
         )}
       </section>
+
+      {/* PCP Clarity Tool link */}
+      <section aria-labelledby="pcp-heading" className="rounded-xl bg-blue-50 border border-blue-200 p-5 flex items-start gap-4">
+        <span className="text-2xl" aria-hidden="true">🩺</span>
+        <div className="flex-1">
+          <h2 id="pcp-heading" className="font-semibold text-blue-900">Who manages what after donation?</h2>
+          <p className="text-sm text-blue-800 mt-1">
+            Understand exactly what your primary care doctor handles vs. your nephrologist - so nothing falls through the cracks.
+          </p>
+          <a href="/life-after/pcp-clarity" className="mt-3 inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+            Open PCP Clarity tool →
+          </a>
+        </div>
+      </section>
     </div>
   );
 }

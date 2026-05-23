@@ -122,6 +122,9 @@ model DonorProfile {
   checkins          PostDonationCheckin[]
   phq2Responses     PHQ2Response[]
   fhirPatientId     String?           @map("fhir_patient_id")
+  consentedAt       DateTime?         @map("consented_at")
+  consentVersion    String?           @map("consent_version")
+  researchConsent   Boolean           @default(false) @map("research_consent")
 
   @@map("donor_profiles")
 }

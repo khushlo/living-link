@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Shield, Calculator, FileText, Receipt, ExternalLink } from "lucide-react";
+import { Shield, Calculator, FileText, Receipt, ExternalLink, DollarSign } from "lucide-react";
 
 export default function DonorShieldPage() {
   const [wages, setWages] = useState({ hourlyRate: "", hoursPerWeek: "40", recoveryWeeks: "4" });
@@ -26,9 +26,12 @@ export default function DonorShieldPage() {
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { href: "/donor-shield/expenses", icon: Receipt, label: "Track expenses", color: "text-yellow-600", bg: "bg-yellow-50" },
-          { href: "/donor-shield/nldac", icon: FileText, label: "NLDAC wizard", color: "text-yellow-600", bg: "bg-yellow-50" },
-          { href: "https://nldac.org", icon: ExternalLink, label: "NLDAC website", color: "text-yellow-600", bg: "bg-yellow-50" },
+          { href: "/donor-shield/expenses",    icon: Receipt,     label: "Track expenses",        color: "text-yellow-600", bg: "bg-yellow-50" },
+          { href: "/donor-shield/nldac",       icon: FileText,    label: "NLDAC wizard",           color: "text-yellow-600", bg: "bg-yellow-50" },
+          { href: "/donor-shield/tax-credits", icon: DollarSign,  label: "State tax credits",      color: "text-green-600",  bg: "bg-green-50"  },
+          { href: "/donor-shield/fmla-letter", icon: FileText,    label: "FMLA letter",            color: "text-blue-600",   bg: "bg-blue-50"   },
+          { href: "/donor-shield/insurance",   icon: Shield,      label: "Insurance tracker",      color: "text-red-600",    bg: "bg-red-50"    },
+          { href: "https://nldac.org",         icon: ExternalLink, label: "NLDAC website",         color: "text-yellow-600", bg: "bg-yellow-50" },
         ].map((link) => (
           <a key={link.label} href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined}
             rel={link.href.startsWith("http") ? "noreferrer" : undefined}

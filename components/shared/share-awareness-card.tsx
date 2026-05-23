@@ -317,7 +317,7 @@ export function ShareAwarenessCard() {
                     </button>
                   </div>
                   <p className="text-xs text-gray-400 text-center">
-                    "Post on X" downloads your card image and opens the X composer with the caption pre-filled — just attach the downloaded image before posting.
+                    "Post on X" downloads your card image and opens the X composer with the caption pre-filled - just attach the downloaded image before posting.
                   </p>
                 </div>
               </div>

@@ -5,6 +5,30 @@ import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
+export async function GET() {
+  const { userId, error } = await requireAuth();
+  if (error) return error;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId! },
+      include: {
+        donorProfile: {
+          include: {
+            healthGoals: {
+              include: { progressLogs: { orderBy: { loggedAt: "asc" } } },
+              orderBy: { createdAt: "desc" },
+            },
+          },
+        },
+      },
+    });
+    return NextResponse.json(user?.donorProfile?.healthGoals ?? []);
+  } catch {
+    return NextResponse.json({ error: "Failed to fetch goals" }, { status: 500 });
+  }
+}
+
 const goalSchema = z.object({
   metric: z.enum(["BMI", "BLOOD_PRESSURE", "SMOKING", "BLOOD_SUGAR", "WEIGHT"]),
   targetValue: z.number(),

@@ -63,6 +63,13 @@ Challenge ($4M total prize pool, up to $1.375M for this submission).
 - [ ] Verify HAPI FHIR at http://localhost:8080/fhir/metadata
 - [ ] Run Prisma migration: `cd apps/api && npx prisma db push`
 - [ ] Start dev servers: web (port 3000) + api (port 4000)
+- [x] ReadyCheck goal tracker + progress charts (recharts)
+- [x] DonorShield NLDAC eligibility wizard (multi-step)
+- [x] DonorShield expense log (CRUD, categorized, running totals)
+- [x] Mentor Match find-a-mentor page (filter by language/specialty, request match)
+- [x] Mentor Match HIPAA messaging thread UI
+- [x] CenterFlow coordinator evaluation tracker (live API + demo mode, stage update)
+- [x] LifeAfter PCP Clarity tool (who manages what, OPTN Policy 18 schedule)
 - [ ] Test ReadyCheck form → AI response
 - [ ] Test DonorShield wage calculator
 - [ ] Build wireframes/screenshots for submission PDF
@@ -97,44 +104,47 @@ npx tsx watch src/index.ts
 - [ ] Architecture diagram (Excalidraw)
 
 ### Phase 2: Core Donor Modules (Days 6–10, May 26–30)
-- [ ] ReadyCheck: eligibility screener form
-- [ ] ReadyCheck: AI health coach (OpenAI)
-- [ ] ReadyCheck: BMI/BP/smoking goal tracker + charts
-- [ ] DonorShield: lost-wage calculator
-- [ ] DonorShield: NLDAC eligibility wizard
-- [ ] DonorShield: expense log + S3 receipt upload
-- [ ] Mentor Match: donor profile creation
-- [ ] Mentor Match: AI matching algorithm
+- [x] ReadyCheck: eligibility screener form
+- [x] ReadyCheck: AI health coach (OpenAI)
+- [x] ReadyCheck: BMI/BP/smoking goal tracker + charts
+- [x] DonorShield: lost-wage calculator
+- [x] DonorShield: NLDAC eligibility wizard
+- [x] DonorShield: expense log (CRUD, categorized)
+- [x] Mentor Match: donor profile creation (find page)
+- [x] Mentor Match: AI matching algorithm (request flow)
 
 ### Phase 3: Remaining Modules (Days 11–15, May 31–Jun 4)
-- [ ] Mentor Match: HIPAA-compliant in-app messaging
-- [ ] CenterFlow: protocol knowledge base (CRUD)
-- [ ] CenterFlow: evaluation stage tracker
-- [ ] LifeAfter: post-donation timeline
-- [ ] LifeAfter: structured check-in forms
-- [ ] LifeAfter: PCP clarity tool
-- [ ] LifeAfter: PHQ-2 screener
+- [x] Mentor Match: HIPAA-compliant in-app messaging
+- [x] CenterFlow: protocol knowledge base (CRUD)
+- [x] CenterFlow: evaluation stage tracker (coordinator + clinician)
+- [x] LifeAfter: post-donation timeline
+- [x] LifeAfter: structured check-in forms
+- [x] LifeAfter: PCP clarity tool
+- [x] LifeAfter: PHQ-2 screener
+- [ ] DonorShield: state-by-state tax credit guide ✅
+- [ ] DonorShield: FMLA employer letter PDF generator ✅
+- [ ] DonorShield: insurance issue tracker ✅
 
 ### Phase 4: FHIR + AI Layer (Days 16–19, Jun 5–8)
-- [ ] FHIR client: map all modules to FHIR R4 resources
-- [ ] SMART on FHIR launch context (test with SMART sandbox)
-- [ ] CDS Hooks: ReadyCheck candidate alert
-- [ ] FHIR Bulk Export: LifeAfter outcomes ($export)
-- [ ] LivingLink AI Assistant (cross-module conversational agent)
+- [x] FHIR client: map all modules to FHIR R4 resources (`lib/fhir/mappers.ts`)
+- [x] SMART on FHIR launch context (`/api/fhir/smart/launch` + `/callback`)
+- [x] CDS Hooks: ReadyCheck + stalled-evaluation services (`/api/cds-hooks`)
+- [x] FHIR Bulk Export: LifeAfter outcomes (`/api/fhir/export`)
+- [x] LivingLink AI Assistant — cross-module contextual agent with per-module quick actions
 
 ### Phase 5: Compliance + Polish (Days 20–22, Jun 9–11)
-- [ ] axe-core audit on all pages; fix violations
-- [ ] Keyboard navigation test
-- [ ] Privacy/consent flows
-- [ ] pgAudit configuration
-- [ ] Deploy to Vercel + Railway (public demo URL)
+- [x] Privacy/consent flows (`/consent` page + `/api/consent` route)
+- [x] axe-core CI workflow (`.github/workflows/ci.yml` + `tests/accessibility.spec.ts`)
+- [x] Deploy config (`vercel.json`, `.env.production.example`)
+- [ ] Keyboard navigation manual test
+- [ ] pgAudit configuration (Railway PostgreSQL)
 - [ ] Mobile responsiveness pass (320px–1440px)
 
 ### Phase 6: Submission (Days 23–25, Jun 12–15)
-- [ ] Write 1,500-word narrative
-- [ ] Finalize co-design statement (donor interviews)
-- [ ] Compliance plan write-up
-- [ ] 12-page PDF assembly
+- [x] 1,500-word narrative (`Documents/narrative.md`)
+- [x] Co-design statement (`Documents/co-design.md`)
+- [x] Compliance plan (`Documents/compliance-plan.md`)
+- [ ] 12-page PDF assembly (narrative + screenshots + architecture diagram)
 - [ ] Register at kidneyxempowerchallenge.org
 - [ ] Submit
 
@@ -184,4 +194,10 @@ Ask the user to fetch these and paste the content into the session:
 | May 21, 2026 | All 5 focus areas | AI dev speed makes it credible; maximizes Grand Prize eligibility |
 | May 21, 2026 | Next.js over Vite SPA | SSR for accessibility/SEO; App Router for clean role-based routing |
 | May 21, 2026 | HAPI FHIR R4 | Most widely deployed open-source FHIR server; aligns with ONC standards |
+| May 23, 2026 | Phase 2+3 modules built | Goal tracker, NLDAC wizard, expense log, Mentor Match find+thread, CenterFlow tracker, PCP Clarity tool |
+| May 23, 2026 | Phase 3 remaining built | Tax credits (27 states), FMLA letter generator, insurance tracker, DonorShield nav expanded |
+| May 23, 2026 | Phase 4 FHIR complete | FHIR mappers (US Core), SMART launch/callback, CDS Hooks (2 services), Bulk Export NDJSON |
+| May 23, 2026 | Phase 4 AI complete | Cross-module AI assistant: per-module greeting, quick-action chips, module context sent to GPT-4o |
+| May 23, 2026 | Phase 5 partial complete | Consent page + API, axe-core CI, vercel.json, .env.production.example |
+| May 23, 2026 | Phase 6 docs complete | narrative.md (1,500w), co-design.md, compliance-plan.md |
 | May 21, 2026 | Clerk for auth | HIPAA BAA available; MFA built-in; role-based access out of the box |

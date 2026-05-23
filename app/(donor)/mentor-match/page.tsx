@@ -56,10 +56,10 @@ export default function MentorMatchPage() {
             Continue your existing mentor conversations.
           </p>
           <Link
-            href="/mentor-match/conversations"
+            href="/mentor-match/find"
             className="inline-flex items-center gap-2 rounded-md border border-purple-200 bg-white px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50"
           >
-            View conversations <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            Browse mentors <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
       </div>
