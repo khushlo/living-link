@@ -61,12 +61,12 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
           <div className="flex items-center gap-2 shrink-0">
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="hidden sm:block text-sm font-medium text-gray-600 hover:text-blue-600 px-3 py-1.5 rounded-md transition-colors">
+                <button className="hidden md:block text-sm font-medium text-gray-600 hover:text-blue-600 px-3 py-1.5 rounded-md transition-colors">
                   Sign in
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+                <button className="hidden md:block rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
                   Get started free
                 </button>
               </SignUpButton>
@@ -74,17 +74,18 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
             <SignedIn>
               <Link
                 href="/dashboard"
-                className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                className="hidden md:block rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
               >
                 Dashboard
               </Link>
             </SignedIn>
 
-            {/* Mobile menu toggle */}
+            {/* Mobile menu toggle — always visible on small screens */}
             <button
-              className="md:hidden rounded-lg border p-1.5 ml-1"
+              className="md:hidden rounded-lg border border-gray-200 p-1.5 ml-1 bg-white"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -110,6 +111,37 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
                 {label}
               </Link>
             ))}
+
+            {/* Auth buttons inside mobile menu */}
+            <div className="pt-2 mt-2 border-t border-gray-100 flex flex-col gap-2">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button
+                    onClick={() => setMobileOpen(false)}
+                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                  >
+                    Sign in
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button
+                    onClick={() => setMobileOpen(false)}
+                    className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors text-left"
+                  >
+                    Get started free
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors text-center"
+                >
+                  Go to dashboard
+                </Link>
+              </SignedIn>
+            </div>
           </div>
         )}
       </header>

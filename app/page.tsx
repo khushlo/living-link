@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import { SignInButton, SignUpButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { ArrowRight, Heart, Shield, Users, Activity, CheckCircle, Map, TrendingUp, MessageSquare, BookOpen } from "lucide-react";
+import { PublicNav } from "@/components/shared/public-nav";
 
 const modules = [
   {
@@ -78,73 +79,7 @@ export default function LandingPage() {
       {/* Skip nav target */}
       <a id="main-content" className="sr-only" aria-label="Main content start" />
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <Heart className="h-6 w-6 fill-blue-600 text-blue-600" aria-hidden="true" />
-            <span className="text-xl font-bold text-gray-900">LivingLink</span>
-          </Link>
-          <nav aria-label="Primary navigation">
-            <ul className="hidden items-center gap-6 md:flex">
-              {/* Logged out: public tool links */}
-              <SignedOut>
-                {[
-                  { href: "/could-i-qualify", label: "Could I qualify?" },
-                  { href: "/ripple",           label: "Ripple effect" },
-                  { href: "/waitlist-map",      label: "Waitlist map" },
-                  { href: "/stories",           label: "Donor stories" },
-                  { href: "/start-conversation",label: "Practice conversation" },
-                ].map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-gray-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </SignedOut>
-              {/* Logged in: portal module links */}
-              <SignedIn>
-                {modules.map((m) => (
-                  <li key={m.name}>
-                    <Link
-                      href={m.authHref}
-                      className="text-sm text-gray-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-                    >
-                      {m.name}
-                    </Link>
-                  </li>
-                ))}
-              </SignedIn>
-            </ul>
-          </nav>
-          <div className="flex items-center gap-3">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="text-sm font-medium text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1">
-                  Sign in
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-                  Get started
-                </button>
-              </SignUpButton>
-            </SignedOut>
-            <SignedIn>
-              <Link
-                href="/dashboard"
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              >
-                Go to dashboard
-              </Link>
-            </SignedIn>
-          </div>
-        </div>
-      </header>
+      <PublicNav />
 
       <main>
         {/* Hero */}

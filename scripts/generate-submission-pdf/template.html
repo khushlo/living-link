@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LivingLink - KidneyX EMPOWER Track B Submission</title>
+
+<!-- Mermaid loaded from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+<style>
+  /* ============================================================
+     BASE RESET & TYPOGRAPHY
+  ============================================================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --teal:     #0d6e6e;
+    --teal-mid: #1a9e8c;
+    --teal-lt:  #d0f0ec;
+    --navy:     #0d2d4f;
+    --navy-lt:  #e8f0f8;
+    --gold:     #c07a1a;
+    --gold-lt:  #fdf3e2;
+    --red:      #c0392b;
+    --green:    #1a7a4a;
+    --green-lt: #e2f5eb;
+    --gray-1:   #1c1c1c;
+    --gray-2:   #444;
+    --gray-3:   #666;
+    --gray-4:   #999;
+    --gray-5:   #ccc;
+    --gray-6:   #f4f4f4;
+    --white:    #ffffff;
+    --font:     'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+
+  html { font-size: 10.5pt; }
+
+  body {
+    font-family: var(--font);
+    color: var(--gray-1);
+    background: var(--white);
+    line-height: 1.45;
+  }
+
+  h1 { font-size: 2rem;   line-height: 1.2; color: var(--navy); }
+  h2 { font-size: 1.2rem; line-height: 1.3; color: var(--teal); margin-bottom: 0.4rem; }
+  h3 { font-size: 1rem; color: var(--navy); margin-bottom: 0.3rem; margin-top: 0.6rem; }
+  h4 { font-size: 0.9rem; color: var(--teal); margin-bottom: 0.2rem; margin-top: 0.5rem; }
+
+  p  { margin-bottom: 0.35rem; }
+  ul { padding-left: 1.3rem; margin-bottom: 0.35rem; }
+  li { margin-bottom: 0.1rem; }
+  strong { color: var(--gray-1); }
+  a  { color: var(--teal); text-decoration: none; }
+  code { font-family: 'Consolas', monospace; font-size: 0.85em;
+         background: var(--gray-6); padding: 1px 4px; border-radius: 3px; }
+
+  /* ============================================================
+     PAGE LAYOUT
+  ============================================================ */
+  .page {
+    width: 100%;
+    padding: 4mm 12mm;
+    position: relative;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm 14mm;
+  }
+  @media print {
+    .cover { page-break-after: always; }
+  }
+
+  /* ============================================================
+     COVER PAGE
+  ============================================================ */
+  .cover {
+    background: linear-gradient(160deg, var(--navy) 0%, var(--teal) 100%);
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 18mm 16mm;
+    page-break-after: always;
+  }
+  .cover-logo {
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  .cover-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--white);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+  }
+  .cover h1 {
+    color: var(--white);
+    font-size: 3.2rem;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  .cover-tagline {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    max-width: 540px;
+  }
+  .cover-stats {
+    display: flex;
+    gap: 2.5rem;
+    margin: 2rem 0;
+  }
+  .cover-stat { text-align: center; }
+  .cover-stat-num {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--teal-lt);
+    line-height: 1;
+  }
+  .cover-stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+    margin-top: 0.2rem;
+  }
+  .cover-modules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+  }
+  .cover-module-chip {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+  .cover-footer {
+    border-top: 1px solid rgba(255,255,255,0.25);
+    padding-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .cover-contact p { font-size: 0.82rem; opacity: 0.85; line-height: 1.6; }
+  .cover-contact strong { color: var(--white); opacity: 1; }
+  .cover-url {
+    font-size: 0.82rem;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+  }
+
+  /* ============================================================
+     PAGE HEADER STRIPE
+  ============================================================ */
+  .page-header {
+    border-left: 5px solid var(--teal);
+    padding-left: 10px;
+    margin-bottom: 1rem;
+  }
+  .page-header .section-num {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--teal-mid);
+    margin-bottom: 0.1rem;
+  }
+  .page-header h2 { margin-bottom: 0; }
+
+  /* ============================================================
+     CALLOUT BOXES
+  ============================================================ */
+  .callout {
+    border-radius: 8px;
+    padding: 7px 11px;
+    margin: 0.5rem 0;
+  }
+  .callout-teal  { background: var(--teal-lt); border-left: 4px solid var(--teal-mid); }
+  .callout-gold  { background: var(--gold-lt);  border-left: 4px solid var(--gold); }
+  .callout-navy  { background: var(--navy-lt);  border-left: 4px solid var(--navy); }
+  .callout-green { background: var(--green-lt); border-left: 4px solid var(--green); }
+
+  .callout-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.35rem;
+  }
+  .callout-teal  .callout-title { color: var(--teal); }
+  .callout-gold  .callout-title { color: var(--gold); }
+  .callout-navy  .callout-title { color: var(--navy); }
+  .callout-green .callout-title { color: var(--green); }
+
+  /* ============================================================
+     PUBLIC ENDPOINT CARDS
+  ============================================================ */
+  .public-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 0.8rem 0;
+  }
+  .public-card {
+    background: var(--white);
+    border: 1.5px solid var(--teal-mid);
+    border-radius: 8px;
+    padding: 10px 12px;
+    position: relative;
+  }
+  .public-card-badge {
+    position: absolute;
+    top: -9px;
+    right: 10px;
+    background: var(--teal-mid);
+    color: var(--white);
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .public-card-route {
+    font-family: 'Consolas', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--teal);
+    margin-bottom: 0.25rem;
+  }
+  .public-card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.2rem;
+  }
+  .public-card p { font-size: 0.78rem; color: var(--gray-2); line-height: 1.4; margin: 0; }
+
+  .api-card {
+    background: var(--gray-6);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .api-method {
+    font-family: 'Consolas', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--white);
+    background: var(--teal);
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+  .api-method.post { background: var(--gold); }
+  .api-card-body p { font-size: 0.78rem; color: var(--gray-2); margin: 0; }
+  .api-card-body code { background: transparent; padding: 0; font-size: 0.82em; }
+
+  /* ============================================================
+     MODULE CARDS (two-column layout)
+  ============================================================ */
+  .module-layout {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 14px;
+    align-items: start;
+  }
+  .module-stat-box {
+    background: linear-gradient(135deg, var(--teal), var(--navy));
+    color: var(--white);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+  .module-stat-box .stat-num {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--teal-lt);
+  }
+  .module-stat-box .stat-label {
+    font-size: 0.63rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+  .module-stat-box .stat-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    margin: 5px 0;
+  }
+
+  .feature-list { list-style: none; padding: 0; }
+  .feature-list li {
+    padding: 2px 0 2px 20px;
+    position: relative;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--gray-6);
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--teal-mid);
+  }
+
+  .fhir-pill {
+    display: inline-block;
+    background: var(--navy-lt);
+    color: var(--navy);
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin: 1px 2px;
+    border: 1px solid var(--navy);
+    opacity: 0.7;
+  }
+
+  /* ============================================================
+     TABLES
+  ============================================================ */
+  table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.83rem; }
+  thead th {
+    background: var(--navy);
+    color: var(--white);
+    font-weight: 600;
+    padding: 5px 8px;
+    text-align: left;
+  }
+  tbody td { padding: 5px 8px; border-bottom: 1px solid var(--gray-5); vertical-align: top; }
+  tbody tr:nth-child(even) { background: var(--gray-6); }
+  tbody tr:hover { background: var(--teal-lt); }
+
+  .score-cell {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--teal);
+    white-space: nowrap;
+  }
+
+  /* ============================================================
+     MERMAID DIAGRAMS
+  ============================================================ */
+  .mermaid-wrap {
+    background: var(--gray-6);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 0.5rem 0;
+    overflow: visible;
+    text-align: center;
+  }
+  .mermaid { display: block; width: 100%; }
+  .mermaid svg { width: 100% !important; height: auto !important; max-height: 260px; }
+  .diagram-caption {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--teal);
+    margin-bottom: 6px;
+    text-align: left;
+    padding: 0 2px;
+  }
+  .diagram-caption span {
+    color: var(--gray-3);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 6px;
+    font-size: 0.68rem;
+  }
+
+  /* ============================================================
+     STATS ROW
+  ============================================================ */
+  .stats-row {
+    display: flex;
+    gap: 8px;
+    margin: 0.5rem 0;
+  }
+  .stat-card {
+    flex: 1;
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 7px;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--teal-lt);
+    line-height: 1.1;
+  }
+  .stat-card .lbl {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+
+  /* ============================================================
+     TIMELINE (LifeAfter)
+  ============================================================ */
+  .timeline {
+    display: flex;
+    gap: 0;
+    margin: 0.8rem 0;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 22px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--teal-mid);
+    z-index: 0;
+  }
+  .tl-item {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    padding-top: 36px;
+  }
+  .tl-dot {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--teal);
+    border: 3px solid var(--white);
+    box-shadow: 0 0 0 2px var(--teal-mid);
+  }
+  .tl-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .tl-desc {
+    font-size: 0.65rem;
+    color: var(--gray-3);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+
+  /* ============================================================
+     MISC UTILITIES
+  ============================================================ */
+  .divider { border: none; border-top: 1px solid var(--gray-5); margin: 1rem 0; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0.6rem 0 0.4rem;
+  }
+  .section-divider span {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--teal);
+    white-space: nowrap;
+  }
+  .section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gray-5);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin: 1px 2px;
+  }
+  .tag-teal  { background: var(--teal-lt);  color: var(--teal); border: 1px solid var(--teal-mid); }
+  .tag-navy  { background: var(--navy-lt);  color: var(--navy); border: 1px solid var(--navy); }
+  .tag-gold  { background: var(--gold-lt);  color: var(--gold); border: 1px solid var(--gold); }
+  .tag-green { background: var(--green-lt); color: var(--green); border: 1px solid var(--green); }
+
+  .page-num {
+    font-size: 0.65rem;
+    color: var(--gray-4);
+    text-align: right;
+    margin-top: 0.5rem;
+  }
+  .page-section-break {
+    border: none;
+    border-top: 2px solid var(--teal-lt);
+    margin: 0 0 0;
+  }
+  .footnote { font-size: 0.7rem; color: var(--gray-3); margin-top: 0.5rem; }
+
+  .check { color: var(--green); font-weight: 700; }
+  .highlight { background: #fff3cd; padding: 1px 3px; border-radius: 2px; }
+
+  /* Score bar for judging table */
+  .score-bar {
+    background: var(--gray-5);
+    border-radius: 4px;
+    height: 8px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--teal-mid), var(--teal));
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     COVER PAGE
+============================================================ -->
+<div class="page cover">
+  <div>
+    <div class="cover-logo">KidneyX EMPOWER Prize &bull; Track B Submission &bull; June 2026</div>
+    <div style="height: 2.5rem;"></div>
+    <div class="cover-badge">Track B - Scalable Prototype</div>
+    <h1>LivingLink</h1>
+
+    <div style="height: 2rem;"></div>
+
+    <div style="max-width: 560px;">
+      <p style="font-size:1.05rem; line-height:1.65; opacity:0.93; margin-bottom:1.2rem;">
+        LivingLink is a full-stack, open-source platform that addresses all five EMPOWER
+        focus areas through five interconnected modules: <strong style="color:#d0f0ec;">ReadyCheck</strong>,
+        <strong style="color:#d0f0ec;">DonorShield</strong>,
+        <strong style="color:#d0f0ec;">MentorMatch</strong>,
+        <strong style="color:#d0f0ec;">CenterFlow</strong>, and
+        <strong style="color:#d0f0ec;">LifeAfter</strong>.
+      </p>
+      <p style="font-size:0.9rem; line-height:1.6; opacity:0.82; margin-bottom:1.2rem;">
+        Built on HL7 FHIR R4 with SMART on FHIR and CDS Hooks, it integrates natively
+        into Epic and Cerner with no additional hardware. Five public-facing tools require
+        no account to use, removing the single biggest barrier to donor engagement.
+      </p>
+      <p style="font-size:0.9rem; line-height:1.6; opacity:0.82;">
+        Released under the MIT open-source license. HIPAA-compliant with AES-256 field-level
+        encryption, append-only audit logging, and WCAG 2.1 AA accessibility throughout.
+        Co-designed with three prior living donors, a veteran transplant coordinator,
+        and a living-donor nephrologist.
+      </p>
+    </div>
+
+    <div style="height: 2.5rem;"></div>
+
+    <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1.2rem;">
+      <p style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; opacity:0.6; margin-bottom:0.6rem;">Platform Modules</p>
+      <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+        <span class="cover-module-chip">ReadyCheck - Health Readiness Coach</span>
+        <span class="cover-module-chip">DonorShield - Financial Advocacy Suite</span>
+        <span class="cover-module-chip">MentorMatch - Peer Support Network</span>
+        <span class="cover-module-chip">CenterFlow - Evaluation Workflow Intelligence</span>
+        <span class="cover-module-chip">LifeAfter - Post-Donation Continuity</span>
+      </div>
+      <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.5rem;">
+        <span class="cover-module-chip">HL7 FHIR R4</span>
+        <span class="cover-module-chip">SMART on FHIR</span>
+        <span class="cover-module-chip">CDS Hooks 1.0</span>
+        <span class="cover-module-chip">US Core IG</span>
+        <span class="cover-module-chip">Da Vinci PDex</span>
+        <span class="cover-module-chip">FHIR Bulk Export</span>
+        <span class="cover-module-chip">OpenAI GPT-4o</span>
+        <span class="cover-module-chip">HIPAA Compliant</span>
+        <span class="cover-module-chip">MIT Open Source</span>
+        <span class="cover-module-chip">WCAG 2.1 AA</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <div class="cover-contact">
+      <p><strong>Submission Lead</strong><br />
+      Richard Horsley<br />
+      rhorsley2@gmail.com</p>
+      <p style="margin-top:0.5rem; opacity:0.7;">Submitted June 7, 2026 &bull; Deadline June 15, 2026</p>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:0.62rem; text-transform:uppercase; letter-spacing:0.1em; opacity:0.7; margin-bottom:0.4rem; font-weight:700;">Try the Live App</div>
+      <a href="https://living-link-wine.vercel.app/" style="display:inline-block; background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.6); color:white; font-family:'Consolas',monospace; font-size:0.82rem; font-weight:700; padding:7px 14px; border-radius:6px; letter-spacing:0.02em; text-decoration:none;">living-link-wine.vercel.app</a>
+      <div style="font-size:0.6rem; opacity:0.6; margin-top:0.4rem;">No account required for public tools</div>
+      <div style="font-size:0.6rem; opacity:0.55; margin-top:0.25rem;">MIT Open Source &bull; GitHub (public repository)</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 1 - EXECUTIVE SUMMARY + PROBLEM
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 1</div>
+    <h2>Executive Summary and Problem Statement</h2>
+  </div>
+
+  <div style="background: linear-gradient(135deg, var(--navy), var(--teal)); color: white; border-radius: 8px; padding: 12px 16px; margin-bottom: 0.9rem;">
+    <div style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.75; margin-bottom: 0.3rem; font-weight: 700;">Our Vision</div>
+    <p style="font-size: 1.05rem; font-weight: 600; line-height: 1.45; margin: 0; color: #d0f0ec;">
+      A world where no willing living kidney donor withdraws because of something we could have prevented.
+    </p>
+    <p style="font-size: 0.8rem; margin: 0.4rem 0 0; opacity: 0.85; line-height: 1.5;">
+      Every barrier LivingLink addresses - financial fear, health uncertainty, isolation, admin delays, post-donation abandonment - is preventable with the right tools, at the right moment, in the right hands.
+    </p>
+  </div>
+
+  <p>
+    LivingLink is a full-stack, open-source platform purpose-built to remove every major barrier
+    between a willing living kidney donor and a successful donation. It addresses all five EMPOWER
+    focus areas through five interconnected modules, a floating AI assistant, and a federal-grade
+    FHIR interoperability layer that plugs natively into Epic and Cerner via SMART on FHIR and CDS Hooks.
+  </p>
+
+  <div style="display:flex; align-items:center; gap:14px; background:var(--navy); border-radius:7px; padding:9px 14px; margin-bottom:0.7rem;">
+    <div style="flex-shrink:0;">
+      <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.6); font-weight:700; margin-bottom:2px;">Live Working App</div>
+      <a href="https://living-link-wine.vercel.app/" style="font-family:'Consolas',monospace; font-size:1rem; font-weight:700; color:#d0f0ec; text-decoration:underline; letter-spacing:0.01em;">https://living-link-wine.vercel.app/</a>
+    </div>
+    <div style="width:1px; height:32px; background:rgba(255,255,255,0.15); flex-shrink:0;"></div>
+    <div style="font-size:0.72rem; color:rgba(255,255,255,0.75); line-height:1.5;">
+      Five public tools accessible with <strong style="color:white;">no account required.</strong>
+      Start at <code style="background:rgba(255,255,255,0.1); color:#d0f0ec; padding:1px 5px; border-radius:3px;">/could-i-qualify</code> or
+      <code style="background:rgba(255,255,255,0.1); color:#d0f0ec; padding:1px 5px; border-radius:3px;">/ripple</code> to see the platform in action instantly.
+    </div>
+  </div>
+
+  <div class="callout callout-gold">
+    <div class="callout-title">The Core Problem</div>
+    <p>
+      Despite 100,000+ Americans awaiting a kidney transplant, living donation rates have
+      <strong>stagnated for over two decades</strong>. Research consistently identifies five friction points
+      that prevent willing donors from completing the process:
+    </p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Friction Point</th>
+        <th>EMPOWER Focus Area</th>
+        <th>LivingLink Module</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Awareness gaps, misinformation, no peer support</td>
+        <td>Public Awareness and Mentorship</td>
+        <td><strong>MentorMatch + Public Tools</strong></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Clinical eligibility barriers (BMI, BP, smoking)</td>
+        <td>Donor Readiness and Eligibility</td>
+        <td><strong>ReadyCheck</strong></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Financial hardship, psychosocial stress</td>
+        <td>Donor Interventions</td>
+        <td><strong>DonorShield</strong></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Admin delays, no best-practice playbooks</td>
+        <td>Center Practices and Decision Support</td>
+        <td><strong>CenterFlow</strong></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Inconsistent post-donation follow-up, PCP confusion</td>
+        <td>Donor-Centered Outcomes</td>
+        <td><strong>LifeAfter</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="num">26%</div>
+      <div class="lbl">NLDAC applications completed without support</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">41%</div>
+      <div class="lbl">Donors drop out due to financial fear</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">59%</div>
+      <div class="lbl">Two-year nephrologist follow-up rate (OPTN)</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">6 wks</div>
+      <div class="lbl">Avg. delay from evaluation bottlenecks</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">$91K</div>
+      <div class="lbl">Annual dialysis cost avoided per transplant</div>
+    </div>
+  </div>
+
+  <div class="section-divider"><span>Our Commitment</span></div>
+
+  <div class="two-col">
+    <div class="callout callout-teal">
+      <div class="callout-title">Open Source (MIT License)</div>
+      <p>
+        Every line of LivingLink is publicly available on GitHub. No vendor lock-in.
+        Any transplant center, OPTN region, or state health department can deploy and extend it.
+      </p>
+    </div>
+    <div class="callout callout-navy">
+      <div class="callout-title">Federal-Grade Interoperability</div>
+      <p>
+        HL7 FHIR R4, US Core IG, SMART on FHIR, CDS Hooks, Da Vinci PDex, and
+        FHIR Bulk Export for OPTN Policy 18 automated reporting to HRSA.
+      </p>
+    </div>
+  </div>
+
+  <p class="footnote">
+    Sources: USRDS 2024 Annual Data Report; OPTN/SRTR 2024; Rodrigue et al. 2014 RCT (AJKD);
+    National Living Donor Assistance Center (NLDAC) 2023 data; HRSA 2024 organ procurement statistics.
+  </p>
+
+  <div class="page-num">1</div>
+</div>
+
+
+<!-- ============================================================
+     HOW IT WORKS + BEFORE vs AFTER
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 2</div>
+    <h2>How LivingLink Works and Why It Is Different</h2>
+  </div>
+
+  <!-- Before vs After -->
+  <h3 style="margin-top:0.2rem;">Before LivingLink vs. With LivingLink</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:35%;">Touchpoint</th>
+        <th style="width:32.5%; background:#c0392b;">Before: Current Reality</th>
+        <th style="width:32.5%; background:#1a7a4a;">With LivingLink</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>First curiosity</strong></td>
+        <td>Google search returns conflicting information; donor lands on a PDF from 2016 or a transplant center's generic page</td>
+        <td><code>/could-i-qualify</code> gives a 60-second plain-language answer. No account, no form, no wait</td>
+      </tr>
+      <tr>
+        <td><strong>Financial fear</strong></td>
+        <td>Donor calls their coordinator who says "I don't know, you'd have to look that up." 41% withdraw here</td>
+        <td>DonorShield calculates lost wages, opens the NLDAC wizard, and shows 27-state tax credits in under 2 minutes</td>
+      </tr>
+      <tr>
+        <td><strong>Health concern</strong></td>
+        <td>"My BMI is too high - I was told not to bother." Donor self-disqualifies and never calls the center</td>
+        <td>ReadyCheck shows the donor exactly what to improve, sets 90-day goals, and sends them to evaluation ready</td>
+      </tr>
+      <tr>
+        <td><strong>Isolation and doubt</strong></td>
+        <td>No one in their life has donated. Questions go unanswered for weeks; anxiety builds until withdrawal</td>
+        <td>MentorMatch connects them to a verified prior donor who matches their language, donation type, and specific concern within 48 hours</td>
+      </tr>
+      <tr>
+        <td><strong>Evaluation delays</strong></td>
+        <td>Coordinator tracks 40 evaluations on a spreadsheet. A stalled bloodwork order sits unnoticed for 3 weeks</td>
+        <td>CenterFlow flags the stall after 14 days, fires a CDS Hooks alert into Epic/Cerner, and shows the coordinator exactly what is blocked</td>
+      </tr>
+      <tr>
+        <td><strong>Post-donation</strong></td>
+        <td>2-year OPTN follow-up ends. PCP has never managed a prior donor. Donor falls through cracks - only 59% get year-2 follow-up</td>
+        <td>LifeAfter extends check-ins for life. PCP Clarity Tool prints out who manages what. PHQ-2 screener catches depression early. FHIR export automates HRSA reporting</td>
+      </tr>
+      <tr>
+        <td><strong>EHR integration</strong></td>
+        <td>Every donor tool is a separate silo. Clinicians context-switch between 3-5 portals per patient</td>
+        <td>SMART on FHIR embeds LivingLink inside Epic and Cerner. CDS Hooks delivers alerts without leaving the chart</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Donor Journey -->
+  <h3 style="margin-top:0.7rem;">The LivingLink Donor Journey</h3>
+  <div style="display:flex; gap:0; margin:0.5rem 0; position:relative;">
+    <!-- connector line -->
+    <div style="position:absolute; top:18px; left:32px; right:32px; height:3px; background:linear-gradient(90deg, var(--teal-mid), var(--navy)); z-index:0;"></div>
+
+    <div style="flex:1; text-align:center; position:relative; z-index:1; padding: 0 4px;">
+      <div style="width:36px; height:36px; border-radius:50%; background:var(--teal); color:white; font-weight:800; font-size:0.85rem; line-height:36px; margin:0 auto 6px; border:3px solid white; box-shadow:0 0 0 2px var(--teal-mid);">1</div>
+      <div style="font-size:0.7rem; font-weight:700; color:var(--navy);">Discover</div>
+      <div style="font-size:0.62rem; color:var(--gray-3); margin-top:2px; line-height:1.3;">Public tools, no login. /could-i-qualify, /ripple, /stories</div>
+    </div>
+    <div style="flex:1; text-align:center; position:relative; z-index:1; padding: 0 4px;">
+      <div style="width:36px; height:36px; border-radius:50%; background:var(--teal); color:white; font-weight:800; font-size:0.85rem; line-height:36px; margin:0 auto 6px; border:3px solid white; box-shadow:0 0 0 2px var(--teal-mid);">2</div>
+      <div style="font-size:0.7rem; font-weight:700; color:var(--navy);">Practice</div>
+      <div style="font-size:0.62rem; color:var(--gray-3); margin-top:2px; line-height:1.3;">AI conversation simulator. Tell spouse, boss, PCP - no account needed</div>
+    </div>
+    <div style="flex:1; text-align:center; position:relative; z-index:1; padding: 0 4px;">
+      <div style="width:36px; height:36px; border-radius:50%; background:var(--teal); color:white; font-weight:800; font-size:0.85rem; line-height:36px; margin:0 auto 6px; border:3px solid white; box-shadow:0 0 0 2px var(--teal-mid);">3</div>
+      <div style="font-size:0.7rem; font-weight:700; color:var(--navy);">Prepare</div>
+      <div style="font-size:0.62rem; color:var(--gray-3); margin-top:2px; line-height:1.3;">ReadyCheck: AI health coach sets 90-day goals before evaluation</div>
+    </div>
+    <div style="flex:1; text-align:center; position:relative; z-index:1; padding: 0 4px;">
+      <div style="width:36px; height:36px; border-radius:50%; background:var(--teal); color:white; font-weight:800; font-size:0.85rem; line-height:36px; margin:0 auto 6px; border:3px solid white; box-shadow:0 0 0 2px var(--teal-mid);">4</div>
+      <div style="font-size:0.7rem; font-weight:700; color:var(--navy);">Protect</div>
+      <div style="font-size:0.62rem; color:var(--gray-3); margin-top:2px; line-height:1.3;">DonorShield: NLDAC wizard, wage calc, FMLA letter, insurance tracker</div>
+    </div>
+    <div style="flex:1; text-align:center; position:relative; z-index:1; padding: 0 4px;">
+      <div style="width:36px; height:36px; border-radius:50%; background:var(--teal); color:white; font-weight:800; font-size:0.85rem; line-height:36px; margin:0 auto 6px; border:3px solid white; box-shadow:0 0 0 2px var(--teal-mid);">5</div>
+      <div style="font-size:0.7rem; font-weight:700; color:var(--navy);">Connect</div>
+      <div style="font-size:0.62rem; color:var(--gray-3); margin-top:2px; line-height:1.3;">MentorMatch: verified prior donor, same language and situation</div>
+    </div>
+    <div style="flex:1; text-align:center; position:relative; z-index:1; padding: 0 4px;">
+      <div style="width:36px; height:36px; border-radius:50%; background:var(--teal); color:white; font-weight:800; font-size:0.85rem; line-height:36px; margin:0 auto 6px; border:3px solid white; box-shadow:0 0 0 2px var(--teal-mid);">6</div>
+      <div style="font-size:0.7rem; font-weight:700; color:var(--navy);">Evaluate</div>
+      <div style="font-size:0.62rem; color:var(--gray-3); margin-top:2px; line-height:1.3;">CenterFlow: coordinator dashboard, EHR alerts, zero bottlenecks</div>
+    </div>
+    <div style="flex:1; text-align:center; position:relative; z-index:1; padding: 0 4px;">
+      <div style="width:36px; height:36px; border-radius:50%; background:var(--navy); color:white; font-weight:800; font-size:0.85rem; line-height:36px; margin:0 auto 6px; border:3px solid white; box-shadow:0 0 0 2px var(--navy);">7</div>
+      <div style="font-size:0.7rem; font-weight:700; color:var(--navy);">Thrive</div>
+      <div style="font-size:0.62rem; color:var(--gray-3); margin-top:2px; line-height:1.3;">LifeAfter: lifetime check-ins, PHQ-2, PCP Clarity, OPTN reporting</div>
+    </div>
+  </div>
+
+  <div class="callout callout-navy" style="margin-top:0.6rem;">
+    <div class="callout-title">What Makes LivingLink Unique</div>
+    <p style="font-size:0.82rem;">
+      Every other solution addresses one friction point. LivingLink addresses all seven touchpoints in a single platform, with a zero-login public layer that removes the first barrier before the donor even knows the platform exists.
+      No specialized hardware. No new EHR installation. One SMART on FHIR launch URL is all a transplant center needs to go live.
+    </p>
+  </div>
+
+</div>
+
+
+<!-- ============================================================
+     PAGE 2 - PUBLIC FEATURES (NO LOGIN REQUIRED)
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 3</div>
+    <h2>Public-First Features - No Account Required</h2>
+  </div>
+
+  <div class="callout callout-green">
+    <div class="callout-title">Zero Barrier to Entry</div>
+    <p>
+      LivingLink removes the biggest conversion killer in digital health: the sign-up wall.
+      Five full web experiences and two API endpoints are accessible with <strong>no account, no login,
+      no personal data required</strong>. A curious potential donor can explore their eligibility,
+      calculate donation impact, practice a difficult conversation with AI, and read real donor
+      stories before ever creating an account.
+    </p>
+  </div>
+
+  <div class="public-grid">
+    <div class="public-card">
+      <div class="public-card-badge">No Login</div>
+      <div class="public-card-route">/could-i-qualify</div>
+      <div class="public-card-title">Could I Qualify?</div>
+      <p>A 60-second, 5-question eligibility pre-screener. No PHI collected. Returns one of three
+      plain-language results: "Great candidate," "Possible candidate," or "Work on it first."
+      Converts awareness into intent.</p>
+    </div>
+
+    <div class="public-card">
+      <div class="public-card-badge">No Login</div>
+      <div class="public-card-route">/ripple</div>
+      <div class="public-card-title">Ripple Effect Calculator</div>
+      <p>Animated impact visualizer using USRDS 2024 data. Shows dialysis sessions avoided,
+      life-years gained for the recipient, caregiver hours freed, and the $91K/yr dialysis
+      cost avoided. Designed to motivate exploration without pressure.</p>
+    </div>
+
+    <div class="public-card">
+      <div class="public-card-badge">No Login</div>
+      <div class="public-card-route">/waitlist-map</div>
+      <div class="public-card-title">National Waitlist Explorer</div>
+      <p>All 50 states with OPTN/SRTR 2024 data: waitlist count, living donor rate per million,
+      average wait months, and transplant center count. Lets donors see the need in their
+      own community.</p>
+    </div>
+
+    <div class="public-card">
+      <div class="public-card-badge">No Login</div>
+      <div class="public-card-route">/stories</div>
+      <div class="public-card-title">Donor Story Library</div>
+      <p>A filterable, searchable library of verified donor stories. Filter by donation type
+      (directed, non-directed, paired exchange). Helpful-vote system surfaces the most
+      useful stories. Addresses misinformation through authentic lived experience.</p>
+    </div>
+
+    <div class="public-card" style="grid-column: 1 / -1;">
+      <div class="public-card-badge">No Login + AI Powered</div>
+      <div class="public-card-route">/start-conversation</div>
+      <div class="public-card-title">AI Conversation Practice Simulator</div>
+      <p>
+        One of LivingLink's most distinctive features: a GPT-4o-powered role-play tool where
+        the AI plays the other person in a difficult conversation the donor needs to have.
+        Five scenarios are available without any account:
+      </p>
+      <div class="three-col" style="margin-top:0.6rem; gap:6px;">
+        <span class="tag tag-teal">Telling your spouse</span>
+        <span class="tag tag-teal">Talking to your boss about FMLA</span>
+        <span class="tag tag-teal">Explaining it to your parent</span>
+        <span class="tag tag-navy">Addressing a worried friend</span>
+        <span class="tag tag-navy">Preparing your primary care doctor</span>
+      </div>
+      <p style="margin-top:0.5rem;">
+        The AI responds naturally, pushes back with realistic concerns, and helps the donor
+        practice until they feel confident. No account created, no data stored.
+      </p>
+    </div>
+  </div>
+
+  <div class="section-divider"><span>Public API Endpoints</span></div>
+
+  <div class="api-card">
+    <div class="api-method">GET</div>
+    <div class="api-card-body">
+      <p><code>/api/stories</code> - Returns donor story library, filterable by <code>?type=directed|non-directed|paired</code>.
+      Served with CORS headers for potential embedding by transplant center websites or patient advocacy organizations.</p>
+    </div>
+  </div>
+
+  <div class="api-card">
+    <div class="api-method post">POST</div>
+    <div class="api-card-body">
+      <p><code>/api/ai/conversation-practice</code> - GPT-4o conversation role-play endpoint.
+      Accepts <code>{ scenario, messages[] }</code>, returns AI response. No auth required.
+      Rate-limited at the edge (Vercel middleware). No PHI transmitted or stored.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-navy" style="margin-top:1rem;">
+    <div class="callout-title">Why This Matters for EMPOWER Scoring</div>
+    <p>
+      The EMPOWER prize prioritizes <strong>donor experience (35 pts)</strong>. Starting the donor
+      journey with zero friction directly increases the addressable population. Every person who
+      uses <code>/could-i-qualify</code> or <code>/ripple</code> without an account is a potential
+      donor that would have bounced from a login-first experience. This design is a deliberate,
+      evidence-informed conversion strategy.
+    </p>
+  </div>
+
+  <div class="page-num">2</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 3 - SYSTEM ARCHITECTURE
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 4</div>
+    <h2>System Architecture</h2>
+  </div>
+
+  <div class="two-col" style="margin-bottom:0.8rem;">
+    <div>
+      <h3>Technology Stack</h3>
+      <table>
+        <thead><tr><th>Layer</th><th>Technology</th></tr></thead>
+        <tbody>
+          <tr><td>Framework</td><td>Next.js 15 (App Router, SSR)</td></tr>
+          <tr><td>Language</td><td>TypeScript (end-to-end)</td></tr>
+          <tr><td>Auth</td><td>Clerk (MFA, OIDC/PKCE, RBAC)</td></tr>
+          <tr><td>Database</td><td>PostgreSQL on Neon (SOC 2 Type II)</td></tr>
+          <tr><td>ORM</td><td>Prisma</td></tr>
+          <tr><td>AI</td><td>OpenAI GPT-4o (per-module prompts)</td></tr>
+          <tr><td>FHIR Server</td><td>HAPI FHIR R4 (Docker)</td></tr>
+          <tr><td>Styling</td><td>Tailwind CSS + shadcn/ui</td></tr>
+          <tr><td>Charts</td><td>Recharts</td></tr>
+          <tr><td>Hosting</td><td>Vercel (frontend) + Railway (FHIR)</td></tr>
+          <tr><td>CI/CD</td><td>GitHub Actions</td></tr>
+          <tr><td>Testing</td><td>Playwright + axe-core</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>Database Schema Design</h3>
+      <div class="callout callout-teal">
+        <div class="callout-title">3 Logical Schemas in PostgreSQL</div>
+        <ul style="font-size:0.82rem;">
+          <li><strong>app_data</strong> - Non-PHI application data (goals, evaluations, protocols)</li>
+          <li><strong>phi_data</strong> - AES-256 column-level encrypted PHI (health summaries, mental health notes, SSN, DOB)</li>
+          <li><strong>audit_log</strong> - Append-only pgAudit log (INSERT only, never UPDATE or DELETE)</li>
+        </ul>
+      </div>
+      <h3>RBAC Roles</h3>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+        <span class="tag tag-teal">DONOR</span>
+        <span class="tag tag-navy">PATIENT</span>
+        <span class="tag tag-gold">COORDINATOR</span>
+        <span class="tag tag-green">CLINICIAN</span>
+      </div>
+      <p style="font-size:0.8rem; margin-top:0.5rem;">
+        Role stored in Clerk <code>sessionClaims.metadata.role</code>. Smart dashboard at
+        <code>/dashboard</code> auto-routes each role to their dedicated portal on first login.
+      </p>
+    </div>
+  </div>
+
+  <div class="mermaid-wrap" style="padding:14px;">
+    <div class="diagram-caption">Diagram 1<span>Full System Architecture - Next.js App Router through FHIR and AI layers</span></div>
+    <pre class="mermaid">
+flowchart LR
+    Browser["Browser /\nEHR Iframe\n(SMART on FHIR)"]
+
+    subgraph Public["Public Layer (No Auth)"]
+        P1["/could-i-qualify"]
+        P2["/ripple"]
+        P3["/waitlist-map"]
+        P4["/stories"]
+        P5["/start-conversation\n(GPT-4o)"]
+    end
+
+    subgraph Auth["Authenticated App (Clerk RBAC)"]
+        MW["middleware.ts\nRoute Guard"]
+        Next["Next.js 15\nApp Router (SSR)"]
+        API["API Routes\n/api/**"]
+    end
+
+    subgraph Data["Data Layer"]
+        Prisma["Prisma ORM"]
+        PG["PostgreSQL (Neon)\napp_data | phi_data | audit_log"]
+        S3["AWS S3\n(encrypted receipts)"]
+    end
+
+    subgraph AI["AI Layer"]
+        GPT["OpenAI GPT-4o\nPer-module system prompts"]
+    end
+
+    subgraph FHIR["FHIR Layer"]
+        HAPI["HAPI FHIR R4\n(Docker / Railway)"]
+        CDS["CDS Hooks\n2 services"]
+        Export["Bulk Export\nOPTN / HRSA NDJSON"]
+    end
+
+    Browser --> Public
+    Browser --> MW
+    MW --> Next
+    Next --> API
+    API --> Prisma
+    Prisma --> PG
+    API --> GPT
+    API --> HAPI
+    HAPI --> CDS
+    HAPI --> Export
+    API --> S3
+    </pre>
+  </div>
+
+  <div class="page-num">3</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 4 - READYCHECK
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 5 - Module 1</div>
+    <h2>ReadyCheck: Health Readiness Coach</h2>
+  </div>
+  <p style="margin-bottom:0.7rem;">
+    Many willing donors fail evaluation due to manageable health conditions they could have
+    improved before presenting. ReadyCheck gives donors an AI-powered health coach months
+    before their evaluation, turning "too high BMI" into a 90-day action plan instead of a rejection letter.
+  </p>
+
+  <div class="module-layout">
+    <div>
+      <h3>Core Features</h3>
+      <ul class="feature-list">
+        <li>Self-reported health metrics intake: age, BMI, blood pressure (systolic/diastolic), eGFR estimate, smoking status, diabetes indicator</li>
+        <li>GPT-4o generates a plain-language AI summary - explicitly marked "not a medical diagnosis"</li>
+        <li>Goal Tracker with 30/60/90-day targets for BMI, blood pressure, weight, smoking cessation, and blood sugar</li>
+        <li>Recharts trend visualizations showing progress over time</li>
+        <li>AI coach notes stored per goal to keep donors motivated between check-ins</li>
+        <li>CDS Hooks alert fires into Epic/Cerner when a matched patient has an active ReadyCheck profile</li>
+        <li>Disclaimer-first UX: no medical diagnosis framing, referral to nephrologist always included</li>
+      </ul>
+
+      <h3>FHIR Resources Generated</h3>
+      <div>
+        <span class="fhir-pill">Observation (BMI - LOINC 39156-5)</span>
+        <span class="fhir-pill">Observation (BP)</span>
+        <span class="fhir-pill">Observation (eGFR - LOINC 62238-1)</span>
+        <span class="fhir-pill">Goal</span>
+        <span class="fhir-pill">RiskAssessment</span>
+        <span class="fhir-pill">Patient (US Core)</span>
+      </div>
+
+      <h3>API Endpoints</h3>
+      <div class="api-card">
+        <div class="api-method post">POST</div>
+        <div class="api-card-body">
+          <p><code>/api/ready-check/assess</code> - Sends health metrics to GPT-4o, returns structured AI summary, writes FHIR Observations to HAPI server. Requires donor auth.</p>
+        </div>
+      </div>
+      <div class="api-card">
+        <div class="api-method post">POST</div>
+        <div class="api-card-body">
+          <p><code>/api/ready-check/goals</code> - CRUD for health goals and progress log entries. Stores AI coach note per goal.</p>
+        </div>
+      </div>
+      <div class="api-card">
+        <div class="api-method">GET</div>
+        <div class="api-card-body">
+          <p><code>/api/ready-check/history</code> - Returns chronological eligibility checks for trend display.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="module-stat-box">
+        <div class="stat-num">30%</div>
+        <div class="stat-label">Target increase in donors arriving at evaluation within health parameters</div>
+        <hr class="stat-divider" />
+        <div class="stat-num" style="font-size:1.4rem;">GPT-4o</div>
+        <div class="stat-label">Personalized health coaching via AI</div>
+        <hr class="stat-divider" />
+        <div class="stat-num" style="font-size:1.4rem;">5</div>
+        <div class="stat-label">Trackable health metrics with trend charts</div>
+        <hr class="stat-divider" />
+        <div class="stat-num" style="font-size:1.2rem;">CDS Hooks</div>
+        <div class="stat-label">Alert pushed into Epic/Cerner on patient-view hook</div>
+      </div>
+
+      <div class="callout callout-teal" style="margin-top:10px;">
+        <div class="callout-title">AI Safety Design</div>
+        <p style="font-size:0.78rem;">All GPT-4o prompts include explicit instructions to:<br/>
+        - Avoid diagnosing conditions<br/>
+        - Always recommend nephrologist consultation<br/>
+        - Use 6th-grade Flesch-Kincaid reading level<br/>
+        - Respond in the user's input language</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-num">4</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 5 - DONORSHIELD
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 6 - Module 2</div>
+    <h2>DonorShield: Financial Advocacy Suite</h2>
+  </div>
+  <p style="margin-bottom:0.7rem;">
+    Financial fear is the number-one reason willing donors withdraw. DonorShield replaces a
+    scattered web of government PDFs and phone calls with an integrated financial toolkit -
+    from lost-wage calculation on day one to tax credit guidance at filing time.
+  </p>
+
+  <div class="module-layout">
+    <div>
+      <h3>Six Financial Tools in One Suite</h3>
+      <ul class="feature-list">
+        <li><strong>Lost-Wage Calculator</strong> - hourly rate x hours/week x recovery weeks, returns estimated loss, NLDAC coverage estimate, and net out-of-pocket total</li>
+        <li><strong>NLDAC Wizard</strong> - multi-step eligibility flow for National Living Donor Assistance Center (up to $6,000 reimbursement). Guides donor through every requirement</li>
+        <li><strong>Expense Log</strong> - categorized CRUD (travel, lodging, childcare, medical, lost wages), receipt photo upload to encrypted AWS S3, running totals with reimbursement tracking</li>
+        <li><strong>27-State Tax Credit Guide</strong> - state-by-state reference for donor tax credits, updated annually, with direct links to state revenue department forms</li>
+        <li><strong>FMLA Employer Letter Generator</strong> - printable, legally accurate letter template citing 29 CFR 825 with donor-specific fields pre-filled, PDF download</li>
+        <li><strong>Insurance Issue Tracker</strong> - log coverage disputes, escalate to transplant coordinator with one click, track resolution status</li>
+      </ul>
+
+      <h3>FHIR Resources (Da Vinci PDex)</h3>
+      <div>
+        <span class="fhir-pill">Coverage</span>
+        <span class="fhir-pill">Claim</span>
+        <span class="fhir-pill">ExplanationOfBenefit</span>
+      </div>
+
+      <div class="callout callout-gold" style="margin-top:0.7rem;">
+        <div class="callout-title">NLDAC Application Flow</div>
+        <p style="font-size:0.78rem;">
+          The NLDAC wizard walks through: income verification, employment status, transplant
+          center confirmation, expense categories, and document checklist. On completion it
+          generates a pre-filled PDF application. Current national completion rate without
+          support is 26%. Target with DonorShield: 75%.
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <div class="module-stat-box">
+        <div class="stat-num">26%</div>
+        <div class="stat-label">NLDAC completion rate without support</div>
+        <hr class="stat-divider" />
+        <div class="stat-num">75%</div>
+        <div class="stat-label">Target NLDAC completion rate with DonorShield</div>
+        <hr class="stat-divider" />
+        <div class="stat-num">$6K</div>
+        <div class="stat-label">Maximum NLDAC reimbursement per donor</div>
+        <hr class="stat-divider" />
+        <div class="stat-num">27</div>
+        <div class="stat-label">States with donor tax credits covered</div>
+        <hr class="stat-divider" />
+        <div class="stat-num">41%</div>
+        <div class="stat-label">Donors who cite financial fear as withdrawal reason</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-num">5</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 6 - MENTORMATCH
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 7 - Module 3</div>
+    <h2>MentorMatch: Peer Support Network</h2>
+  </div>
+  <p style="margin-bottom:0.7rem;">
+    A 2014 randomized controlled trial (Rodrigue et al., AJKD) found that peer education from
+    a prior living donor increased donation intent by 23% among ambivalent candidates. MentorMatch
+    operationalizes this evidence at scale - connecting willing donors with verified prior donors
+    who match their specific situation and language.
+  </p>
+
+  <div class="module-layout">
+    <div>
+      <h3>Core Features</h3>
+      <ul class="feature-list">
+        <li>Verified mentor network of prior living kidney donors (coordinator-verified badge)</li>
+        <li>Multi-axis matching: donation type (laparoscopic, open, directed, non-directed, paired exchange), language, and specialty area</li>
+        <li>Specialty areas: financial concerns, parenting logistics, anxiety management, recovery, employer relations, spouse/partner dynamics</li>
+        <li>AI-assisted initial match ranking (GPT-4o) followed by coordinator-facilitated confirmation</li>
+        <li>HIPAA-compliant in-app messaging thread with app-layer encryption before database storage</li>
+        <li>Become-a-Mentor application flow for prior donors to give back to the community</li>
+        <li>Message read receipts and notification system</li>
+      </ul>
+
+      <h3>FHIR Resources</h3>
+      <div>
+        <span class="fhir-pill">Patient (de-identified)</span>
+        <span class="fhir-pill">RelatedPerson</span>
+        <span class="fhir-pill">Communication</span>
+      </div>
+
+      <div class="callout callout-teal" style="margin-top:0.7rem;">
+        <div class="callout-title">Evidence Base</div>
+        <p style="font-size:0.78rem;">
+          Rodrigue JR et al. "Increasing the Pool of Potential Kidney Donors: How to Educate
+          Patients and Family Members." AJKD 2014. RCT: N=243 ambivalent candidates.
+          Peer education group: 23% higher donation intent. 18% lower anxiety scores.
+          Effect persisted at 6-month follow-up.
+        </p>
+      </div>
+
+      <h3>Privacy Architecture</h3>
+      <p style="font-size:0.85rem;">
+        Messages are encrypted at the application layer using AES-256 before storage in the
+        <code>phi_data</code> schema. Mentor full names are never shown to candidates until
+        coordinator confirms the match. De-identified FHIR <code>Communication</code> resources
+        are written to HAPI for outcomes analytics only.
+      </p>
+    </div>
+
+    <div>
+      <div class="module-stat-box">
+        <div class="stat-num">23%</div>
+        <div class="stat-label">Increase in donation intent with peer education (RCT)</div>
+        <hr class="stat-divider" />
+        <div class="stat-num">20%</div>
+        <div class="stat-label">Target reduction in donor withdrawal rate</div>
+        <hr class="stat-divider" />
+        <div class="stat-num" style="font-size:1.3rem;">AI Match</div>
+        <div class="stat-label">GPT-4o ranks mentors by compatibility score</div>
+        <hr class="stat-divider" />
+        <div class="stat-num" style="font-size:1.3rem;">HIPAA</div>
+        <div class="stat-label">AES-256 app-layer message encryption</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-num">6</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 7 - CENTERFLOW
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 8 - Module 4</div>
+    <h2>CenterFlow: Evaluation Workflow Intelligence</h2>
+  </div>
+  <p style="margin-bottom:0.5rem;">
+    Transplant coordinators managing 35-50 simultaneous donor evaluations on spreadsheets lose
+    track of who is waiting and why. CenterFlow replaces spreadsheets with a real-time evaluation
+    tracker, bottleneck detection, and best-practice protocol library - all integrated into the
+    EHR via SMART on FHIR and CDS Hooks.
+  </p>
+
+  <h3>8-Stage Evaluation Pipeline</h3>
+  <div class="mermaid-wrap" style="padding:8px;">
+    <div class="diagram-caption">Diagram 2<span>CenterFlow 8-Stage Evaluation Pipeline with bottleneck detection and CDS Hooks alert</span></div>
+    <pre class="mermaid">
+flowchart LR
+    A["INITIAL\nINQUIRY"] --> B["BLOOD\nWORK"] --> C["IMAGING"] --> D["CARDIAC\nEVAL"]
+    D --> E["PSYCH\nEVAL"] --> F["FINAL\nREVIEW"] --> G["APPROVED"]
+    F --> H["DECLINED"]
+
+    style A fill:#e8f0f8,stroke:#0d2d4f,color:#0d2d4f
+    style G fill:#e2f5eb,stroke:#1a7a4a,color:#1a7a4a
+    style H fill:#fde8e8,stroke:#c0392b,color:#c0392b
+
+    A -- "Stalled >14 days" --> ALERT["COORDINATOR\nALERT\n+ CDS Hook"]
+    B -- "Stalled >14 days" --> ALERT
+    C -- "Stalled >14 days" --> ALERT
+    D -- "Stalled >14 days" --> ALERT
+    E -- "Stalled >14 days" --> ALERT
+
+    style ALERT fill:#fdf3e2,stroke:#c07a1a,color:#c07a1a
+    </pre>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h3>Core Features</h3>
+      <ul class="feature-list">
+        <li>Real-time evaluation dashboard sorted by <code>daysElapsed</code> - color-coded staleness indicators</li>
+        <li>Automatic <code>isStalled</code> flag when any evaluation has no progress for 14 days</li>
+        <li>Coordinator role has full CRUD; clinician role has read and review access</li>
+        <li>Protocol Knowledge Base - searchable best-practice playbooks tagged by EMPOWER focus area</li>
+        <li>CDS Hooks service pushes warning card directly into Epic/Cerner workflow when stalled evaluation detected</li>
+        <li>SMART on FHIR launch enables EHR-embedded access with no duplicate login inside Epic App Orchard or Cerner App Market</li>
+        <li>Stage history stored as JSON - full audit trail of every stage transition with timestamp</li>
+      </ul>
+    </div>
+    <div>
+      <h3>FHIR Resources</h3>
+      <div style="margin-bottom:0.5rem;">
+        <span class="fhir-pill">Organization</span>
+        <span class="fhir-pill">PractitionerRole</span>
+        <span class="fhir-pill">Task</span>
+        <span class="fhir-pill">ServiceRequest</span>
+        <span class="fhir-pill">Procedure</span>
+      </div>
+
+      <h3>CDS Hooks Services</h3>
+      <div class="api-card">
+        <div class="api-method">GET</div>
+        <div class="api-card-body">
+          <p><code>/api/cds-hooks</code> - Discovery endpoint listing both services</p>
+        </div>
+      </div>
+      <div style="font-size:0.78rem; margin-top:0.5rem; background:var(--gray-6); border-radius:6px; padding:8px 10px;">
+        <strong>livinglink-readycheck-alert</strong> - fires on <code>patient-view</code> hook, returns info card when patient has active ReadyCheck profile<br/><br/>
+        <strong>livinglink-stalled-evaluation</strong> - fires on <code>patient-view</code> hook, returns warning card when evaluation stalled and links coordinator to CenterFlow
+      </div>
+
+      <div class="callout callout-navy" style="margin-top:0.7rem;">
+        <div class="callout-title">Impact Target</div>
+        <p style="font-size:0.78rem;">Reduce average evaluation duration by 6 weeks through bottleneck identification and best-practice protocol adoption across participating centers.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-num">7</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 8 - LIFEAFTER
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 9 - Module 5</div>
+    <h2>LifeAfter: Post-Donation Continuity</h2>
+  </div>
+  <p style="margin-bottom:0.7rem;">
+    OPTN data shows that only 59% of living donors receive nephrologist follow-up at two years.
+    The mandatory OPTN Policy 18 reporting window ends at two years, but kidney function can
+    decline for decades. LifeAfter extends structured follow-up to a lifetime horizon with
+    automated OPTN/HRSA reporting, mental health screening, and a tool that finally answers
+    the question "who does what" for both the donor and their PCP.
+  </p>
+
+  <h3>Post-Donation Timeline</h3>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-label">Week 2</div>
+      <div class="tl-desc">Wound healing, pain, mobility</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-label">Month 1</div>
+      <div class="tl-desc">Return to work, BP baseline</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-label">Month 3</div>
+      <div class="tl-desc">eGFR stabilization check</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-label">Month 6</div>
+      <div class="tl-desc">Labs, mood, energy trends</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-label">Year 1</div>
+      <div class="tl-desc">OPTN Policy 18 report #1</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--gold);"></div>
+      <div class="tl-label">Year 2+</div>
+      <div class="tl-desc">Annual lifetime check-ins</div>
+    </div>
+  </div>
+
+  <div class="module-layout" style="margin-top:0.8rem;">
+    <div>
+      <h3>Core Features</h3>
+      <ul class="feature-list">
+        <li>Structured check-in form at each milestone: BP (systolic/diastolic), weight (kg), mood score (1-10), energy score (1-10), free-text notes (AES-256 encrypted)</li>
+        <li>Recharts trend visualizations for BP, weight, mood, and energy over all milestones</li>
+        <li>PHQ-2 validated 2-question depression screener at every check-in. Scores 3 or higher trigger automatic coordinator escalation alert</li>
+        <li>PCP Clarity Tool - disambiguates nephrologist vs. PCP responsibilities with a printable responsibility matrix. Addresses the "my PCP had no idea what to do" problem directly</li>
+        <li>Parent-donor specific pathway with tailored emotional support prompts</li>
+        <li>FHIR Bulk Export for automated OPTN Policy 18 outcomes reporting to HRSA (de-identified NDJSON)</li>
+      </ul>
+
+      <h3>FHIR Resources</h3>
+      <div>
+        <span class="fhir-pill">CarePlan</span>
+        <span class="fhir-pill">Observation (weight - LOINC 29463-7)</span>
+        <span class="fhir-pill">Appointment</span>
+        <span class="fhir-pill">QuestionnaireResponse (PHQ-2 - LOINC 55757-9)</span>
+        <span class="fhir-pill">DiagnosticReport</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="module-stat-box">
+        <div class="stat-num">59%</div>
+        <div class="stat-label">Current 2-year nephrologist follow-up rate (OPTN)</div>
+        <hr class="stat-divider" />
+        <div class="stat-num">85%</div>
+        <div class="stat-label">Target follow-up rate with LifeAfter nudges</div>
+        <hr class="stat-divider" />
+        <div class="stat-num">PHQ-2</div>
+        <div class="stat-label">Validated depression screener at every check-in</div>
+        <hr class="stat-divider" />
+        <div class="stat-num" style="font-size:1.1rem;">Auto</div>
+        <div class="stat-label">OPTN Policy 18 reporting via FHIR Bulk Export to HRSA</div>
+      </div>
+
+      <div class="callout callout-gold" style="margin-top:10px;">
+        <div class="callout-title">PCP Clarity Tool</div>
+        <p style="font-size:0.78rem;">
+          A printable responsibility matrix showing exactly which conditions the nephrologist
+          manages vs. which the PCP manages post-donation. Printable on first post-donation
+          visit. Directly addresses co-design feedback from James (page 10).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-num">8</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 9 - FHIR INTEROPERABILITY
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 10</div>
+    <h2>FHIR Interoperability and Federal Standards Alignment</h2>
+  </div>
+  <p style="margin-bottom:0.7rem;">
+    LivingLink is the only EMPOWER Track B submission designed to operate natively inside
+    existing EHR workflows via SMART on FHIR and CDS Hooks - with zero additional hardware and
+    zero IT infrastructure requirements for transplant centers. It directly supports the ONC
+    21st Century Cures Act interoperability mandate and OPTN Policy 18 outcomes reporting.
+  </p>
+
+  <h3>Standards Implemented</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Standard</th>
+        <th>Version</th>
+        <th>Purpose in LivingLink</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>HL7 FHIR</td>
+        <td>R4</td>
+        <td>Core data exchange across all five modules</td>
+      </tr>
+      <tr>
+        <td>US Core IG</td>
+        <td>6.1</td>
+        <td>ONC 21st Century Cures Act compliance - Patient, Observation, Condition profiles</td>
+      </tr>
+      <tr>
+        <td>SMART on FHIR</td>
+        <td>2.0</td>
+        <td>EHR-embedded launch - no duplicate login inside Epic App Orchard or Cerner App Market</td>
+      </tr>
+      <tr>
+        <td>CDS Hooks</td>
+        <td>1.0</td>
+        <td>Real-time clinical decision support cards pushed into EHR workflow on patient-view events</td>
+      </tr>
+      <tr>
+        <td>Da Vinci PDex</td>
+        <td>2.0</td>
+        <td>Payer data exchange for DonorShield insurance and coverage resources</td>
+      </tr>
+      <tr>
+        <td>FHIR Bulk Data Export</td>
+        <td>2.0</td>
+        <td>De-identified NDJSON export for OPTN Policy 18 outcomes reporting to HRSA and HHS</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="two-col">
+    <div class="callout callout-teal">
+      <div class="callout-title">FHIR Bulk Export for OPTN</div>
+      <p style="font-size:0.78rem;">
+        <code>POST /api/fhir/export</code> - Role-gated (admin, clinician, coordinator).
+        Supports <code>_since</code> parameter for incremental exports.
+        De-identifies before export: removes name, DOB, phone; hashes IDs.
+        Outputs NDJSON: Patient, Observation, QuestionnaireResponse, CarePlan.
+        Satisfies OPTN Policy 18 mandatory 2-year follow-up reporting requirement automatically.
+      </p>
+    </div>
+    <div class="callout callout-navy">
+      <div class="callout-title">No Information Blocking</div>
+      <p style="font-size:0.78rem;">
+        21st Century Cures Act (ONC) requires that certified health IT must not block
+        the flow of health information. LivingLink never restricts data portability.
+        Every donor can export their own FHIR Bundle at any time. All data exchange
+        uses open FHIR standards with no proprietary APIs.
+      </p>
+    </div>
+  </div>
+
+  <div class="page-num">9</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 10 - PRIVACY, COMPLIANCE, ACCESSIBILITY
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 11</div>
+    <h2>Privacy, Compliance, and Accessibility</h2>
+  </div>
+
+  <div class="three-col">
+    <div>
+      <h3>HIPAA Controls</h3>
+      <ul class="feature-list">
+        <li>AES-256 encryption at rest (Neon KMS + field-level for highest-sensitivity fields)</li>
+        <li>TLS 1.3 in transit with HSTS headers (Vercel edge)</li>
+        <li>Append-only pgAudit log - every PHI-touching API route logged; log rows can never be updated or deleted</li>
+        <li>MFA enforced for coordinator and clinician roles via Clerk</li>
+        <li>Session expiry after 24 hours of inactivity</li>
+        <li>BAAs obtained from Vercel, Neon, Railway, Clerk, and OpenAI Enterprise DPA</li>
+        <li>PHI minimized in all GPT-4o prompts: no SSN, full DOB, or insurance IDs</li>
+        <li>AI conversations not persisted (transient only)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>FIPS 199 Categorization</h3>
+      <div class="callout callout-gold">
+        <div class="callout-title">Overall Impact: MODERATE</div>
+        <p style="font-size:0.78rem;">
+          Confidentiality: HIGH<br/>
+          Integrity: HIGH<br/>
+          Availability: MODERATE<br/>
+          (High-water mark capped by availability)
+        </p>
+      </div>
+      <h4>NIST SP 800-53 Rev. 5 HIGH Controls Applied</h4>
+      <ul style="font-size:0.78rem;">
+        <li>IA-2: MFA for privileged users</li>
+        <li>SC-28: AES-256 at rest</li>
+        <li>SC-8: TLS 1.3 / HSTS in transit</li>
+        <li>AU-9: Append-only pgAudit log</li>
+        <li>AC-2: RBAC with role-gated routes</li>
+      </ul>
+    </div>
+    <div>
+      <h3>WCAG 2.1 AA / Section 508</h3>
+      <ul class="feature-list">
+        <li>Semantic HTML with ARIA roles throughout all components</li>
+        <li>aria-live regions on all AI chat, toast alerts, and dynamic content</li>
+        <li>Skip-navigation links on every page (#main-content)</li>
+        <li>All form inputs have associated label elements</li>
+        <li>Color contrast: 4.5:1 normal text, 3:1 large text</li>
+        <li>html lang="en" set; AI responds in user's input language</li>
+        <li>axe-core automated accessibility CI on every PR via Playwright</li>
+        <li>Targets 6th-grade Flesch-Kincaid reading level throughout</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-teal" style="margin-top:0.6rem;">
+    <div class="callout-title">Health Equity Design Choices</div>
+    <p style="font-size:0.8rem;">
+      Multilingual AI responses (GPT-4o responds in the user's input language). Spanish-language roadmap in Phase 2.
+      6th-grade Flesch-Kincaid reading level enforced in all AI output. Mobile-first responsive design (320px to 1440px).
+      NLDAC wizard specifically addresses communities where financial hardship most frequently causes withdrawal.
+    </p>
+  </div>
+
+  <div class="page-num">10</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 11 - CO-DESIGN AND EVIDENCE BASE
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 12</div>
+    <h2>Co-Design and Lived Experience</h2>
+  </div>
+  <p style="margin-bottom:0.7rem;">
+    LivingLink was designed with and for the people it serves. Five co-design participants
+    shaped every major product decision through structured interviews and iterative feedback
+    sessions before a single line of code was written.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Participant</th>
+        <th>Background</th>
+        <th>Key Insight</th>
+        <th>Design Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Maria, 38</strong></td>
+        <td>Non-directed donor, 2 yrs post-donation</td>
+        <td>"I never knew NLDAC existed. I lost $4,200 in wages and paid it myself."</td>
+        <td>NLDAC wizard placed on Day 1 of onboarding; wage calculator shown before any clinical step</td>
+      </tr>
+      <tr>
+        <td><strong>James, 52</strong></td>
+        <td>Directed donor (spouse), 5 yrs post-donation</td>
+        <td>"My PCP had no idea how to manage me. The handoff from my nephrologist was total confusion."</td>
+        <td>PCP Clarity Tool created specifically for this use case - printable responsibility matrix</td>
+      </tr>
+      <tr>
+        <td><strong>Priya, 29</strong></td>
+        <td>Directed donor (sister), considering donation</td>
+        <td>"All the forms are English-only. My mother couldn't understand any of the consent documents."</td>
+        <td>AI responds in user's input language; 6th-grade reading level enforced; Spanish roadmap in Phase 2</td>
+      </tr>
+      <tr>
+        <td><strong>David</strong></td>
+        <td>Coordinator, 12 yrs, large academic center</td>
+        <td>"I manage 40 evaluations on spreadsheets. I have no idea who's stalled until someone calls angry."</td>
+        <td>CenterFlow evaluation tracker with staleness indicators and automatic 14-day stall alerts</td>
+      </tr>
+      <tr>
+        <td><strong>Dr. Chen</strong></td>
+        <td>Nephrologist, living donor follow-up specialist</td>
+        <td>"Donors fall through the cracks after the 2-year OPTN window. We just stop seeing them."</td>
+        <td>LifeAfter extends follow-up to "Year 2+" with annual lifetime check-in prompts and FHIR Bulk Export</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Design Principles and Evidence</h3>
+  <ul style="font-size:0.83rem; margin-bottom:0.5rem;">
+    <li><strong>Lead with action:</strong> NLDAC wizard, lost-wage calculator, and conversation practice reachable in one tap from the dashboard.</li>
+    <li><strong>No jargon:</strong> eGFR explained on first mention; Flesch-Kincaid grade level tested with every AI prompt; all labels reviewed by co-design participants.</li>
+    <li><strong>Emotional check-ins:</strong> Mood and energy scores on every LifeAfter check-in; PHQ-2 at every milestone; the platform acknowledges the emotional weight of this decision.</li>
+    <li>Rodrigue JR et al. (2014) AJKD - Peer education RCT: 23% increase in donation intent.</li>
+    <li>USRDS 2024, OPTN/SRTR 2024, NLDAC 2023 - all statistics cited in Section 1 footnote.</li>
+    <li>Executive Order 13879 (Advancing American Kidney Health) - direct policy alignment.</li>
+  </ul>
+
+  <div class="page-num">11</div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 12 - JUDGING ALIGNMENT, BUDGET, MILESTONES
+============================================================ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-num">Section 13</div>
+    <h2>Judging Alignment, Budget, and 12-Month Milestones</h2>
+  </div>
+
+  <h3>Judging Criteria Alignment (100 Points Total)</h3>
+  <table>
+    <thead>
+      <tr><th>Criterion</th><th style="text-align:center;">Points</th><th>LivingLink Response</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <strong>Donor Experience</strong>
+        </td>
+        <td class="score-cell" style="text-align:center;">35 / 35</td>
+        <td>5 donor-facing modules. Zero-login public tools. AI conversation practice simulator. Financial advocacy suite covering NLDAC, FMLA, tax credits, and insurance disputes. HIPAA-compliant peer mentorship. Post-donation lifetime follow-up with PHQ-2 mental health screening. All co-designed with 3 prior donors.</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Clinical Feasibility</strong>
+        </td>
+        <td class="score-cell" style="text-align:center;">25 / 25</td>
+        <td>SMART on FHIR embeds LivingLink inside Epic App Orchard and Cerner App Market with no additional hardware. CDS Hooks delivers alerts in existing EHR workflows. No specialized equipment required. OPTN Policy 18 reporting fully automated via FHIR Bulk Export. Co-designed with a veteran coordinator and a nephrologist.</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Technical Sustainability</strong>
+        </td>
+        <td class="score-cell" style="text-align:center;">25 / 25</td>
+        <td>MIT open-source license - no vendor lock-in, any center can fork and deploy. HAPI FHIR R4 open-source server ensures EHR-agnostic longevity. Post-prize SaaS subscription model (center-tier pricing) sustains operations without further grant funding. GitHub Actions CI/CD. Vercel edge hosting with 99.9% SLA.</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>EMPOWER Alignment</strong>
+        </td>
+        <td class="score-cell" style="text-align:center;">15 / 15</td>
+        <td>All 5 EMPOWER focus areas covered by a dedicated module. Cites Executive Order 13879 (Advancing American Kidney Health). Aligns with ONC interoperability mandate. Supports CMS's chronic kidney disease goals. Only submission with native EHR integration via SMART on FHIR.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="two-col" style="margin-top:0.8rem;">
+    <div>
+      <h3>Budget Summary ($672,750 Requested)</h3>
+      <table>
+        <thead><tr><th>Line Item</th><th>Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Engineering (2 FTE, 12 months)</td><td>$320,000</td></tr>
+          <tr><td>Clinical Advisory Board</td><td>$72,000</td></tr>
+          <tr><td>Pilot Deployment (2 centers)</td><td>$85,000</td></tr>
+          <tr><td>Security and Penetration Audit</td><td>$45,000</td></tr>
+          <tr><td>Accessibility / VPAT Assessment</td><td>$22,000</td></tr>
+          <tr><td>Patient Co-Design (Phase 2)</td><td>$18,000</td></tr>
+          <tr><td>Infrastructure (12 months)</td><td>$14,400</td></tr>
+          <tr><td>Dissemination (ASTS, NKF)</td><td>$8,600</td></tr>
+          <tr><td>Indirect (15%)</td><td>$87,750</td></tr>
+          <tr style="font-weight:700;"><td>Total</td><td>$672,750</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>12-Month Milestone Timeline</h3>
+      <table>
+        <thead><tr><th>Months</th><th>Milestone</th></tr></thead>
+        <tbody>
+          <tr><td>M1-M2</td><td>Security audit, HIPAA pen test, BAA finalization, VPAT assessment</td></tr>
+          <tr><td>M2-M3</td><td>Manual keyboard/mobile accessibility pass, Recharts ARIA tables, PDF accessibility</td></tr>
+          <tr><td>M3-M4</td><td>Pilot deployment - Center 1 (coordinator + clinician onboarding)</td></tr>
+          <tr><td>M4-M5</td><td>Epic App Orchard and Cerner App Market submission and review</td></tr>
+          <tr><td>M5-M6</td><td>Pilot deployment - Center 2. First FHIR Bulk Export to HRSA test run</td></tr>
+          <tr><td>M6-M8</td><td>Spanish localization, Phase 2 co-design with 10 additional participants</td></tr>
+          <tr><td>M8-M10</td><td>OPTN region-wide rollout planning, outcomes data collection</td></tr>
+          <tr><td>M10-M12</td><td>Publish 12-month outcomes paper, open-source community launch</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout callout-teal" style="margin-top:0.6rem;">
+    <div class="callout-title">Grand Prize Argument</div>
+    <p style="font-size:0.8rem;">
+      LivingLink is the only Track B submission addressing all 5 EMPOWER friction points with dedicated co-designed modules, native EHR integration via SMART on FHIR (zero hardware), automated OPTN Policy 18 reporting, zero sign-up barrier for public tools, and a fully MIT open-source codebase so every prize dollar multiplies through community adoption.
+      <strong>Contact: Richard Horsley - rhorsley2@gmail.com</strong>
+    </p>
+    <div style="margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid rgba(26,158,140,0.3); display:flex; align-items:center; gap:12px;">
+      <div style="font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--teal); white-space:nowrap;">Live App:</div>
+      <a href="https://living-link-wine.vercel.app/" style="font-family:'Consolas',monospace; font-size:0.95rem; font-weight:700; color:var(--navy); background:var(--teal-lt); border:1.5px solid var(--teal-mid); padding:4px 12px; border-radius:5px; text-decoration:none; letter-spacing:0.01em;">https://living-link-wine.vercel.app/</a>
+      <div style="font-size:0.68rem; color:var(--gray-3);">No account required for public tools</div>
+    </div>
+  </div>
+
+  <div class="page-num">12</div>
+</div>
+
+
+<script>
+  // Initialize Mermaid and signal when all diagrams are rendered
+  window.__mermaidReady = false;
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'default',
+    themeVariables: {
+      primaryColor: '#d0f0ec',
+      primaryTextColor: '#0d2d4f',
+      primaryBorderColor: '#1a9e8c',
+      lineColor: '#0d6e6e',
+      secondaryColor: '#e8f0f8',
+      tertiaryColor: '#fdf3e2',
+      fontSize: '13px'
+    },
+    flowchart: {
+      htmlLabels: true,
+      curve: 'basis',
+      nodeSpacing: 50,
+      rankSpacing: 55
+    }
+  });
+
+  mermaid.run().then(function () {
+    window.__mermaidReady = true;
+  }).catch(function (err) {
+    console.warn('Mermaid error:', err);
+    window.__mermaidReady = true; // proceed anyway
+  });
+</script>
+
+</body>
+</html>
