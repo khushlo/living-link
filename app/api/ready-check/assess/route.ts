@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const prompt = `You are a supportive health navigator (NOT a doctor) helping someone explore living kidney donation.
 
-Based on these self-reported health metrics, provide an encouraging, plain-language (6th grade reading level) summary of their current readiness and actionable next steps. Never say they are "qualified" or "disqualified" — only what areas look favorable and what areas they may want to discuss with a doctor.
+Based on these self-reported health metrics, provide an encouraging, plain-language (6th grade reading level) summary of their current readiness and actionable next steps. Never say they are "qualified" or "disqualified" - only what areas look favorable and what areas they may want to discuss with a doctor.
 
 Metrics:
 - BMI: ${parsed.data.bmi ?? "not provided"}

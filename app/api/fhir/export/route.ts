@@ -1,5 +1,5 @@
-/**
- * FHIR Bulk Data Export — LifeAfter Outcomes
+﻿/**
+ * FHIR Bulk Data Export - LifeAfter Outcomes
  *
  * Implements FHIR Bulk Data Access IG (R4):
  * https://hl7.org/fhir/uv/bulkdata/
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * GET /api/fhir/export — capability statement for bulk export
+ * GET /api/fhir/export - capability statement for bulk export
  */
 export async function GET() {
   return NextResponse.json({

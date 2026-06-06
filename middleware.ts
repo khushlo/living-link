@@ -7,6 +7,14 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/webhooks(.*)",
+  "/could-i-qualify",
+  "/ripple",
+  "/waitlist-map",
+  "/stories",
+  "/start-conversation",
+  "/api/stories(.*)",
+  "/api/waitlist-stats(.*)",
+  "/api/ai/conversation-practice",
 ]);
 
 // Role-specific route matchers

@@ -1,5 +1,5 @@
-/**
- * CDS Hooks Service — LivingLink
+﻿/**
+ * CDS Hooks Service - LivingLink
  *
  * Implements CDS Hooks 1.0 spec: https://cds-hooks.hl7.org/
  *
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
 
     if (stalledEval) {
       cards.push({
-        summary: `LivingLink: Stalled Evaluation — ${stalledEval.stage}`,
+        summary: `LivingLink: Stalled Evaluation - ${stalledEval.stage}`,
         detail: `A living donor evaluation has been stalled at stage "${stalledEval.stage}". Review required in CenterFlow.`,
         indicator: "warning",
         source: {
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
       });
     }
   } catch {
-    // Fail gracefully — CDS card failure must not break EHR workflow
+    // Fail gracefully - CDS card failure must not break EHR workflow
     return NextResponse.json({ cards: [] });
   }
 

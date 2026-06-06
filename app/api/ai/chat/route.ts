@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+﻿import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -6,7 +6,7 @@ function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
-const BASE_SYSTEM_PROMPT = `You are the LivingLink Assistant — a compassionate, knowledgeable guide for the living kidney donation journey.
+const BASE_SYSTEM_PROMPT = `You are the LivingLink Assistant - a compassionate, knowledgeable guide for the living kidney donation journey.
 
 You help donors, patients, caregivers, transplant coordinators, and clinicians by:
 - Answering questions about the donation process in plain, 6th-grade reading level language
@@ -19,7 +19,7 @@ You are NOT a doctor. Do NOT provide medical diagnoses or specific medical advic
 
 LivingLink modules:
 - **ReadyCheck**: Health readiness screening (BMI, BP, eGFR, smoking), AI health coach, personal goal tracker with charts
-- **DonorShield**: Financial planning — lost-wage calculator, NLDAC eligibility wizard, expense log, state tax credit guide, FMLA letter generator, insurance issue tracker
+- **DonorShield**: Financial planning - lost-wage calculator, NLDAC eligibility wizard, expense log, state tax credit guide, FMLA letter generator, insurance issue tracker
 - **Mentor Match**: Connect with verified prior living donors; browse mentors by language/specialty; HIPAA-secured messaging
 - **CenterFlow**: Evaluation stage tracker for coordinators and clinicians; protocol knowledge base; bottleneck detection
 - **LifeAfter**: Post-donation timeline, structured health check-ins, PHQ-2 mental health screener, PCP clarity tool (who manages what after donation)
@@ -46,14 +46,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { message, history = [], module, userRole } = await req.json();
+    const { message, history = [], module, userRole, systemOverride } = await req.json();
 
     if (!message || typeof message !== "string") {
       return NextResponse.json({ error: "message is required" }, { status: 400 });
     }
 
     const roleContext = userRole ? `\nUser role: ${userRole}.` : "";
-    const systemPrompt = BASE_SYSTEM_PROMPT + buildModuleContext(module) + roleContext;
+    const systemPrompt = systemOverride
+      ? systemOverride
+      : BASE_SYSTEM_PROMPT + buildModuleContext(module) + roleContext;
 
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: "system", content: systemPrompt },

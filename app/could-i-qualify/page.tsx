@@ -1,0 +1,397 @@
+﻿"use client";
+import { useState } from "react";
+import Link from "next/link";
+import { Heart, ArrowRight, CheckCircle, XCircle, AlertCircle, ChevronRight, ArrowLeft } from "lucide-react";
+import { SignUpButton } from "@clerk/nextjs";
+import { PublicPageShell } from "@/components/shared/public-page-shell";
+
+type Step = "welcome" | "q1" | "q2" | "q3" | "q4" | "q5" | "result";
+
+interface Answers {
+  age: string;
+  bmiRange: string;
+  generalHealth: string;
+  chronicConditions: string;
+  interest: string;
+}
+
+const initialAnswers: Answers = {
+  age: "",
+  bmiRange: "",
+  generalHealth: "",
+  chronicConditions: "",
+  interest: "",
+};
+
+function scoreAnswers(a: Answers): "great" | "possible" | "work-on-it" {
+  let score = 0;
+
+  if (a.age === "18-59") score += 2;
+  else if (a.age === "60-70") score += 1;
+  else if (a.age === "under18" || a.age === "over70") score -= 2;
+
+  if (a.bmiRange === "18-30") score += 2;
+  else if (a.bmiRange === "31-35") score += 1;
+  else if (a.bmiRange === "over35") score -= 1;
+
+  if (a.generalHealth === "excellent" || a.generalHealth === "good") score += 2;
+  else if (a.generalHealth === "fair") score += 1;
+  else score -= 1;
+
+  if (a.chronicConditions === "none") score += 2;
+  else if (a.chronicConditions === "managed") score += 1;
+  else score -= 1;
+
+  if (score >= 7) return "great";
+  if (score >= 4) return "possible";
+  return "work-on-it";
+}
+
+const steps: Step[] = ["welcome", "q1", "q2", "q3", "q4", "q5", "result"];
+
+export default function CouldIQualifyPage() {
+  const [step, setStep] = useState<Step>("welcome");
+  const [answers, setAnswers] = useState<Answers>(initialAnswers);
+
+  function next(nextStep: Step) {
+    setStep(nextStep);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  const result = scoreAnswers(answers);
+  const progress = ((steps.indexOf(step)) / (steps.length - 1)) * 100;
+
+  return (
+    <PublicPageShell>
+      <main className="mx-auto max-w-2xl px-6 py-12">
+        {step !== "welcome" && step !== "result" && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+              <span>Question {steps.indexOf(step)} of 5</span>
+              <span>{Math.round(progress)}% complete</span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-gray-100" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
+              <div
+                className="h-2 rounded-full bg-blue-600 transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Welcome */}
+        {step === "welcome" && (
+          <div className="text-center space-y-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-200 px-4 py-1.5 text-sm font-medium text-blue-700">
+              60-second check · No account needed
+            </div>
+            <h1 className="text-4xl font-bold text-gray-900 leading-tight">
+              Could you be a<br />
+              <span className="text-blue-600">living kidney donor?</span>
+            </h1>
+            <p className="text-lg text-gray-600 max-w-xl mx-auto">
+              Over 100,000 Americans are waiting for a kidney right now. 5 quick questions will show you
+              whether donation could be an option for you - and what your first step looks like.
+            </p>
+            <div className="flex flex-col items-center gap-3">
+              <button
+                onClick={() => next("q1")}
+                className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-4 text-base font-semibold text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Find out in 60 seconds
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <p className="text-xs text-gray-400">Not a medical assessment · Always consult your doctor</p>
+            </div>
+            <div className="grid grid-cols-3 gap-4 pt-4">
+              {[
+                { value: "100K+", label: "People waiting" },
+                { value: "13", label: "People die daily waiting" },
+                { value: "95%", label: "Donors lead normal lives" },
+              ].map(({ value, label }) => (
+                <div key={label} className="rounded-xl bg-gray-50 border border-gray-100 p-4 text-center">
+                  <p className="text-2xl font-bold text-blue-600">{value}</p>
+                  <p className="text-xs text-gray-500 mt-1">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Q1: Age */}
+        {step === "q1" && (
+          <div className="space-y-6">
+            <div>
+              <p className="text-sm font-medium text-blue-600 mb-1">Question 1 of 5</p>
+              <h2 className="text-2xl font-bold text-gray-900">How old are you?</h2>
+              <p className="text-gray-500 mt-1 text-sm">Transplant centers generally consider donors between 18–70 years old.</p>
+            </div>
+            <div className="space-y-3">
+              {[
+                { value: "under18", label: "Under 18" },
+                { value: "18-59", label: "18 – 59 years old" },
+                { value: "60-70", label: "60 – 70 years old" },
+                { value: "over70", label: "Over 70" },
+              ].map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => { setAnswers({ ...answers, age: value }); next("q2"); }}
+                  className="flex w-full items-center justify-between rounded-xl border-2 border-gray-200 bg-white px-5 py-4 text-left text-sm font-medium text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {label}
+                  <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Q2: BMI */}
+        {step === "q2" && (
+          <div className="space-y-6">
+            <button onClick={() => next("q1")} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <div>
+              <p className="text-sm font-medium text-blue-600 mb-1">Question 2 of 5</p>
+              <h2 className="text-2xl font-bold text-gray-900">What's your approximate BMI?</h2>
+              <p className="text-gray-500 mt-1 text-sm">BMI = weight (lbs) ÷ height (in)² × 703. Most centers prefer BMI under 35. Not sure? Pick your best estimate.</p>
+            </div>
+            <div className="space-y-3">
+              {[
+                { value: "18-30", label: "Under 30 - healthy range" },
+                { value: "31-35", label: "31 – 35" },
+                { value: "over35", label: "Over 35" },
+                { value: "unsure", label: "I'm not sure" },
+              ].map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => { setAnswers({ ...answers, bmiRange: value }); next("q3"); }}
+                  className="flex w-full items-center justify-between rounded-xl border-2 border-gray-200 bg-white px-5 py-4 text-left text-sm font-medium text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {label}
+                  <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Q3: General health */}
+        {step === "q3" && (
+          <div className="space-y-6">
+            <button onClick={() => next("q2")} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <div>
+              <p className="text-sm font-medium text-blue-600 mb-1">Question 3 of 5</p>
+              <h2 className="text-2xl font-bold text-gray-900">How would you describe your overall health?</h2>
+            </div>
+            <div className="space-y-3">
+              {[
+                { value: "excellent", label: "Excellent - I feel great, no health concerns" },
+                { value: "good", label: "Good - generally healthy, minor issues occasionally" },
+                { value: "fair", label: "Fair - managing some health conditions" },
+                { value: "poor", label: "Poor - significant ongoing health issues" },
+              ].map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => { setAnswers({ ...answers, generalHealth: value }); next("q4"); }}
+                  className="flex w-full items-center justify-between rounded-xl border-2 border-gray-200 bg-white px-5 py-4 text-left text-sm font-medium text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {label}
+                  <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Q4: Chronic conditions */}
+        {step === "q4" && (
+          <div className="space-y-6">
+            <button onClick={() => next("q3")} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <div>
+              <p className="text-sm font-medium text-blue-600 mb-1">Question 4 of 5</p>
+              <h2 className="text-2xl font-bold text-gray-900">Do you have any of these conditions?</h2>
+              <p className="text-gray-500 mt-1 text-sm">Diabetes, kidney disease, high blood pressure, or cancer.</p>
+            </div>
+            <div className="space-y-3">
+              {[
+                { value: "none", label: "None of the above" },
+                { value: "managed", label: "Yes, but well-controlled with medication" },
+                { value: "active", label: "Yes, and currently active / not fully controlled" },
+              ].map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => { setAnswers({ ...answers, chronicConditions: value }); next("q5"); }}
+                  className="flex w-full items-center justify-between rounded-xl border-2 border-gray-200 bg-white px-5 py-4 text-left text-sm font-medium text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {label}
+                  <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Q5: Interest */}
+        {step === "q5" && (
+          <div className="space-y-6">
+            <button onClick={() => next("q4")} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <div>
+              <p className="text-sm font-medium text-blue-600 mb-1">Question 5 of 5</p>
+              <h2 className="text-2xl font-bold text-gray-900">What best describes you right now?</h2>
+            </div>
+            <div className="space-y-3">
+              {[
+                { value: "curious", label: "Just curious - exploring the idea" },
+                { value: "considering", label: "Seriously considering it" },
+                { value: "specific", label: "I have someone specific in mind to help" },
+                { value: "directed", label: "A doctor or coordinator suggested I look into this" },
+              ].map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => { setAnswers({ ...answers, interest: value }); next("result"); }}
+                  className="flex w-full items-center justify-between rounded-xl border-2 border-gray-200 bg-white px-5 py-4 text-left text-sm font-medium text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {label}
+                  <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Result */}
+        {step === "result" && (
+          <div className="space-y-8">
+            {result === "great" && (
+              <>
+                <div className="rounded-2xl bg-green-50 border-2 border-green-300 p-8 text-center">
+                  <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" aria-hidden="true" />
+                  <h2 className="text-2xl font-bold text-green-900 mb-2">You may be a great candidate!</h2>
+                  <p className="text-green-800">
+                    Based on your answers, you have the profile of someone many transplant centers would want to hear from.
+                    The next step is a free initial consultation - it costs nothing and commits you to nothing.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-white border border-gray-200 p-6 space-y-3">
+                  <h3 className="font-semibold text-gray-900">Your recommended next steps</h3>
+                  {[
+                    "Create a free LivingLink account to run your full ReadyCheck with personalized health goals",
+                    "Connect with a real donor who matches your background through Mentor Match",
+                    "Check your financial protection options - most out-of-pocket costs are reimbursable",
+                  ].map((s, i) => (
+                    <div key={i} className="flex gap-3 text-sm text-gray-700">
+                      <span className="flex-shrink-0 h-5 w-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {result === "possible" && (
+              <>
+                <div className="rounded-2xl bg-blue-50 border-2 border-blue-300 p-8 text-center">
+                  <AlertCircle className="h-12 w-12 text-blue-600 mx-auto mb-4" aria-hidden="true" />
+                  <h2 className="text-2xl font-bold text-blue-900 mb-2">Donation may be possible for you</h2>
+                  <p className="text-blue-800">
+                    Your answers suggest some areas to discuss with a transplant team - but many people in your situation
+                    go on to donate successfully. There's only one way to know for sure.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-white border border-gray-200 p-6 space-y-3">
+                  <h3 className="font-semibold text-gray-900">What to do next</h3>
+                  {[
+                    "Use LivingLink's ReadyCheck to get specific, AI-guided health goals before your evaluation",
+                    "Talk to a prior donor who had similar questions - they've been through it",
+                    "A transplant center evaluation is free and you can stop at any point",
+                  ].map((s, i) => (
+                    <div key={i} className="flex gap-3 text-sm text-gray-700">
+                      <span className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {result === "work-on-it" && (
+              <>
+                <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-8 text-center">
+                  <XCircle className="h-12 w-12 text-amber-600 mx-auto mb-4" aria-hidden="true" />
+                  <h2 className="text-2xl font-bold text-amber-900 mb-2">Some things to work on first</h2>
+                  <p className="text-amber-800">
+                    Based on your answers, there are a few health or age factors that transplant centers would likely
+                    want to address first. That doesn't mean donation is impossible - but starting with your health is the right move.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-white border border-gray-200 p-6 space-y-3">
+                  <h3 className="font-semibold text-gray-900">How LivingLink can help</h3>
+                  {[
+                    "ReadyCheck gives you a personalized health roadmap with measurable goals",
+                    "Our AI coach explains what each metric means in plain language - no medical degree needed",
+                    "Many donors who were initially told 'not yet' went on to donate after working on specific goals",
+                  ].map((s, i) => (
+                    <div key={i} className="flex gap-3 text-sm text-gray-700">
+                      <span className="flex-shrink-0 h-5 w-5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* CTA */}
+            <div className="rounded-2xl bg-gray-900 p-8 text-center space-y-4">
+              <h3 className="text-xl font-bold text-white">Ready for your full evaluation?</h3>
+              <p className="text-gray-400 text-sm">
+                LivingLink gives you everything you need - health goals, financial protection,
+                peer mentorship, and lifetime support.
+              </p>
+              <SignUpButton mode="modal">
+                <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white hover:bg-blue-500 transition-colors mx-auto focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  Create your free account
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </SignUpButton>
+              <p className="text-xs text-gray-500">Free · No credit card · No commitment</p>
+            </div>
+
+            <div className="text-center">
+              <button
+                onClick={() => { setAnswers(initialAnswers); setStep("welcome"); }}
+                className="text-sm text-blue-600 hover:underline focus:outline-none"
+              >
+                Start over
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-400 text-center border-t pt-4">
+              This screener is for informational purposes only. It is not a medical assessment and does not
+              constitute medical advice. Only a transplant center can evaluate your eligibility for living kidney donation.
+            </p>
+          </div>
+        )}
+      </main>
+
+      <footer className="border-t border-gray-100 py-6 mt-8">
+        <div className="mx-auto max-w-3xl px-6 flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-4 text-sm text-gray-500">
+            <Link href="/" className="hover:text-blue-600">Home</Link>
+            <Link href="/ripple" className="hover:text-blue-600">Ripple Calculator</Link>
+            <Link href="/stories" className="hover:text-blue-600">Donor Stories</Link>
+            <Link href="/waitlist-map" className="hover:text-blue-600">Waitlist Map</Link>
+          </div>
+          <p className="text-xs text-gray-400">© 2026 LivingLink · Not a medical service</p>
+        </div>
+      </footer>
+    </PublicPageShell>
+  );
+}

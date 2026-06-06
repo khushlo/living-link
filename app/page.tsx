@@ -1,52 +1,67 @@
 ﻿import Link from "next/link";
 import { SignInButton, SignUpButton, SignedIn, SignedOut } from "@clerk/nextjs";
-import { ArrowRight, Heart, Shield, Users, Activity, CheckCircle } from "lucide-react";
+import { ArrowRight, Heart, Shield, Users, Activity, CheckCircle, Map, TrendingUp, MessageSquare, BookOpen } from "lucide-react";
 
 const modules = [
   {
     icon: Users,
     name: "Mentor Match",
+    publicHref: "/stories",       // public: read real donor stories
+    authHref: "/mentor-match",    // authenticated: full peer matching
     tagline: "Connect with donors who've walked your path",
     description:
       "AI-matched peer mentorship with prior living donors. Get real answers from real people who've been through it.",
     color: "bg-blue-50 border-blue-200 text-blue-700",
     iconColor: "text-blue-600",
+    publicCta: "Read donor stories",
   },
   {
     icon: CheckCircle,
     name: "ReadyCheck",
+    publicHref: "/could-i-qualify", // public: 60-second screener, no account needed
+    authHref: "/ready-check",       // authenticated: full health tracker
     tagline: "Know your eligibility before your first appointment",
     description:
-      "Interactive health screener with AI coaching for BMI, blood pressure, and smoking goals. Not a diagnosis  a roadmap.",
+      "Interactive health screener with AI coaching for BMI, blood pressure, and smoking goals. Not a diagnosis - a roadmap.",
     color: "bg-green-50 border-green-200 text-green-700",
     iconColor: "text-green-600",
+    publicCta: "Check eligibility free",
   },
   {
     icon: Shield,
     name: "DonorShield",
+    publicHref: "/ripple",        // public: see the impact of your donation
+    authHref: "/donor-shield",    // authenticated: full financial tools
     tagline: "Donation shouldn't cost you your financial security",
     description:
       "Lost-wage calculator, NLDAC reimbursement wizard, expense tracking, and FMLA letter generation.",
     color: "bg-purple-50 border-purple-200 text-purple-700",
     iconColor: "text-purple-600",
+    publicCta: "See the ripple effect",
   },
   {
     icon: Activity,
     name: "CenterFlow",
+    publicHref: "/waitlist-map",  // public: explore the national waitlist
+    authHref: "/dashboard",       // authenticated: coordinator/clinician portal
     tagline: "Faster evaluations. Fewer delays. More donors.",
     description:
       "Protocol knowledge base and evaluation tracker for transplant coordinators. Close the gap between referral and donation.",
     color: "bg-orange-50 border-orange-200 text-orange-700",
     iconColor: "text-orange-600",
+    publicCta: "Explore the waitlist map",
   },
   {
     icon: Heart,
     name: "LifeAfter",
+    publicHref: "/stories",       // public: read stories from donors post-donation
+    authHref: "/life-after",      // authenticated: personal health timeline
     tagline: "Your health matters after donation too",
     description:
       "Structured check-ins, PHQ-2 mental health screening, PCP guidance, and automated follow-up reporting under OPTN Policy 18.",
     color: "bg-red-50 border-red-200 text-red-700",
     iconColor: "text-red-600",
+    publicCta: "Read post-donation stories",
   },
 ];
 
@@ -66,22 +81,44 @@ export default function LandingPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <Heart className="h-6 w-6 fill-blue-600 text-blue-600" aria-hidden="true" />
             <span className="text-xl font-bold text-gray-900">LivingLink</span>
-          </div>
+          </Link>
           <nav aria-label="Primary navigation">
             <ul className="hidden items-center gap-6 md:flex">
-              {modules.map((m) => (
-                <li key={m.name}>
-                  <a
-                    href={`#${m.name.toLowerCase().replace(" ", "-")}`}
-                    className="text-sm text-gray-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-                  >
-                    {m.name}
-                  </a>
-                </li>
-              ))}
+              {/* Logged out: public tool links */}
+              <SignedOut>
+                {[
+                  { href: "/could-i-qualify", label: "Could I qualify?" },
+                  { href: "/ripple",           label: "Ripple effect" },
+                  { href: "/waitlist-map",      label: "Waitlist map" },
+                  { href: "/stories",           label: "Donor stories" },
+                  { href: "/start-conversation",label: "Practice conversation" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </SignedOut>
+              {/* Logged in: portal module links */}
+              <SignedIn>
+                {modules.map((m) => (
+                  <li key={m.name}>
+                    <Link
+                      href={m.authHref}
+                      className="text-sm text-gray-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                    >
+                      {m.name}
+                    </Link>
+                  </li>
+                ))}
+              </SignedIn>
             </ul>
           </nav>
           <div className="flex items-center gap-3">
@@ -181,18 +218,45 @@ export default function LandingPage() {
             {modules.map((module) => {
               const Icon = module.icon;
               return (
-                <article
+                <div
                   key={module.name}
                   id={module.name.toLowerCase().replace(" ", "-")}
-                  className={`rounded-2xl border p-6 ${module.color} transition-transform hover:-translate-y-1`}
+                  className={`rounded-2xl border p-6 ${module.color}`}
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <Icon className={`h-6 w-6 ${module.iconColor}`} aria-hidden="true" />
                     <h3 className="font-bold text-lg">{module.name}</h3>
                   </div>
                   <p className="font-medium text-sm mb-2">{module.tagline}</p>
-                  <p className="text-sm opacity-80">{module.description}</p>
-                </article>
+                  <p className="text-sm opacity-80 mb-4">{module.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {/* Public entry - no account needed */}
+                    <Link
+                      href={module.publicHref}
+                      className={`inline-flex items-center gap-1 rounded-lg bg-white/70 px-3 py-1.5 text-xs font-semibold ${module.iconColor} hover:bg-white transition-colors border border-current/20`}
+                    >
+                      {module.publicCta} →
+                    </Link>
+                    {/* Full access - requires account */}
+                    <SignedIn>
+                      <Link
+                        href={module.authHref}
+                        className="inline-flex items-center gap-1 rounded-lg border border-gray-400/40 bg-white/50 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-white transition-colors"
+                      >
+                        Open full module →
+                      </Link>
+                    </SignedIn>
+                    <SignedOut>
+                      <SignUpButton mode="modal">
+                        <button className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition-opacity`}
+                          style={{ backgroundColor: "rgb(37 99 235)" }}
+                        >
+                          Full access (free) →
+                        </button>
+                      </SignUpButton>
+                    </SignedOut>
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -226,6 +290,79 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Awareness tools - no account required */}
+        <section className="mx-auto max-w-6xl px-6 py-24" aria-labelledby="tools-heading">
+          <div className="text-center mb-12">
+            <h2 id="tools-heading" className="text-3xl font-bold text-gray-900 mb-4">
+              Explore before you decide
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              No account needed. These free tools help you understand kidney donation, see real
+              impact, and feel ready to have the conversation.
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                href: "/could-i-qualify",
+                icon: CheckCircle,
+                title: "Could I qualify?",
+                desc: "60-second screener to gauge your eligibility - no sign-up required.",
+                color: "text-green-600",
+                bg: "bg-green-50",
+                border: "border-green-200",
+              },
+              {
+                href: "/ripple",
+                icon: TrendingUp,
+                title: "Ripple Effect",
+                desc: "See the cascade of hours, sessions, and years your donation creates.",
+                color: "text-blue-600",
+                bg: "bg-blue-50",
+                border: "border-blue-200",
+              },
+              {
+                href: "/waitlist-map",
+                icon: Map,
+                title: "Waitlist Map",
+                desc: "Explore the kidney waitlist in every U.S. state - make it real.",
+                color: "text-orange-600",
+                bg: "bg-orange-50",
+                border: "border-orange-200",
+              },
+              {
+                href: "/stories",
+                icon: BookOpen,
+                title: "Donor Stories",
+                desc: "Read first-hand accounts from living donors across the country.",
+                color: "text-purple-600",
+                bg: "bg-purple-50",
+                border: "border-purple-200",
+              },
+            ].map((tool) => {
+              const Icon = tool.icon;
+              return (
+                <Link
+                  key={tool.href}
+                  href={tool.href}
+                  className={`group flex flex-col gap-4 rounded-2xl border ${tool.border} ${tool.bg} p-6 transition-transform hover:-translate-y-1 hover:shadow-md`}
+                >
+                  <div className={`w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm`}>
+                    <Icon className={`h-5 w-5 ${tool.color}`} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-1">{tool.title}</h3>
+                    <p className="text-sm text-gray-600">{tool.desc}</p>
+                  </div>
+                  <span className={`text-sm font-medium ${tool.color} group-hover:underline`}>
+                    Try it free →
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </section>
 

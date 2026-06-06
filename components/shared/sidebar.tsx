@@ -11,6 +11,10 @@ import {
   Shield,
   Activity,
   Calendar,
+  MessageCircle,
+  TrendingUp,
+  Map,
+  BookOpen,
   Menu,
   X,
 } from "lucide-react";
@@ -44,8 +48,10 @@ export function Sidebar({ navItems, role }: SidebarProps) {
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <Heart className="h-5 w-5 fill-blue-600 text-blue-600" aria-hidden="true" />
-        <span className="font-bold text-gray-900">LivingLink</span>
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <Heart className="h-5 w-5 fill-blue-600 text-blue-600" aria-hidden="true" />
+          <span className="font-bold text-gray-900">LivingLink</span>
+        </Link>
         <span
           className={cn(
             "ml-auto rounded-full px-2 py-0.5 text-xs font-medium capitalize",
@@ -151,11 +157,16 @@ export function Sidebar({ navItems, role }: SidebarProps) {
 
 // Pre-built nav item sets per role
 export const donorNavItems: NavItem[] = [
-  { href: "/donor/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/ready-check", label: "ReadyCheck", icon: CheckCircle },
-  { href: "/donor-shield", label: "DonorShield", icon: Shield },
-  { href: "/mentor-match", label: "Mentor Match", icon: Users },
-  { href: "/life-after", label: "LifeAfter", icon: Heart },
+  { href: "/donor/dashboard",      label: "Dashboard",          icon: LayoutDashboard },
+  { href: "/ready-check",          label: "ReadyCheck",          icon: CheckCircle },
+  { href: "/donor-shield",         label: "DonorShield",         icon: Shield },
+  { href: "/mentor-match",         label: "Mentor Match",        icon: Users },
+  { href: "/life-after",           label: "LifeAfter",           icon: Heart },
+  { href: "/start-conversation",   label: "Conversation Guide",  icon: MessageCircle },
+  { href: "/could-i-qualify",      label: "Eligibility Check",   icon: CheckCircle,  badge: "Public" },
+  { href: "/ripple",               label: "Ripple Effect",       icon: TrendingUp,   badge: "Public" },
+  { href: "/waitlist-map",         label: "Waitlist Map",        icon: Map,          badge: "Public" },
+  { href: "/stories",              label: "Donor Stories",       icon: BookOpen,     badge: "Public" },
 ];
 
 export const clinicianNavItems: NavItem[] = [
