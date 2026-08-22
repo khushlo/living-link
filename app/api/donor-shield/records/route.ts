@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
@@ -35,14 +36,34 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 });
 
   try {
-    const user = await prisma.user.findUnique({
+    const clerkUser = await currentUser();
+    const email = clerkUser?.primaryEmailAddress?.emailAddress ?? clerkUser?.emailAddresses[0]?.emailAddress;
+    if (!clerkUser || !email) {
+      return NextResponse.json({ error: "Unable to load authenticated user" }, { status: 401 });
+    }
+
+    // Clerk users may not have a local row yet because provisioning is deferred.
+    const user = await prisma.user.upsert({
       where: { clerkId: userId! },
-      include: { donorProfile: true },
+      update: {},
+      create: {
+        clerkId: userId!,
+        email,
+        firstName: clerkUser.firstName,
+        lastName: clerkUser.lastName,
+      },
+      select: { id: true },
     });
-    if (!user?.donorProfile) return NextResponse.json({ error: "Donor profile not found" }, { status: 404 });
+
+    // A donor profile is created lazily so first-time donors can log an expense.
+    const donorProfile = await prisma.donorProfile.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id },
+    });
 
     const record = await prisma.financialRecord.create({
-      data: { donorProfileId: user.donorProfile.id, ...parsed.data } as any,
+      data: { donorProfileId: donorProfile.id, ...parsed.data } as any,
     });
     return NextResponse.json(record, { status: 201 });
   } catch {

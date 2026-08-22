@@ -1,12 +1,42 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Activity, TrendingUp, Target, CheckCircle, AlertCircle } from "lucide-react";
+
+type Goal = {
+  id: string;
+  metric: string;
+  targetValue: number;
+  currentValue: number | null;
+  targetDate: string | null;
+  progressLogs: { id: string; value: number; note: string | null; loggedAt: string }[];
+};
+
+const GOAL_META: Record<string, { label: string; unit: string; color: string }> = {
+  BMI: { label: "BMI", unit: "", color: "#10b981" },
+  BLOOD_PRESSURE: { label: "Systolic BP", unit: "mmHg", color: "#3b82f6" },
+  SMOKING: { label: "Cigarettes / day", unit: "cigs", color: "#ef4444" },
+  BLOOD_SUGAR: { label: "Blood Sugar", unit: "mg/dL", color: "#f59e0b" },
+  WEIGHT: { label: "Weight", unit: "kg", color: "#8b5cf6" },
+};
 
 export default function ReadyCheckPage() {
   const [step, setStep] = useState<"intro" | "form" | "results">("intro");
   const [form, setForm] = useState({ bmi: "", bpSystolic: "", bpDiastolic: "", egfr: "", smokingStatus: "never", hasDiabetes: false, age: "" });
   const [result, setResult] = useState<{ aiSummary: string } | null>(null);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/ready-check/goals")
+      .then((res) => res.json())
+      .then((data) => setGoals(Array.isArray(data) ? data : []))
+      .catch(() => setGoals([]));
+  }, []);
+
+  const goalProgress = (goal: Goal) => {
+    if (goal.currentValue == null || goal.targetValue <= 0) return 0;
+    return Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100));
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,7 +66,7 @@ export default function ReadyCheckPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-2xl">
+    <div className="space-y-8 max-w-5xl">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">ReadyCheck</h1>
         <p className="mt-1 text-gray-600">
@@ -45,7 +75,9 @@ export default function ReadyCheckPage() {
         </p>
       </div>
 
-      {step === "intro" && (
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+        <div className="space-y-6">
+          {step === "intro" && (
         <div className="space-y-6">
           <div className="rounded-xl bg-green-50 border border-green-200 p-6">
             <h2 className="font-semibold text-green-900 mb-3">What ReadyCheck does</h2>
@@ -65,9 +97,9 @@ export default function ReadyCheckPage() {
             Start my ReadyCheck
           </button>
         </div>
-      )}
+          )}
 
-      {step === "form" && (
+          {step === "form" && (
         <form onSubmit={handleSubmit} className="space-y-6" aria-label="Eligibility self-assessment form">
           <fieldset className="space-y-4">
             <legend className="text-base font-semibold text-gray-900">Your health metrics</legend>
@@ -122,9 +154,9 @@ export default function ReadyCheckPage() {
             </button>
           </div>
         </form>
-      )}
+          )}
 
-      {step === "results" && result && (
+          {step === "results" && result && (
         <div className="space-y-6">
           <div className="rounded-xl bg-green-50 border border-green-200 p-6">
             <div className="flex items-center gap-2 mb-3">
@@ -145,7 +177,63 @@ export default function ReadyCheckPage() {
             This summary is for educational purposes only and does not constitute medical advice. Please consult your transplant team for a formal evaluation.
           </p>
         </div>
-      )}
+          )}
+        </div>
+
+        <section aria-labelledby="goals-heading" className="rounded-xl border border-gray-200 bg-white p-5 lg:sticky lg:top-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-green-600" aria-hidden="true" />
+                <h2 id="goals-heading" className="font-semibold text-gray-900">Your health goals</h2>
+              </div>
+              <p className="mt-1 text-sm text-gray-500">Track the milestones you are working toward.</p>
+            </div>
+            <a href="/ready-check/goals" className="shrink-0 text-sm font-medium text-green-700 hover:underline">
+              Manage goals
+            </a>
+          </div>
+
+          {goals.length === 0 ? (
+            <p className="rounded-lg bg-gray-50 p-4 text-sm text-gray-500">
+              No goals yet. Create a goal to start tracking your progress.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {goals.map((goal) => {
+                const meta = GOAL_META[goal.metric] ?? { label: goal.metric, unit: "", color: "#6b7280" };
+                const progress = goalProgress(goal);
+                const latestLog = goal.progressLogs.at(-1);
+                const currentValue = goal.currentValue ?? latestLog?.value;
+
+                return (
+                  <div key={goal.id} className="rounded-lg border border-gray-100 bg-gray-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{meta.label}</p>
+                        <p className="mt-1 text-sm text-gray-600">
+                          Target: <strong>{goal.targetValue} {meta.unit}</strong>
+                          {currentValue != null && <> · Current: <strong>{currentValue} {meta.unit}</strong></>}
+                        </p>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700">{progress}%</span>
+                    </div>
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={`${meta.label} progress`}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: meta.color }} />
+                    </div>
+                    {latestLog && (
+                      <p className="mt-2 text-xs text-gray-500">
+                        Last logged {new Date(latestLog.loggedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        {latestLog.note ? ` · ${latestLog.note}` : ""}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

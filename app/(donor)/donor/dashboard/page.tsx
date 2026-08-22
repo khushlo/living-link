@@ -70,10 +70,7 @@ export default async function DonorDashboard() {
         <div>
           <p className="font-medium text-amber-800 text-sm">Complete your health profile</p>
           <p className="text-amber-700 text-sm mt-0.5">
-            Add your BMI and blood pressure to unlock personalized ReadyCheck coaching.
-            <Link href="/donor/ready-check" className="underline ml-1 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded">
-              Get started →
-            </Link>
+            Add your BMI and blood pressure to unlock personalized ReadyCheck coaching. Use the ReadyCheck tab in the sidebar to get started.
           </p>
         </div>
       </div>
