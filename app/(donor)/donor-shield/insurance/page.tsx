@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Shield, Plus, AlertCircle, CheckCircle, Clock, ChevronDown, Phone, ExternalLink } from "lucide-react";
+import { BackToModule } from "@/components/shared/back-to-module";
 
 type Issue = {
   id: string;
@@ -64,6 +65,7 @@ export default function InsurancePage() {
 
   return (
     <div className="max-w-3xl space-y-8">
+      <BackToModule href="/donor-shield" label="Back to DonorShield" />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Insurance Issue Tracker</h1>

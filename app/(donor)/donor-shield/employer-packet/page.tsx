@@ -1,6 +1,7 @@
 ﻿"use client";
 import { useState } from "react";
 import { Briefcase, FileText, DollarSign, CheckCircle, Download, Copy, ArrowRight } from "lucide-react";
+import { BackToModule } from "@/components/shared/back-to-module";
 
 interface EmployerForm {
   donorName: string;
@@ -127,6 +128,7 @@ RESOURCES
 
   return (
     <div className="space-y-8 max-w-3xl">
+      <BackToModule href="/donor-shield" label="Back to DonorShield" />
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Employer Partner Toolkit</h1>
         <p className="mt-1 text-gray-600">

@@ -1,4 +1,5 @@
 import { DollarSign, ExternalLink, Info, CheckCircle, XCircle } from "lucide-react";
+import { BackToModule } from "@/components/shared/back-to-module";
 
 export const metadata = { title: "State Tax Credits - DonorShield" };
 
@@ -49,6 +50,7 @@ const withoutCredit = STATE_TAX_DATA.filter((s) => !s.hasCredit);
 export default function TaxCreditsPage() {
   return (
     <div className="max-w-4xl space-y-10">
+      <BackToModule href="/donor-shield" label="Back to DonorShield" />
       <div>
         <h1 className="text-2xl font-bold text-gray-900">State Tax Credit Guide</h1>
         <p className="mt-1 text-gray-600">

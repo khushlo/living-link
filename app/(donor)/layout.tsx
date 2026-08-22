@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { Sidebar, donorNavItems } from "@/components/shared/sidebar";
 import { AIAssistant } from "@/components/shared/ai-assistant";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -9,9 +10,14 @@ export default async function DonorLayout({ children }: { children: React.ReactN
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    select: { mentorProfile: { select: { id: true } } },
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar navItems={donorNavItems} role="donor" />
+      <Sidebar navItems={donorNavItems} role="donor" isMentor={Boolean(user?.mentorProfile)} />
       <div className="lg:pl-64">
         <main id="main-content" className="p-6 lg:p-8" tabIndex={-1}>
           {children}

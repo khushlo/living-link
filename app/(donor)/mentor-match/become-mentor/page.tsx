@@ -27,6 +27,7 @@ export default function BecomeMentorPage() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [form, setForm] = useState({
     donationYear: "",
     donationType: "",
@@ -59,14 +60,22 @@ export default function BecomeMentorPage() {
 
   async function handleSubmit() {
     setSubmitting(true);
+    setSubmitError("");
     try {
-      await fetch("/api/mentor-match/profiles", {
+      const res = await fetch("/api/mentor-match/profiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setSubmitError(typeof data?.error === "string" ? data.error : "We could not submit your application. Please check your details and try again.");
+        return;
+      }
       setDone(true);
     } catch {
+      setSubmitError("Network error. Please try again.");
+    } finally {
       setSubmitting(false);
     }
   }
@@ -245,6 +254,13 @@ export default function BecomeMentorPage() {
       {step === 2 && (
         <div className="rounded-xl border border-gray-200 p-6 space-y-5">
           <h2 className="font-semibold text-gray-900">Review & agree</h2>
+
+          {submitError && (
+            <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+              <span>{submitError}</span>
+            </div>
+          )}
 
           <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 flex gap-3 text-sm text-amber-800">
             <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-amber-500" />

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { FileText, CheckCircle, XCircle, ChevronRight, Phone, ExternalLink, AlertCircle } from "lucide-react";
+import { BackToModule } from "@/components/shared/back-to-module";
 
 type Step = "employment" | "residency" | "surgery" | "income" | "result";
 
@@ -35,6 +36,7 @@ export default function NLDACWizardPage() {
 
   return (
     <div className="max-w-2xl space-y-8">
+      <BackToModule href="/donor-shield" label="Back to DonorShield" />
       <div>
         <h1 className="text-2xl font-bold text-gray-900">NLDAC Eligibility Wizard</h1>
         <p className="mt-1 text-gray-600">

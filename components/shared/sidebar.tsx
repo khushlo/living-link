@@ -19,7 +19,8 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { Fragment, useState } from "react";
+import { NotificationBell } from "@/components/shared/notification-bell";
 
 export interface NavItem {
   href: string;
@@ -31,9 +32,10 @@ export interface NavItem {
 interface SidebarProps {
   navItems: NavItem[];
   role: string;
+  isMentor?: boolean;
 }
 
-export function Sidebar({ navItems, role }: SidebarProps) {
+export function Sidebar({ navItems, role, isMentor = false }: SidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -58,40 +60,44 @@ export function Sidebar({ navItems, role }: SidebarProps) {
             roleBadgeColor[role] ?? "bg-gray-100 text-gray-700"
           )}
         >
-          {role}
+          {isMentor ? "Donor & Mentor" : role}
         </span>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4" aria-label="Sidebar navigation">
         <ul className="space-y-1 px-3">
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
             return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                    "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
-                    isActive
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                  )}
-                  aria-current={isActive ? "page" : undefined}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  {item.label}
-                  {item.badge && (
-                    <span className="ml-auto rounded-full bg-blue-600 px-2 py-0.5 text-xs text-white">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              </li>
+              <Fragment key={item.href}>
+                {item.badge === "Public" && navItems[index - 1]?.badge !== "Public" && (
+                  <li aria-hidden="true" className="my-3 flex items-center gap-2 px-3">
+                    <span className="h-px flex-1 bg-gray-200" />
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-gray-400">Public</span>
+                    <span className="h-px flex-1 bg-gray-200" />
+                  </li>
+                )}
+                <li>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+                      isActive
+                        ? "bg-blue-50 text-blue-700"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    )}
+                    aria-current={isActive ? "page" : undefined}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {item.label}
+                  </Link>
+                </li>
+              </Fragment>
             );
           })}
         </ul>
@@ -109,6 +115,7 @@ export function Sidebar({ navItems, role }: SidebarProps) {
 
   return (
     <>
+      <NotificationBell />
       {/* Desktop sidebar */}
       <aside
         className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col border-r bg-white"

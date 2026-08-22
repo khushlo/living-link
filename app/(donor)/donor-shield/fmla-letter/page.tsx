@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
 import { FileText, Download, Printer, Info } from "lucide-react";
+import { BackToModule } from "@/components/shared/back-to-module";
 
 export default function FMLALetterPage() {
   const [form, setForm] = useState({
@@ -53,6 +54,7 @@ export default function FMLALetterPage() {
 
   return (
     <div className="max-w-3xl space-y-8">
+      <BackToModule href="/donor-shield" label="Back to DonorShield" />
       <div>
         <h1 className="text-2xl font-bold text-gray-900">FMLA Employer Letter Generator</h1>
         <p className="mt-1 text-gray-600">

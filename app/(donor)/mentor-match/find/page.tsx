@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Users, MessageCircle, Star, Search, Loader2, CheckCircle } from "lucide-react";
+import { BackToModule } from "@/components/shared/back-to-module";
 
 type Mentor = {
   id: string;
   donationYear: number | null;
+  isVerified: boolean;
+  isAvailable: boolean;
   languages: string[];
   specialties: string[];
   bio: string | null;
@@ -26,6 +29,7 @@ export default function FindMentorPage() {
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState("");
   const [specialty, setSpecialty] = useState("");
+  const [verification, setVerification] = useState("");
   const [requesting, setRequesting] = useState<string | null>(null);
   const [requested, setRequested] = useState<Set<string>>(new Set());
   const [error, setError] = useState("");
@@ -36,6 +40,7 @@ export default function FindMentorPage() {
       const params = new URLSearchParams();
       if (lang) params.set("lang", lang);
       if (specialty) params.set("specialty", specialty);
+      if (verification) params.set("verification", verification);
       const res = await fetch(`/api/mentor-match/profiles?${params}`);
       const data = await res.json();
       setMentors(Array.isArray(data) ? data : []);
@@ -46,7 +51,7 @@ export default function FindMentorPage() {
     }
   }
 
-  useEffect(() => { load(); }, [lang, specialty]);
+  useEffect(() => { load(); }, [lang, specialty, verification]);
 
   async function requestMatch(mentorId: string) {
     setRequesting(mentorId);
@@ -72,6 +77,7 @@ export default function FindMentorPage() {
 
   return (
     <div className="max-w-3xl space-y-8">
+      <BackToModule href="/mentor-match" label="Back to Mentor Match" />
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Find a Mentor</h1>
         <p className="mt-1 text-gray-600">Browse verified living donors who have volunteered to support people exploring donation.</p>
@@ -88,10 +94,22 @@ export default function FindMentorPage() {
             onChange={(e) => setLang(e.target.value)}
           >
             <option value="">Any</option>
-            <option value="en">English</option>
-            <option value="es">Spanish</option>
-            <option value="zh">Chinese</option>
-            <option value="pt">Portuguese</option>
+            {[
+              "English",
+              "Spanish",
+              "French",
+              "Mandarin",
+              "Cantonese",
+              "Arabic",
+              "Hindi",
+              "Tagalog",
+              "Vietnamese",
+              "Korean",
+              "Portuguese",
+              "Other",
+            ].map((languageOption) => (
+              <option key={languageOption} value={languageOption}>{languageOption}</option>
+            ))}
           </select>
         </div>
         <div>
@@ -103,9 +121,29 @@ export default function FindMentorPage() {
             onChange={(e) => setSpecialty(e.target.value)}
           >
             <option value="">Any</option>
-            {Object.entries(SPECIALTY_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
+            {[
+              "Non-directed (altruistic) donation",
+              "Paired/chain exchange",
+              "Donation as a parent",
+              "Laparoscopic (minimally invasive) surgery",
+              "Managing financial impact",
+              "Emotional recovery",
+            ].map((specialtyOption) => (
+              <option key={specialtyOption} value={specialtyOption}>{specialtyOption}</option>
             ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1" htmlFor="verification-filter">Verification</label>
+          <select
+            id="verification-filter"
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+            value={verification}
+            onChange={(e) => setVerification(e.target.value)}
+          >
+            <option value="">All donors</option>
+            <option value="verified">Verified only</option>
+            <option value="unverified">Not verified only</option>
           </select>
         </div>
       </div>
@@ -143,9 +181,15 @@ export default function FindMentorPage() {
                     {mentor.donationYear && (
                       <span className="text-xs text-gray-400">Donated {mentor.donationYear}</span>
                     )}
-                    <span className="flex items-center gap-0.5 text-xs text-yellow-500">
-                      <Star className="h-3 w-3 fill-current" aria-hidden="true" /> Verified donor
-                    </span>
+                    {mentor.isVerified ? (
+                      <span className="flex items-center gap-0.5 text-xs text-yellow-600">
+                        <Star className="h-3 w-3 fill-current" aria-hidden="true" /> Verified donor
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-0.5 text-xs text-gray-500">
+                        <CheckCircle className="h-3 w-3" aria-hidden="true" /> Verification pending
+                      </span>
+                    )}
                   </div>
                   {mentor.bio && <p className="text-sm text-gray-600 line-clamp-2">{mentor.bio}</p>}
                   <div className="flex flex-wrap gap-1.5">
@@ -163,6 +207,10 @@ export default function FindMentorPage() {
                   {isRequested ? (
                     <span className="inline-flex items-center gap-1.5 rounded-md bg-green-50 border border-green-200 px-3 py-2 text-sm font-medium text-green-700">
                       <CheckCircle className="h-4 w-4" /> Request sent
+                    </span>
+                  ) : !mentor.isAvailable ? (
+                    <span className="rounded-md bg-gray-100 border border-gray-200 px-3 py-2 text-sm font-medium text-gray-500">
+                      Currently unavailable
                     </span>
                   ) : (
                     <button

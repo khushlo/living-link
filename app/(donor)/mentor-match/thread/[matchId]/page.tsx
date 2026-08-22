@@ -7,12 +7,13 @@ type Message = {
   id: string;
   content: string;
   sentAt: string;
-  sender: { firstName: string | null; role: string };
+  sender: { id: string; firstName: string | null; role: string };
 };
 
 type Thread = {
   id: string;
   messages: Message[];
+  viewerId: string;
 };
 
 export default function ThreadPage({ params }: { params: Promise<{ matchId: string }> }) {
@@ -84,7 +85,7 @@ export default function ThreadPage({ params }: { params: Promise<{ matchId: stri
           </div>
         ) : (
           thread.messages.map((msg) => {
-            const isMe = msg.sender.role === "DONOR";
+            const isMe = msg.sender.id === thread.viewerId;
             return (
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                 <div
@@ -94,9 +95,9 @@ export default function ThreadPage({ params }: { params: Promise<{ matchId: stri
                       : "bg-gray-100 text-gray-900 rounded-bl-sm"
                   }`}
                 >
-                  {!isMe && (
-                    <p className="text-xs font-medium mb-1 text-purple-700">{msg.sender.firstName ?? "Mentor"}</p>
-                  )}
+                  <p className={`text-xs font-medium mb-1 ${isMe ? "text-purple-100" : "text-purple-700"}`}>
+                    {isMe ? "You" : msg.sender.firstName ?? "Mentor"}
+                  </p>
                   <p>{msg.content}</p>
                   <p className={`text-xs mt-1 ${isMe ? "text-purple-200" : "text-gray-400"}`}>
                     {new Date(msg.sentAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}

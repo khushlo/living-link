@@ -1,5 +1,6 @@
 import { Stethoscope, UserCheck, Phone, ClipboardList, Heart, ShieldAlert, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { BackToModule } from "@/components/shared/back-to-module";
 
 export const metadata = { title: "PCP Clarity - LivingLink LifeAfter" };
 
@@ -73,6 +74,7 @@ const CONTACT_TIPS = [
 export default function PCPClarityPage() {
   return (
     <div className="max-w-3xl space-y-10">
+      <BackToModule href="/life-after" label="Back to LifeAfter" />
       <div>
         <h1 className="text-2xl font-bold text-gray-900">PCP Clarity Tool</h1>
         <p className="mt-1 text-gray-600">

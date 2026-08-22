@@ -1,5 +1,6 @@
 ﻿import { Users, MessageCircle, Star, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { MentorRequests } from "@/components/shared/mentor-requests";
 
 export const metadata = { title: "Mentor Match" };
 
@@ -13,6 +14,8 @@ export default function MentorMatchPage() {
           Connect with a real person who has donated a kidney and understands exactly what you're going through.
         </p>
       </div>
+
+      <MentorRequests />
 
       {/* How it works */}
       <section aria-labelledby="how-heading" className="rounded-xl bg-purple-50 p-6">
@@ -56,10 +59,10 @@ export default function MentorMatchPage() {
             Continue your existing mentor conversations.
           </p>
           <Link
-            href="/mentor-match/find"
+            href="/mentor-match/conversations"
             className="inline-flex items-center gap-2 rounded-md border border-purple-200 bg-white px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50"
           >
-            Browse mentors <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            View conversations <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { Target, TrendingUp, Plus, CheckCircle, Clock, ChevronDown, ChevronUp } 
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine,
 } from "recharts";
+import { BackToModule } from "@/components/shared/back-to-module";
 
 type Goal = {
   id: string;
@@ -95,6 +96,7 @@ export default function GoalsPage() {
 
   return (
     <div className="max-w-3xl space-y-8">
+      <BackToModule href="/ready-check" label="Back to ReadyCheck" />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Health Goals</h1>

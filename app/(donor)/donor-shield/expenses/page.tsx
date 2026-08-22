@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Receipt, Plus, Trash2, DollarSign, AlertCircle } from "lucide-react";
+import { BackToModule } from "@/components/shared/back-to-module";
 
 type Record = {
   id: string;
@@ -72,6 +73,7 @@ export default function ExpensesPage() {
 
   return (
     <div className="max-w-3xl space-y-8">
+      <BackToModule href="/donor-shield" label="Back to DonorShield" />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Expense Log</h1>
