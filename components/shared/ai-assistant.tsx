@@ -163,7 +163,10 @@ export function AIAssistant() {
         }),
       });
       const data = await res.json();
-      setMessages([...newMessages, { role: "assistant", content: data.reply }]);
+      const responseMessage = res.ok
+        ? (typeof data.reply === "string" ? data.reply : "I couldn't generate a response. Please try again.")
+        : (typeof data.error === "string" ? data.error : "The assistant is unavailable right now.");
+      setMessages([...newMessages, { role: "assistant", content: responseMessage }]);
     } catch {
       setMessages([...newMessages, { role: "assistant", content: "I'm having trouble responding right now. Please try again." }]);
     } finally {

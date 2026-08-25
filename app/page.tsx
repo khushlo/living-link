@@ -59,7 +59,7 @@ const modules = [
     authHref: "/life-after",      // authenticated: personal health timeline
     tagline: "Your health matters after donation too",
     description:
-      "Structured check-ins, PHQ-2 mental health screening, PCP guidance, and automated follow-up reporting under OPTN Policy 18.",
+      "Structured check-ins, PHQ-2 mental health screening, PCP guidance, and pilot-ready follow-up export tools.",
     color: "bg-red-50 border-red-200 text-red-700",
     iconColor: "text-red-600",
     publicCta: "Read post-donation stories",
@@ -95,9 +95,8 @@ export default function LandingPage() {
             <span className="text-blue-600">reimagined</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-xl text-gray-600">
-            LivingLink is the national platform connecting donors, patients, transplant centers, and
-            federal health systems  every step of the journey. FHIR-native. AI-powered.
-            HIPAA-compliant.
+            LivingLink is a prototype platform supporting donors, patients, and transplant centers
+            throughout the donation journey. FHIR-ready. AI features are disabled by default for PHI.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <SignedOut>
@@ -204,17 +203,17 @@ export default function LandingPage() {
               Built for the federal health ecosystem
             </h2>
             <p className="text-gray-400 mb-12 max-w-2xl">
-              LivingLink speaks FHIR R4 natively  connecting to Epic, Cerner, OPTN, HHS, and ONC
-              through proven interoperability standards.
+              LivingLink includes FHIR R4, SMART-on-FHIR, CDS Hooks, and export prototypes designed
+              for validation with approved health-system partners.
             </p>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {[
                 { standard: "HL7 FHIR R4", desc: "Core clinical data exchange" },
-                { standard: "US Core IG", desc: "ONC 21st Century Cures compliance" },
-                { standard: "SMART on FHIR", desc: "Epic App Orchard / Cerner launch" },
-                { standard: "CDS Hooks", desc: "Real-time EHR decision support" },
-                { standard: "Da Vinci PDex", desc: "Payer / insurance data exchange" },
-                { standard: "FHIR Bulk Export", desc: "HHS / CMS population analytics" },
+                { standard: "US Core IG", desc: "Resource-profile mapping target" },
+                { standard: "SMART on FHIR", desc: "Secure launch prototype" },
+                { standard: "CDS Hooks", desc: "Authenticated service prototype" },
+                { standard: "Da Vinci PDex", desc: "Planned payer-data mapping" },
+                { standard: "FHIR Bulk Export", desc: "Pseudonymized operational export prototype" },
               ].map(({ standard, desc }) => (
                 <div
                   key={standard}

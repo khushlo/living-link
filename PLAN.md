@@ -33,11 +33,11 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 ### Module 1: Mentor Match (Public Awareness & Mentorship)
 - AI-matched peer mentor network (candidate ↔ prior living donor)
 - Profile: donation motivation, health concerns, demographics, language preference
-- HIPAA-compliant in-app messaging
+- Private messaging prototype with selected app-layer encryption; HIPAA compliance is not claimed
 - Community forum moderated by transplant coordinators
 - Verified resource library (replaces Google/social media)
 - Multilingual: English + Spanish (priority)
-- FHIR: `Patient` (de-identified), `RelatedPerson`, `Communication`
+- FHIR: `Patient` and related-resource mapping scaffolding; de-identification and additional resources require validation
 
 ### Module 2: ReadyCheck (Donor Readiness & Eligibility)
 - Interactive eligibility pre-screener (BMI, BP, eGFR, smoking, diabetes, age)
@@ -45,7 +45,7 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 - AI health coach: personalized 30/60/90-day goals for BMI, BP, smoking cessation
 - Progress tracking with trend charts
 - Transplant center locator (OPTN data) triggered when readiness thresholds approached
-- CDS Hooks: alert inside clinician's EHR when a patient begins ReadyCheck
+- CDS Hooks: authenticated alert prototype; center-scoped EHR validation remains pending
 - FHIR: `Patient`, `Observation` (BMI/BP/eGFR), `Condition`, `RiskAssessment`, `Goal`
 
 ### Module 3: DonorShield (Donor Interventions)
@@ -72,7 +72,7 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 - PCP vs. nephrologist clarity tool: who manages what after donation
 - PHQ-2 psychological screener with mental health resource escalation
 - Parent-donor specific pathway (unique stress profile, tailored content)
-- Automated OPTN Policy 18 follow-up data submission via FHIR → HRSA
+- FHIR export prototype for authorized follow-up-data testing; OPTN/HRSA submission is not automated
 - Donor data export (HIPAA Right of Access): JSON or PDF
 - FHIR: `CarePlan`, `Observation`, `Appointment`, `QuestionnaireResponse`, `DiagnosticReport`
 
@@ -83,19 +83,19 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 | Standard | Purpose | Where Used |
 |---|---|---|
 | HL7 FHIR R4 | Core data exchange | All clinical modules |
-| US Core IG | ONC 21st Century Cures compliance | Patient, Observation, Condition |
-| SMART on FHIR | EHR app launch (Epic, Cerner, Oracle) | CenterFlow, ReadyCheck |
+| US Core IG | Planned profile alignment; validation pending | Patient, Observation |
+| SMART on FHIR | EHR launch prototype; Epic/Cerner/Oracle validation pending | CenterFlow, ReadyCheck |
 | CDS Hooks | Real-time clinical decision support | ReadyCheck candidate alerts |
 | Da Vinci PDex | Payer data exchange | DonorShield insurance module |
 | FHIR Subscriptions R4B | Real-time push notifications | Evaluation stage updates |
-| FHIR Bulk Export ($export) | De-identified population data for HHS/ONC | LifeAfter outcomes reporting |
+| FHIR Bulk Export ($export) | Pseudonymized population-data prototype; formal de-identification pending | LifeAfter outcomes testing |
 
 ### Federal Connectivity
 ```
 LivingLink FHIR API
-    ├── SMART on FHIR ──────► Epic App Orchard / Cerner App Market
+    ├── SMART on FHIR ──────► Future approved EHR sandbox validation
     ├── US Core IG ──────────► ONC Certified Health IT (21st Century Cures)
-    ├── FHIR R4 API ─────────► OPTN / HRSA (Policy 18 automated reporting)
+    ├── FHIR R4 API ─────────► Future OPTN / HRSA workflow validation
     ├── Da Vinci PDex ────────► Payer / Insurance Systems
     └── FHIR Bulk Export ─────► HHS / CMS / ONC (national analytics)
 ```
@@ -113,11 +113,11 @@ LivingLink FHIR API
 | FHIR Server | HAPI FHIR R4 (Docker container) |
 | FHIR Client | fhirclient.js |
 | AI Engine | OpenAI GPT-4o API (LivingLink Assistant) |
-| Auth | Clerk with MFA (HIPAA BAA available) |
+| Auth | Clerk authentication; BAA and deployment configuration require verification |
 | File Storage | AWS S3 (encrypted, private) |
 | Hosting (demo) | Vercel (frontend) + Railway (backend + HAPI FHIR) |
 | Hosting (prod) | AWS GovCloud or Azure Government (FedRAMP) |
-| Accessibility | axe-core (automated CI) + VoiceOver/NVDA manual |
+| Accessibility | axe-core prototype coverage; authenticated/manual and VPAT/ACR assessment pending |
 | CI/CD | GitHub Actions |
 
 ---

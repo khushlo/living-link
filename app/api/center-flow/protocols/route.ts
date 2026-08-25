@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
+import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,9 @@ export async function POST(req: NextRequest) {
       where: { clerkId: userId! },
       include: { center: true },
     });
+    if (!user || !["COORDINATOR", "ADMIN"].includes(user.role)) {
+      return NextResponse.json({ error: "Coordinator access required" }, { status: 403 });
+    }
     const protocol = await prisma.protocol.create({
       data: {
         ...parsed.data,
@@ -56,6 +60,7 @@ export async function POST(req: NextRequest) {
         isPublished: false,
       } as any,
     });
+    await recordAuditEvent(req, userId, "CREATE", "Protocol", protocol.id);
     return NextResponse.json(protocol, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create protocol" }, { status: 500 });

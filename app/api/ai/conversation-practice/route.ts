@@ -1,5 +1,6 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { validatePublicConversationRequest } from "@/lib/public-ai-safety";
 
 // Public endpoint - no auth required.
 // Used exclusively by the Conversation Practice simulator (/start-conversation).
@@ -45,19 +46,27 @@ Speak in plain language. 2-4 sentences per response. Ask one follow-up question 
 export async function POST(req: NextRequest) {
   try {
     const { message, history = [], scenarioId } = await req.json();
-
-    if (!message || typeof message !== "string") {
-      return NextResponse.json({ error: "message is required" }, { status: 400 });
-    }
+    const validationError = validatePublicConversationRequest(req, message, history);
+    if (validationError) return validationError;
 
     const systemPrompt = SCENARIOS[scenarioId];
     if (!systemPrompt) {
       return NextResponse.json({ error: "invalid scenarioId" }, { status: 400 });
     }
 
+    const sanitizedHistory: OpenAI.Chat.ChatCompletionMessageParam[] = history
+      .filter(
+        (entry): entry is { role: "user" | "assistant"; content: string } =>
+          typeof entry === "object" &&
+          entry !== null &&
+          ((entry as { role?: unknown }).role === "user" || (entry as { role?: unknown }).role === "assistant") &&
+          typeof (entry as { content?: unknown }).content === "string"
+      )
+      .map((entry) => ({ role: entry.role, content: entry.content.slice(0, 1_000) }));
+
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: "system", content: systemPrompt },
-      ...(history as OpenAI.Chat.ChatCompletionMessageParam[]),
+      ...sanitizedHistory,
       { role: "user", content: message },
     ];
 

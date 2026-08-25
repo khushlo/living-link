@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
+import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ const mentorApplicationSchema = z.object({
   bio: z.string().min(50).max(5000),
   languages: z.array(z.string().min(1)).min(1),
   specialties: z.array(z.string().min(1)).min(1),
+  acknowledgesBoundaries: z.literal(true),
 });
 
 const LANGUAGE_ALIASES: Record<string, string[]> = {
@@ -53,21 +55,26 @@ export async function GET(req: NextRequest) {
   const verification = searchParams.get("verification");
   const languageValues = lang ? LANGUAGE_ALIASES[lang.toLowerCase()] ?? [lang] : null;
   const specialtyValues = specialty ? SPECIALTY_ALIASES[specialty.toLowerCase()] ?? [specialty] : null;
-  const verificationFilter = verification === "verified"
-    ? { isVerified: true }
-    : verification === "unverified"
-      ? { isVerified: false }
-      : {};
+  let verificationFilter: { isVerified?: boolean } = { isVerified: true };
+  if (verification === "unverified") {
+    const viewer = await prisma.user.findUnique({ where: { clerkId: userId! }, select: { role: true } });
+    if (!viewer || !["COORDINATOR", "ADMIN"].includes(viewer.role)) {
+      return NextResponse.json({ error: "Coordinator access required" }, { status: 403 });
+    }
+    verificationFilter = { isVerified: false };
+  }
 
   try {
     const mentors = await prisma.mentorProfile.findMany({
       where: {
         ...verificationFilter,
+        isAvailable: true,
         ...(languageValues ? { languages: { hasSome: languageValues } } : {}),
         ...(specialtyValues ? { specialties: { hasSome: specialtyValues } } : {}),
       },
       include: { user: { select: { firstName: true, preferredLang: true } } },
     });
+    await recordAuditEvent(req, userId!, "READ", "MentorProfile");
     return NextResponse.json(mentors);
   } catch {
     return NextResponse.json({ error: "Failed to fetch mentor profiles" }, { status: 500 });
@@ -116,6 +123,7 @@ export async function POST(req: NextRequest) {
         specialties: parsed.data.specialties,
         bio: parsed.data.bio,
         isAvailable: true,
+        trainingAcknowledgedAt: new Date(),
       },
       create: {
         userId: user.id,
@@ -124,8 +132,10 @@ export async function POST(req: NextRequest) {
         languages: parsed.data.languages,
         specialties: parsed.data.specialties,
         bio: parsed.data.bio,
+        trainingAcknowledgedAt: new Date(),
       },
     });
+    await recordAuditEvent(req, userId!, "UPDATE", "MentorProfile", profile.id, { trainingAcknowledged: true });
 
     return NextResponse.json({ profile, message: "Mentor application submitted for review" }, { status: 201 });
   } catch (err) {

@@ -1,6 +1,7 @@
 "use client";
 
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 import { PublicNav } from "@/components/shared/public-nav";
 import { Sidebar, donorNavItems } from "@/components/shared/sidebar";
 import { AIAssistant } from "@/components/shared/ai-assistant";
@@ -17,10 +18,15 @@ interface PublicPageShellProps {
  */
 export function PublicPageShell({ children }: PublicPageShellProps) {
   const { isSignedIn, isLoaded } = useAuth();
-  const { user } = useUser();
+  const [role, setRole] = useState("donor");
 
-  const role =
-    (user?.publicMetadata?.role as string | undefined) ?? "donor";
+  useEffect(() => {
+    if (!isSignedIn) return;
+    fetch("/api/session/role")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => { if (typeof data?.role === "string") setRole(data.role); })
+      .catch(() => setRole("donor"));
+  }, [isSignedIn]);
 
   // While Clerk is hydrating, show the public layout to avoid layout shift
   if (!isLoaded || !isSignedIn) {
@@ -35,7 +41,7 @@ export function PublicPageShell({ children }: PublicPageShellProps) {
   // Authenticated: full portal experience with sidebar
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar navItems={donorNavItems} role={role} />
+      <Sidebar navItems={donorNavItems} role={role} includeAdmin={role === "admin"} />
       <div className="lg:pl-64">
         <main id="main-content" tabIndex={-1}>
           {children}

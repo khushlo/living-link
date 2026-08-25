@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId, error } = await requireAuth();
   if (error) return error;
 
@@ -18,6 +19,7 @@ export async function GET() {
       take: 20,
     });
     const unreadCount = notifications.filter((notification) => !notification.readAt).length;
+    await recordAuditEvent(req, userId!, "READ", "Notification");
 
     return NextResponse.json({ notifications, unreadCount });
   } catch {
@@ -43,6 +45,7 @@ export async function PATCH(req: NextRequest) {
       data: { readAt: new Date() },
     });
     if (notification.count === 0) return NextResponse.json({ error: "Notification not found" }, { status: 404 });
+    await recordAuditEvent(req, userId!, "UPDATE", "Notification", notificationId);
 
     return NextResponse.json({ ok: true });
   } catch {

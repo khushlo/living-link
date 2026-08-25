@@ -1,6 +1,6 @@
 ﻿import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Sidebar, donorNavItems } from "@/components/shared/sidebar";
+import { Sidebar } from "@/components/shared/sidebar";
 import { AIAssistant } from "@/components/shared/ai-assistant";
 import { prisma } from "@/lib/prisma";
 
@@ -12,12 +12,12 @@ export default async function DonorLayout({ children }: { children: React.ReactN
 
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
-    select: { mentorProfile: { select: { id: true } } },
+    select: { role: true, mentorProfile: { select: { id: true } } },
   });
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar navItems={donorNavItems} role="donor" isMentor={Boolean(user?.mentorProfile)} />
+      <Sidebar role={user?.role.toLowerCase() ?? "donor"} includeAdmin={user?.role === "ADMIN"} />
       <div className="lg:pl-64">
         <main id="main-content" className="p-6 lg:p-8" tabIndex={-1}>
           {children}

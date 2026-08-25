@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { recordAuditEvent } from "@/lib/audit";
+import { decryptField, encryptField } from "@/lib/field-encryption";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +17,7 @@ const checkinSchema = z.object({
   notes: z.string().max(1000).optional(),
 });
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId, error } = await requireAuth();
   if (error) return error;
 
@@ -32,8 +34,15 @@ export async function GET() {
       completed: completedWeeks.has(week as any),
       checkin: user?.donorProfile?.checkins.find((c) => c.week === week) ?? null,
     }));
+    await recordAuditEvent(req, userId!, "READ", "PostDonationCheckin");
 
-    return NextResponse.json({ timeline, phq2Count: user?.donorProfile?.phq2Responses.length ?? 0 });
+    return NextResponse.json({
+      timeline: timeline.map((entry) => ({
+        ...entry,
+        checkin: entry.checkin ? { ...entry.checkin, notes: decryptField(entry.checkin.notes) } : null,
+      })),
+      phq2Count: user?.donorProfile?.phq2Responses.length ?? 0,
+    });
   } catch {
     return NextResponse.json({ error: "Failed to fetch timeline" }, { status: 500 });
   }
@@ -55,8 +64,13 @@ export async function POST(req: NextRequest) {
     if (!user?.donorProfile) return NextResponse.json({ error: "Donor profile not found" }, { status: 404 });
 
     const checkin = await prisma.postDonationCheckin.create({
-      data: { donorProfileId: user.donorProfile.id, ...(parsed.data as any) },
+      data: {
+        donorProfileId: user.donorProfile.id,
+        ...(parsed.data as any),
+        notes: encryptField(parsed.data.notes),
+      },
     });
+    await recordAuditEvent(req, userId, "CREATE", "PostDonationCheckin", checkin.id);
     return NextResponse.json(checkin, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to submit check-in" }, { status: 500 });

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { recordAuditEvent } from "@/lib/audit";
+import { decryptField, encryptField } from "@/lib/field-encryption";
 
 export const dynamic = "force-dynamic";
 
@@ -36,8 +38,13 @@ export async function GET(
       where: { threadId: thread.id, senderId: { not: viewer.id }, readAt: null },
       data: { readAt: new Date(), status: "READ" },
     });
+    await recordAuditEvent(_req, userId, "READ", "MessageThread", thread.id);
 
-    return NextResponse.json({ ...thread, viewerId: viewer.id });
+    return NextResponse.json({
+      ...thread,
+      messages: thread.messages.map((message) => ({ ...message, content: decryptField(message.content) })),
+      viewerId: viewer.id,
+    });
   } catch {
     return NextResponse.json({ error: "Failed to fetch thread" }, { status: 500 });
   }
@@ -68,8 +75,9 @@ export async function POST(
     }
 
     const message = await prisma.message.create({
-      data: { threadId: thread.id, senderId: sender.id, content },
+      data: { threadId: thread.id, senderId: sender.id, content: encryptField(content) as string },
     });
+    await recordAuditEvent(req, userId, "CREATE", "Message", message.id);
     const recipientId = sender.id === thread.match.candidateId
       ? thread.match.mentorId
       : thread.match.candidateId;
@@ -82,8 +90,12 @@ export async function POST(
         payload: { matchId, messageId: message.id },
       },
     });
-    return NextResponse.json(message, { status: 201 });
-  } catch {
+    return NextResponse.json({ ...message, content }, { status: 201 });
+  } catch (err) {
+    console.error("Failed to send mentor message", err);
+    if (err instanceof Error && err.message.toLowerCase().includes("encryption key")) {
+      return NextResponse.json({ error: "Messaging encryption is not configured on this server." }, { status: 503 });
+    }
     return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
   }
 }

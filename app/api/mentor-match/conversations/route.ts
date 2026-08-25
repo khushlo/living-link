@@ -1,10 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { decryptField } from "@/lib/field-encryption";
+import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId, error } = await requireAuth();
   if (error) return error;
 
@@ -27,7 +29,22 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ viewerId: user.id, conversations });
+    await recordAuditEvent(req, userId!, "READ", "MentorMatch");
+    return NextResponse.json({
+      viewerId: user.id,
+      conversations: conversations.map((conversation) => ({
+        ...conversation,
+        thread: conversation.thread
+          ? {
+              ...conversation.thread,
+              messages: conversation.thread.messages.map((message) => ({
+                ...message,
+                content: decryptField(message.content),
+              })),
+            }
+          : null,
+      })),
+    });
   } catch {
     return NextResponse.json({ error: "Failed to fetch conversations" }, { status: 500 });
   }

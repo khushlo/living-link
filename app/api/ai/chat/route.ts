@@ -1,6 +1,17 @@
 ﻿import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { recordAuditEvent } from "@/lib/audit";
+import { z } from "zod";
+
+const chatRequestSchema = z.object({
+  message: z.string().trim().min(1).max(1_000),
+  history: z.array(z.object({
+    role: z.enum(["user", "assistant"]),
+    content: z.string().max(1_000),
+  })).max(12).default([]),
+  module: z.enum(["ready-check", "donor-shield", "mentor-match", "center-flow", "life-after", "dashboard"]).optional(),
+}).strict();
 
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -20,7 +31,7 @@ You are NOT a doctor. Do NOT provide medical diagnoses or specific medical advic
 LivingLink modules:
 - **ReadyCheck**: Health readiness screening (BMI, BP, eGFR, smoking), AI health coach, personal goal tracker with charts
 - **DonorShield**: Financial planning - lost-wage calculator, NLDAC eligibility wizard, expense log, state tax credit guide, FMLA letter generator, insurance issue tracker
-- **Mentor Match**: Connect with verified prior living donors; browse mentors by language/specialty; HIPAA-secured messaging
+- **Mentor Match**: Connect with approved prior living donors; browse mentors by language/specialty; private messaging
 - **CenterFlow**: Evaluation stage tracker for coordinators and clinicians; protocol knowledge base; bottleneck detection
 - **LifeAfter**: Post-donation timeline, structured health check-ins, PHQ-2 mental health screener, PCP clarity tool (who manages what after donation)
 
@@ -46,21 +57,27 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { message, history = [], module, userRole, systemOverride } = await req.json();
+    const parsed = chatRequestSchema.safeParse(await req.json());
+    if (!parsed.success) return NextResponse.json({ error: "Invalid AI request" }, { status: 400 });
 
-    if (!message || typeof message !== "string") {
-      return NextResponse.json({ error: "message is required" }, { status: 400 });
+    if (process.env.ALLOW_PHI_TO_AI !== "true") {
+      return NextResponse.json(
+        { error: "AI processing is disabled until an approved PHI-processing agreement and pilot configuration are in place." },
+        { status: 503 }
+      );
     }
 
-    const roleContext = userRole ? `\nUser role: ${userRole}.` : "";
-    const systemPrompt = systemOverride
-      ? systemOverride
-      : BASE_SYSTEM_PROMPT + buildModuleContext(module) + roleContext;
+    const systemPrompt = BASE_SYSTEM_PROMPT + buildModuleContext(parsed.data.module);
+    const history: OpenAI.Chat.ChatCompletionMessageParam[] = parsed.data.history.map((entry) =>
+      entry.role === "user"
+        ? { role: "user" as const, content: entry.content }
+        : { role: "assistant" as const, content: entry.content }
+    );
 
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: "system", content: systemPrompt },
-      ...(history as OpenAI.Chat.ChatCompletionMessageParam[]),
-      { role: "user", content: message },
+      ...history,
+      { role: "user", content: parsed.data.message },
     ];
 
     const completion = await getOpenAI().chat.completions.create({
@@ -74,6 +91,7 @@ export async function POST(req: NextRequest) {
       completion.choices[0]?.message?.content ??
       "I'm sorry, I couldn't process that. Please try again.";
 
+    await recordAuditEvent(req, userId, "CREATE", "AIConversation", undefined, { model: process.env.OPENAI_MODEL || "gpt-4o" });
     return NextResponse.json({ reply, usage: completion.usage });
   } catch (err) {
     console.error("AI chat error:", err);

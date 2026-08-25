@@ -284,8 +284,8 @@ export default function BecomeMentorPage() {
               <input type="checkbox" checked={form.agreeHipaa} onChange={(e) => set("agreeHipaa", e.target.checked)}
                 className="mt-0.5 accent-violet-600" />
               <span className="text-sm text-gray-700">
-                I understand that all mentee communications on this platform are <strong>HIPAA-aware</strong> and
-                I will not share any mentee personal health information outside of LivingLink.
+                I understand that mentor communications are private but are not for emergencies or medical advice, and
+                I will not share a mentee&apos;s personal information outside of LivingLink.
               </span>
             </label>
           </div>

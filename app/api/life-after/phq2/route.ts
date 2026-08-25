@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { recordAuditEvent } from "@/lib/audit";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -34,11 +35,38 @@ export async function POST(req: NextRequest) {
         isEscalated,
       },
     });
+    let escalationId: string | null = null;
+    if (isEscalated) {
+      const escalation = await prisma.safetyEscalation.create({
+        data: { phq2ResponseId: response.id },
+      });
+      escalationId = escalation.id;
+
+      const administrators = await prisma.user.findMany({
+        where: { role: "ADMIN" },
+        select: { id: true },
+      });
+      if (administrators.length > 0) {
+        await prisma.notification.createMany({
+          data: administrators.map((administrator) => ({
+            userId: administrator.id,
+            type: "safety_escalation",
+            title: "Safety escalation requires review",
+            body: "A donor screening response requires timely clinical review.",
+            payload: { escalationId },
+          })),
+        });
+      }
+    }
+    await recordAuditEvent(req, userId, "CREATE", "PHQ2Response", response.id, {
+      escalated: isEscalated,
+    });
 
     return NextResponse.json({
       ...response,
+      escalationId,
       message: isEscalated
-        ? "Your responses suggest you may benefit from speaking with a mental health professional. Your transplant coordinator can connect you with support resources."
+        ? "Your responses suggest you may benefit from speaking with a mental health professional. If you may harm yourself or feel unsafe, call or text 988 in the United States or contact local emergency services. A designated LivingLink reviewer has been notified, but this tool is not monitored for emergencies."
         : "Thank you for completing your check-in.",
     }, { status: 201 });
   } catch {

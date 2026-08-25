@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Heart, ArrowRight, ThumbsUp, Filter, Search, MapPin, Briefcase, Calendar } from "lucide-react";
-import { SignUpButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
 import { PublicPageShell } from "@/components/shared/public-page-shell";
 
 type Story = {
@@ -172,9 +172,8 @@ export default function StoriesPage() {
             Real donors.<br />
             <span className="text-blue-600">Real stories.</span>
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            These donors - teachers, engineers, nurses, retirees - were once exactly where you are.
-            They had questions, fears, and doubts. Read what they want you to know.
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+             Demonstration stories are shown below for prototype testing. Real donor stories will appear here only after they are submitted with consent, reviewed, and explicitly published by LivingLink administrators.
           </p>
         </section>
 
@@ -183,10 +182,10 @@ export default function StoriesPage() {
           <div className="mx-auto max-w-4xl px-6">
             <dl className="flex flex-wrap justify-center gap-10">
               {[
-                { value: "95%", label: "Would donate again" },
-                { value: "4 weeks", label: "Average recovery time" },
-                { value: "20+ years", label: "Living donor kidney lifespan" },
-                { value: "$0", label: "Out-of-pocket cost for many" },
+                 { value: "Consent-first", label: "Stories shared with permission" },
+                 { value: "Reviewed", label: "Before publication" },
+                 { value: "Anonymous", label: "Public display by default" },
+                 { value: "Real voices", label: "From approved submissions" },
               ].map(({ value, label }) => (
                 <div key={label} className="text-center">
                   <dt className="text-2xl font-bold text-blue-600">{value}</dt>
@@ -286,12 +285,20 @@ export default function StoriesPage() {
               Create a LivingLink account to share your donation story anonymously.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <SignUpButton mode="modal">
-                <button className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors">
+              <SignedIn>
+                <Link href="/stories/share" className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors">
                   Share my story
                   <ArrowRight className="h-4 w-4" />
-                </button>
-              </SignUpButton>
+                </Link>
+              </SignedIn>
+              <SignedOut>
+                <SignUpButton mode="modal">
+                  <button className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors">
+                    Create an account to share
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </SignUpButton>
+              </SignedOut>
               <Link
                 href="/could-i-qualify"
                 className="flex items-center gap-2 rounded-xl border-2 border-blue-300 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-500 transition-colors"

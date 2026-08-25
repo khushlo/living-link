@@ -3,6 +3,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
+import { recordAuditEvent } from "@/lib/audit";
+import { decryptField, encryptField } from "@/lib/field-encryption";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +14,7 @@ const recordSchema = z.object({
   amount: z.number().positive(),
 });
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId, error } = await requireAuth();
   if (error) return error;
 
@@ -21,7 +23,13 @@ export async function GET() {
       where: { clerkId: userId! },
       include: { donorProfile: { include: { financialRecords: { orderBy: { createdAt: "desc" } } } } },
     });
-    return NextResponse.json(user?.donorProfile?.financialRecords ?? []);
+    await recordAuditEvent(req, userId!, "READ", "FinancialRecord");
+    return NextResponse.json(
+      (user?.donorProfile?.financialRecords ?? []).map((record) => ({
+        ...record,
+        description: decryptField(record.description),
+      }))
+    );
   } catch {
     return NextResponse.json({ error: "Failed to fetch records" }, { status: 500 });
   }
@@ -63,8 +71,13 @@ export async function POST(req: NextRequest) {
     });
 
     const record = await prisma.financialRecord.create({
-      data: { donorProfileId: donorProfile.id, ...parsed.data } as any,
+      data: {
+        donorProfileId: donorProfile.id,
+        ...parsed.data,
+        description: encryptField(parsed.data.description),
+      } as any,
     });
+    await recordAuditEvent(req, userId, "CREATE", "FinancialRecord", record.id);
     return NextResponse.json(record, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create record" }, { status: 500 });

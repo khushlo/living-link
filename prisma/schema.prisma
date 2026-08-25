@@ -98,6 +98,9 @@ model User {
   notifications     Notification[]
   forumPosts        ForumPost[]
   auditLogs         AuditLog[]
+  deletionRequests  DataDeletionRequest[]
+  mentorReports     MentorSafetyReport[]
+  storySubmissions  StorySubmission[]
   center            CenterMembership?
 
   @@map("users")
@@ -121,12 +124,45 @@ model DonorProfile {
   financialRecords  FinancialRecord[]
   checkins          PostDonationCheckin[]
   phq2Responses     PHQ2Response[]
+  consentRecords    ConsentRecord[]
   fhirPatientId     String?           @map("fhir_patient_id")
   consentedAt       DateTime?         @map("consented_at")
   consentVersion    String?           @map("consent_version")
   researchConsent   Boolean           @default(false) @map("research_consent")
 
   @@map("donor_profiles")
+}
+
+model ConsentRecord {
+  id             String    @id @default(uuid())
+  donorProfileId String    @map("donor_profile_id")
+  purpose        String
+  version        String
+  granted        Boolean   @default(false)
+  grantedAt      DateTime? @map("granted_at")
+  revokedAt      DateTime? @map("revoked_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  donorProfile   DonorProfile @relation(fields: [donorProfileId], references: [id])
+
+  @@index([donorProfileId, purpose, createdAt])
+  @@map("consent_records")
+}
+
+model SmartSession {
+  id                   String    @id @default(uuid())
+  state                String    @unique
+  issuer               String
+  tokenEndpoint        String    @map("token_endpoint")
+  pkceVerifier         String    @map("pkce_verifier")
+  accessTokenEncrypted String?   @map("access_token_encrypted")
+  patientIdEncrypted   String?   @map("patient_id_encrypted")
+  expiresAt            DateTime  @map("expires_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  consumedAt           DateTime? @map("consumed_at")
+
+  @@map("smart_sessions")
 }
 
 model EligibilityCheck {
@@ -207,11 +243,26 @@ model MentorProfile {
   bio             String?
   isVerified      Boolean   @default(false) @map("is_verified")
   isAvailable     Boolean   @default(true) @map("is_available")
+  trainingAcknowledgedAt DateTime? @map("training_acknowledged_at")
   createdAt       DateTime  @default(now()) @map("created_at")
 
   user            User @relation(fields: [userId], references: [id])
 
   @@map("mentor_profiles")
+}
+
+model DataDeletionRequest {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  status       String    @default("OPEN") // OPEN, UNDER_REVIEW, COMPLETED, DENIED
+  requestedAt  DateTime  @default(now()) @map("requested_at")
+  resolvedAt   DateTime? @map("resolved_at")
+  resolvedById String?   @map("resolved_by_id")
+  reason       String?
+
+  user         User @relation(fields: [userId], references: [id])
+
+  @@map("data_deletion_requests")
 }
 
 model MentorMatch {
@@ -253,6 +304,40 @@ model Message {
   sender      User          @relation("SentMessages", fields: [senderId], references: [id])
 
   @@map("messages")
+}
+
+model MentorSafetyReport {
+  id           String    @id @default(uuid())
+  reporterId   String    @map("reporter_id")
+  messageId    String?   @map("message_id")
+  category     String
+  details      String?
+  status       String    @default("OPEN") // OPEN, ACKNOWLEDGED, CLOSED
+  createdAt    DateTime  @default(now()) @map("created_at")
+  resolvedAt   DateTime? @map("resolved_at")
+  resolvedById String?   @map("resolved_by_id")
+
+  reporter     User @relation(fields: [reporterId], references: [id])
+
+  @@map("mentor_safety_reports")
+}
+
+model StorySubmission {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  body         String
+  donationType String   @map("donation_type")
+  donationYear Int      @map("donation_year")
+  status       String   @default("PENDING")
+  consentedAt  DateTime @map("consented_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  reviewedAt   DateTime? @map("reviewed_at")
+  reviewedById String?   @map("reviewed_by_id")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([status, createdAt])
+  @@map("story_submissions")
 }
 
 // ─── CENTER FLOW ──────────────────────────────────────────────────────────────
@@ -349,8 +434,23 @@ model PHQ2Response {
   completedAt    DateTime @default(now()) @map("completed_at")
 
   donorProfile   DonorProfile @relation(fields: [donorProfileId], references: [id])
+  escalation     SafetyEscalation?
 
   @@map("phq2_responses")
+}
+
+model SafetyEscalation {
+  id                String   @id @default(uuid())
+  phq2ResponseId    String   @unique @map("phq2_response_id")
+  status            String   @default("OPEN") // OPEN, ACKNOWLEDGED, CLOSED
+  acknowledgedAt    DateTime? @map("acknowledged_at")
+  acknowledgedById  String?  @map("acknowledged_by_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  phq2Response      PHQ2Response @relation(fields: [phq2ResponseId], references: [id])
+
+  @@map("safety_escalations")
 }
 
 // ─── SHARED ───────────────────────────────────────────────────────────────────

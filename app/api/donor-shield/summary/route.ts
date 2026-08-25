@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId, error } = await requireAuth();
   if (error) return error;
 
@@ -20,6 +21,7 @@ export async function GET() {
       acc[r.itemType] = (acc[r.itemType] ?? 0) + r.amount;
       return acc;
     }, {});
+    await recordAuditEvent(req, userId!, "READ", "FinancialRecord");
 
     return NextResponse.json({
       totalExpenses,

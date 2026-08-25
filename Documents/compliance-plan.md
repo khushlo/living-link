@@ -1,4 +1,6 @@
-# LivingLink — Security & Compliance Plan
+# LivingLink — Security & Pilot Readiness Plan
+
+This is a prototype planning document, not evidence of HIPAA, Section 508, or WCAG conformance. Items below are proposed controls and dependencies that require deployment evidence, review, and assigned ownership before pilot use.
 
 ## 1. FIPS 199 Security Categorization
 
@@ -20,33 +22,33 @@ FIPS 199 overall categorization: **MODERATE** (per high-water mark, availability
 ### Administrative Safeguards
 - **Security Officer:** Designated before pilot launch
 - **Workforce Training:** Annual HIPAA training required for all contributors with PHI access
-- **Risk Assessment:** Conducted quarterly; findings tracked in private security repo
+- **Risk Assessment:** Required before pilot; no completed HIPAA risk analysis is claimed here
 - **Business Associate Agreements:**
-  - Vercel (hosting) — BAA available on Enterprise plan
-  - Neon/Railway (database) — BAA obtained before PHI storage
-  - OpenAI (AI processing) — Enterprise Data Processing Agreement; PHI minimized in prompts
-  - Clerk (authentication) — BAA available on Pro plan
+  - Vercel (hosting) — BAA/configuration requires contract review
+  - Neon/Railway (database) — BAA and production configuration required before PHI storage
+  - OpenAI (AI processing) — approved DPA/BAA and explicit AI PHI decision required; disabled by default
+  - Clerk (authentication) — BAA and production configuration require verification
 
 ### Technical Safeguards
 - **Access Control:** Clerk-issued JWTs; role-based (`donor`, `coordinator`, `clinician`, `patient`)
-- **Audit Logs:** All PHI-touching API routes log `userId + action + timestamp` to append-only audit table
+- **Audit Logs:** Covered routes log `userId + action + timestamp`; full coverage, immutable retention, and delivery monitoring remain pending
 - **Encryption at Rest:** AES-256 (Neon managed encryption)
 - **Encryption in Transit:** TLS 1.2+ enforced; HSTS header on all responses
 - **Automatic Logoff:** Clerk session expires after 24 hours of inactivity
 - **Authentication:** MFA available via Clerk; required for coordinator/clinician roles
 
-### Physical Safeguards
-- All data stored in Neon/Railway US-East data centers (SOC 2 Type II certified facilities)
-- No local PHI storage; Next.js runs stateless
+### Physical Safeguards (Deployment Dependency)
+- Production hosting, region, physical safeguards, and SOC evidence require vendor and deployment verification
+- The demo is not evidence of a production PHI hosting configuration
 
 ---
 
 ## 3. Section 508 / WCAG 2.1 AA Compliance
 
-### Automated Testing
-- **axe-core** integrated in CI pipeline (`.github/workflows/ci.yml`)
-- Playwright-based accessibility test runs on every PR targeting `main`
-- Target: 0 WCAG 2.1 AA violations on all public and authenticated pages
+### Planned Automated Testing
+- **axe-core** is present for limited public-page testing
+- Authenticated-flow coverage and CI execution require verification
+- A passing axe scan is not a WCAG 2.1 AA or Section 508 conformance claim
 
 ### Manual Testing Checklist
 - [ ] Keyboard navigation: all interactive elements reachable without mouse
@@ -68,20 +70,24 @@ FIPS 199 overall categorization: **MODERATE** (per high-water mark, availability
 
 ---
 
-## 4. Data Minimization & Retention
+## 4. Proposed Data Minimization & Retention
+
+The retention periods below are proposed planning values, not implemented purge schedules or legal determinations.
 
 | Data Type | Retention | Deletion Mechanism |
 |---|---|---|
-| Donor health metrics | 7 years post-donation (OPTN requirement) | Automated cron job + manual request |
-| Financial records | 7 years (IRS) | Same |
-| PHQ-2 results | 7 years | Same |
-| Mentor messages | 3 years post match closure | Scheduled deletion |
+| Donor health metrics | To be determined with clinical/legal owners | Deletion workflow exists; purge job pending |
+| Financial records | To be determined with legal/tax owners | Deletion workflow exists; purge job pending |
+| PHQ-2 results | To be determined with clinical/legal owners | Deletion workflow exists; purge job pending |
+| Mentor messages | To be determined with safety/legal owners | Scheduled deletion pending |
 | AI chat (transient) | Not persisted | Never stored |
 | Auth tokens | Session duration only | Clerk-managed |
 
 ---
 
-## 5. Incident Response
+## 5. Proposed Incident Response
+
+The following is a draft workflow and is not an implemented or tested incident-response program.
 
 1. **Detection:** Automated anomaly alerts via Vercel + Neon monitoring
 2. **Triage:** Security officer notified within 1 hour
@@ -91,12 +97,12 @@ FIPS 199 overall categorization: **MODERATE** (per high-water mark, availability
 
 ---
 
-## 6. Vendor Risk Summary
+## 6. Vendor Risk Summary (Requires Verification)
 
 | Vendor | Role | BAA? | SOC 2? | Data Location |
 |---|---|---|---|---|
-| Vercel | Frontend hosting | Enterprise | Yes (Type II) | US-East |
-| Neon | PostgreSQL | Enterprise | Yes (Type II) | US-East |
-| Railway | FHIR server (HAPI) | Via DPA | In progress | US-East |
-| Clerk | Authentication | Pro plan | Yes (Type II) | US |
-| OpenAI | AI processing | Enterprise DPA | Yes | US |
+| Vercel | Frontend hosting | Requires contract review | Requires evidence | Deployment dependent |
+| Neon | PostgreSQL | Requires contract review | Requires evidence | Deployment dependent |
+| Railway | FHIR server (HAPI) | Requires contract review | Requires evidence | Deployment dependent |
+| Clerk | Authentication | Requires contract review | Requires evidence | Deployment dependent |
+| OpenAI | AI processing | Requires approved DPA/BAA | Requires evidence | Deployment dependent |

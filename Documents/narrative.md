@@ -34,22 +34,22 @@ Living kidney donation saves lives and costs the healthcare system less than hal
 LivingLink comprises five integrated modules, each addressing a documented barrier:
 
 ### 1. ReadyCheck — Health Readiness Coach
-Donors enter BMI, blood pressure, eGFR estimate, and smoking status. An AI coach (GPT-4o with FHIR R4 Observation mappings) explains each metric in plain language, sets SMART goals, and tracks progress via recharts visualizations. Goals sync to FHIR `Goal` resources, enabling transplant center integration.
+Donors enter BMI, blood pressure, eGFR estimate, and smoking status. ReadyCheck provides deterministic, non-diagnostic guidance by default; any authenticated AI processing is disabled unless explicitly enabled by approved deployment configuration. Health metrics can be mapped to prototype FHIR Observation resources for future validation.
 
 **Impact target:** 30% increase in donors who arrive at evaluation already within recommended health parameters.
 
 ### 2. DonorShield — Financial Advocacy Suite
-A six-feature toolkit: (1) NLDAC eligibility wizard with AJAX real-time income calculation, (2) expense log with receipt upload scaffolding, (3) 27-state tax credit reference, (4) FMLA letter generator with printable PDF, (5) insurance issue escalation tracker, and (6) HAPI FHIR bulk export for OPTN Policy 18 financial outcome reporting.
+A six-feature toolkit: (1) NLDAC eligibility wizard with real-time income calculation, (2) expense log with receipt upload scaffolding, (3) state tax credit reference, (4) FMLA letter generator with printable PDF, (5) insurance issue escalation tracker, and (6) pseudonymized FHIR bulk export for authorized operational testing. OPTN Policy 18 reporting is not automated.
 
 **Impact target:** Triple NLDAC application completion rate from 26% to 75% among LivingLink users.
 
 ### 3. Mentor Match — Peer Support Network
-HIPAA-secured messaging between prospective donors and verified prior donors. Mentors are filtered by donation type (laparoscopic/open), kidney retained (left/right), language, and specialty (pediatric, directed, non-directed). Matching is coordinator-facilitated or self-initiated.
+Private prototype messaging between prospective donors and verified prior donors, with selected message fields encrypted before storage. Mentors are filtered by language and specialty. Matching is coordinator-facilitated or self-initiated; HIPAA compliance is not claimed.
 
 **Impact target:** Reduce donor withdrawal rate by 20% through peer support (evidence: Rodrigue et al., 2014 RCT showing 23% increase in donation with peer education).
 
 ### 4. CenterFlow — Evaluation Workflow Intelligence
-Coordinators and clinicians track each donor through 10 standardized evaluation stages. AI-flagged bottleneck detection surfaces stalled cases (>14 days without progress). OPTN policy knowledge base answers staff questions instantly. CDS Hooks integration pushes `patient-view` alerts into Epic/Cerner.
+Coordinators and clinicians track donor evaluations through configured stages. CenterFlow can surface stalled cases (>14 days without progress). CDS Hooks provides authenticated prototype alerts; center-scoped EHR validation remains pending.
 
 **Impact target:** Reduce average evaluation duration by 6 weeks through proactive bottleneck resolution.
 
@@ -64,9 +64,9 @@ Structured monthly check-ins (BP, eGFR, weight, symptoms) with trend charts. PHQ
 
 LivingLink implements FHIR R4 throughout:
 
-- **SMART on FHIR:** Launch sequence (`/api/fhir/smart/launch`) enables EHR-embedded access without duplicate login
-- **CDS Hooks:** Two services — `livinglink-readycheck-alert` (ReadyCheck risk) and `livinglink-stalled-evaluation` (CenterFlow delay) — deliver actionable cards to any CDS Hooks–compliant EHR
-- **Bulk Export:** NDJSON export maps all donor data to US Core profiles for OPTN submission
+- **SMART on FHIR:** Launch sequence (`/api/fhir/smart/launch`) provides an EHR-launch prototype; approved sandbox validation remains pending
+- **CDS Hooks:** Authenticated `patient-view` alert prototype; unscoped stalled-evaluation alerts remain disabled
+- **Bulk Export:** Pseudonymized NDJSON export for authorized testing; formal de-identification and OPTN submission validation remain pending
 - **Resource Coverage:** Patient (US Core), Observation (BMI/BP/eGFR — LOINC coded), Goal, RiskAssessment, CarePlan, QuestionnaireResponse (PHQ-2 LOINC 55757-9), Coverage, Task, Communication, Bundle
 
 ---
@@ -97,9 +97,9 @@ Personas informed by this research are documented in `Documents/co-design.md`.
 
 | Requirement | Implementation |
 |---|---|
-| HIPAA Security Rule | AES-256 at rest (Neon/Railway), TLS 1.2+ in transit, audit logging via Prisma |
-| HIPAA Privacy Rule | Minimum necessary data collection; consent management at `/consent` |
-| Section 508 | WCAG 2.1 AA targeted; axe-core CI automated; semantic HTML, ARIA roles throughout |
+| HIPAA Security Rule | Selected AES-256-GCM fields, application audit logging, and deployment-dependent transport/storage controls; compliance is not claimed |
+| HIPAA Privacy Rule | Consent management at `/consent`; legal/privacy review and operational policies remain pending |
+| Section 508 | Accessibility is in progress; limited axe-core coverage exists, with authenticated/manual testing and VPAT/ACR assessment pending |
 | FIPS 199 | MODERATE impact baseline; see `Documents/compliance-plan.md` |
 | 21st Century Cures Act | No information blocking; FHIR export on demand |
 

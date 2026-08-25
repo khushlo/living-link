@@ -30,20 +30,25 @@ export interface NavItem {
 }
 
 interface SidebarProps {
-  navItems: NavItem[];
+  navItems?: NavItem[];
   role: string;
   isMentor?: boolean;
+  includeAdmin?: boolean;
 }
 
-export function Sidebar({ navItems, role, isMentor = false }: SidebarProps) {
+export function Sidebar({ navItems, role, isMentor = false, includeAdmin = false }: SidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const resolvedNavItems = includeAdmin
+    ? [...(navItems ?? donorNavItems), ...adminNavItems]
+    : navItems ?? donorNavItems;
 
   const roleBadgeColor: Record<string, string> = {
     donor: "bg-blue-100 text-blue-700",
     patient: "bg-green-100 text-green-700",
     coordinator: "bg-orange-100 text-orange-700",
     clinician: "bg-purple-100 text-purple-700",
+    admin: "bg-slate-200 text-slate-800",
   };
 
   const sidebarContent = (
@@ -60,23 +65,23 @@ export function Sidebar({ navItems, role, isMentor = false }: SidebarProps) {
             roleBadgeColor[role] ?? "bg-gray-100 text-gray-700"
           )}
         >
-          {isMentor ? "Donor & Mentor" : role}
+          {role}
         </span>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4" aria-label="Sidebar navigation">
         <ul className="space-y-1 px-3">
-          {navItems.map((item, index) => {
+          {resolvedNavItems.map((item, index) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
             return (
               <Fragment key={item.href}>
-                {item.badge === "Public" && navItems[index - 1]?.badge !== "Public" && (
+                {item.badge && resolvedNavItems[index - 1]?.badge !== item.badge && (
                   <li aria-hidden="true" className="my-3 flex items-center gap-2 px-3">
                     <span className="h-px flex-1 bg-gray-200" />
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-gray-400">Public</span>
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-gray-400">{item.badge}</span>
                     <span className="h-px flex-1 bg-gray-200" />
                   </li>
                 )}
@@ -169,11 +174,13 @@ export const donorNavItems: NavItem[] = [
   { href: "/donor-shield",         label: "DonorShield",         icon: Shield },
   { href: "/mentor-match",         label: "Mentor Match",        icon: Users },
   { href: "/life-after",           label: "LifeAfter",           icon: Heart },
-  { href: "/start-conversation",   label: "Conversation Guide",  icon: MessageCircle },
+  { href: "/privacy",              label: "Privacy & Data",      icon: Shield },
+  { href: "/fhir-export",          label: "My FHIR export",       icon: Activity },
   { href: "/could-i-qualify",      label: "Eligibility Check",   icon: CheckCircle,  badge: "Public" },
   { href: "/ripple",               label: "Ripple Effect",       icon: TrendingUp,   badge: "Public" },
   { href: "/waitlist-map",         label: "Waitlist Map",        icon: Map,          badge: "Public" },
   { href: "/stories",              label: "Donor Stories",       icon: BookOpen,     badge: "Public" },
+  { href: "/start-conversation",   label: "Conversation Guide",  icon: MessageCircle, badge: "Public" },
 ];
 
 export const clinicianNavItems: NavItem[] = [
@@ -189,4 +196,11 @@ export const coordinatorNavItems: NavItem[] = [
 export const patientNavItems: NavItem[] = [
   { href: "/patient/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/patient/appointments", label: "Appointments", icon: Calendar },
+];
+
+export const adminNavItems: NavItem[] = [
+  { href: "/admin/dashboard", label: "Admin dashboard", icon: LayoutDashboard, badge: "Admin" },
+  { href: "/admin/review", label: "Review queues", icon: BookOpen, badge: "Admin" },
+  { href: "/admin/escalations", label: "Safety escalations", icon: Activity, badge: "Admin" },
+  { href: "/admin/audit", label: "Audit log", icon: Shield, badge: "Admin" },
 ];

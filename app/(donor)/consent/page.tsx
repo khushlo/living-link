@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,16 @@ const CONSENT_SECTIONS = [
   {
     id: "hipaa",
     icon: Shield,
-    title: "HIPAA Authorization",
+    title: "Platform Privacy Acknowledgment",
     required: true,
-    body: `LivingLink collects and processes Protected Health Information (PHI) including health metrics, financial records, and mental health screening results solely to support your kidney donation journey.
+    body: `LivingLink collects health, financial, and wellbeing information only to support your kidney donation journey.
 
 Your data may be shared with:
 • Your designated transplant center (with your explicit consent)
 • Your mentor match (only what you choose to share)
-• OPTN/UNOS for required outcome reporting (de-identified)
+• Authorized reporting or care partners only after the relevant pilot agreement and consent are in place
 
-You have the right to access, correct, or request deletion of your data at any time. Data is stored encrypted at rest (AES-256) and in transit (TLS 1.2+).`,
+You may access, correct, or request deletion of your data subject to applicable legal and clinical record-retention requirements. LivingLink is a prototype and is not for emergencies.`,
   },
   {
     id: "data_use",
@@ -29,7 +29,7 @@ You have the right to access, correct, or request deletion of your data at any t
     body: `Optional: Allow LivingLink to use your anonymized, aggregated data to improve care for future living donors.
 
 This includes:
-• De-identified health metrics to refine AI coaching
+• Aggregated and appropriately governed health metrics to improve the platform
 • Anonymized financial patterns to improve reimbursement guidance
 • Aggregate PHQ-2 trend data shared with kidney advocacy organizations
 
@@ -51,14 +51,12 @@ You may opt out of research use at any time without affecting your access to Liv
     id: "ai_use",
     icon: FileText,
     title: "AI Assistant Consent",
-    required: true,
-    body: `LivingLink's AI Assistant is powered by OpenAI GPT-4o. By using the assistant you agree:
+    required: false,
+    body: `LivingLink's AI assistant is disabled by default until approved pilot privacy and vendor controls are in place. If it is enabled for a future pilot, you will be asked to review the applicable terms before use.
 
-• Your messages and relevant health context are transmitted to OpenAI for processing
-• OpenAI processes data subject to their Enterprise Data Processing Agreement
-• Conversations are not stored beyond your current session by default
-• The AI Assistant provides informational guidance only - it is not a licensed medical provider
-• Do not share Social Security numbers, full dates of birth, or insurance IDs with the assistant`,
+• The assistant provides informational guidance only; it is not a licensed medical provider
+• Do not enter Social Security numbers, full dates of birth, insurance IDs, or emergency concerns
+• Contact your transplant team for medical decisions and 988/emergency services for urgent safety concerns`,
   },
 ];
 
@@ -67,6 +65,26 @@ export default function ConsentPage() {
   const [consented, setConsented] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/consent")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        const latest = new Map<string, { granted: boolean }>();
+        for (const record of data?.consentRecords ?? []) {
+          if (!latest.has(record.purpose)) latest.set(record.purpose, record);
+        }
+        setConsented({
+          hipaa: latest.get("platform")?.granted ?? false,
+          data_use: latest.get("research")?.granted ?? false,
+          messaging: latest.get("mentor_messaging")?.granted ?? false,
+          ai_use: latest.get("ai_processing")?.granted ?? false,
+          ehr_exchange: latest.get("ehr_exchange")?.granted ?? false,
+        });
+      })
+      .catch(() => setError("Unable to load your current consent settings."));
+  }, []);
 
   const allRequired = CONSENT_SECTIONS.filter((s) => s.required).every(
     (s) => consented[s.id]
@@ -75,8 +93,9 @@ export default function ConsentPage() {
   async function handleSubmit() {
     if (!allRequired) return;
     setSubmitting(true);
+    setError("");
     try {
-      await fetch("/api/consent", {
+      const response = await fetch("/api/consent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -85,9 +104,11 @@ export default function ConsentPage() {
             .map(([id]) => id),
         }),
       });
+      if (!response.ok) throw new Error("Consent update failed");
       setDone(true);
       setTimeout(() => router.push("/donor/dashboard"), 2000);
     } catch {
+      setError("Unable to save your consent settings. Please try again.");
       setSubmitting(false);
     }
   }
@@ -136,15 +157,13 @@ export default function ConsentPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed mb-4">{section.body}</p>
-                  <label className="flex items-start gap-3 cursor-pointer group">
-                    <div
-                      className={`mt-0.5 h-5 w-5 shrink-0 rounded border-2 flex items-center justify-center transition-colors ${
-                        checked ? "bg-emerald-500 border-emerald-500" : "border-gray-300 group-hover:border-emerald-400"
-                      }`}
-                      onClick={() => setConsented((prev) => ({ ...prev, [section.id]: !prev[section.id] }))}
-                    >
-                      {checked && <CheckCircle className="h-3.5 w-3.5 text-white" />}
-                    </div>
+                   <label className="flex items-start gap-3 cursor-pointer group">
+                     <input
+                       type="checkbox"
+                       checked={checked}
+                       onChange={(event) => setConsented((prev) => ({ ...prev, [section.id]: event.target.checked }))}
+                       className="mt-1 h-4 w-4 shrink-0 accent-emerald-500"
+                     />
                     <span className="text-sm text-gray-700 select-none">
                       {section.required
                         ? "I have read and agree to the above."
@@ -163,6 +182,7 @@ export default function ConsentPage() {
             Please accept all required items to continue.
           </div>
         )}
+        {error && <p role="alert" className="mt-4 text-sm text-red-600">{error}</p>}
 
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
           <Button
@@ -178,7 +198,7 @@ export default function ConsentPage() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          LivingLink is HIPAA-aware. For questions contact{" "}
+          LivingLink is a prototype. For questions contact{" "}
           <a href="mailto:privacy@livinglink.health" className="underline">privacy@livinglink.health</a>.
         </p>
       </div>

@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId, error } = await requireAuth();
   if (error) return error;
 
@@ -26,6 +27,7 @@ export async function GET() {
       },
     });
 
+    await recordAuditEvent(req, userId!, "READ", "MentorMatch");
     return NextResponse.json(requests);
   } catch {
     return NextResponse.json({ error: "Failed to fetch mentor requests" }, { status: 500 });

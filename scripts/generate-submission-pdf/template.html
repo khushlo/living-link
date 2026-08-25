@@ -581,13 +581,13 @@
         <strong style="color:#d0f0ec;">LifeAfter</strong>.
       </p>
       <p style="font-size:0.9rem; line-height:1.6; opacity:0.82; margin-bottom:1.2rem;">
-        Built on HL7 FHIR R4 with SMART on FHIR and CDS Hooks, it integrates natively
-        into Epic and Cerner with no additional hardware. Five public-facing tools require
+         Built on HL7 FHIR R4 with SMART on FHIR and CDS Hooks as a scalable prototype,
+         it includes integration scaffolding for future EHR validation. Five public-facing tools require
         no account to use, removing the single biggest barrier to donor engagement.
       </p>
       <p style="font-size:0.9rem; line-height:1.6; opacity:0.82;">
-        Released under the MIT open-source license. HIPAA-compliant with AES-256 field-level
-        encryption, append-only audit logging, and WCAG 2.1 AA accessibility throughout.
+         Released under the MIT open-source license. The prototype includes selected encrypted
+         fields and audit logging; HIPAA, WCAG, and Section 508 readiness require further evidence.
         Co-designed with three prior living donors, a veteran transplant coordinator,
         and a living-donor nephrologist.
       </p>
@@ -612,9 +612,9 @@
         <span class="cover-module-chip">Da Vinci PDex</span>
         <span class="cover-module-chip">FHIR Bulk Export</span>
         <span class="cover-module-chip">OpenAI GPT-4o</span>
-        <span class="cover-module-chip">HIPAA Compliant</span>
+       <span class="cover-module-chip">Prototype Security Controls</span>
         <span class="cover-module-chip">MIT Open Source</span>
-        <span class="cover-module-chip">WCAG 2.1 AA</span>
+       <span class="cover-module-chip">Accessibility In Progress</span>
       </div>
     </div>
   </div>
@@ -624,7 +624,7 @@
       <p><strong>Submission Lead</strong><br />
       Richard Horsley<br />
       rhorsley2@gmail.com</p>
-      <p style="margin-top:0.5rem; opacity:0.7;">Submitted June 7, 2026 &bull; Deadline June 15, 2026</p>
+      <p style="margin-top:0.5rem; opacity:0.7;">Deadline June 15, 2026 &bull; MIT Open Source</p>
     </div>
     <div style="text-align:right;">
       <div style="font-size:0.62rem; text-transform:uppercase; letter-spacing:0.1em; opacity:0.7; margin-bottom:0.4rem; font-weight:700;">Try the Live App</div>
@@ -658,8 +658,8 @@
   <p>
     LivingLink is a full-stack, open-source platform purpose-built to remove every major barrier
     between a willing living kidney donor and a successful donation. It addresses all five EMPOWER
-    focus areas through five interconnected modules, a floating AI assistant, and a federal-grade
-    FHIR interoperability layer that plugs natively into Epic and Cerner via SMART on FHIR and CDS Hooks.
+     focus areas through five interconnected modules, a floating AI assistant, and a prototype
+     FHIR interoperability layer with SMART on FHIR and CDS Hooks scaffolding for future validation.
   </p>
 
   <div style="display:flex; align-items:center; gap:14px; background:var(--navy); border-radius:7px; padding:9px 14px; margin-bottom:0.7rem;">
@@ -761,10 +761,11 @@
       </p>
     </div>
     <div class="callout callout-navy">
-      <div class="callout-title">Federal-Grade Interoperability</div>
+       <div class="callout-title">Interoperability Prototype</div>
       <p>
         HL7 FHIR R4, US Core IG, SMART on FHIR, CDS Hooks, Da Vinci PDex, and
-        FHIR Bulk Export for OPTN Policy 18 automated reporting to HRSA.
+         FHIR Bulk Export for authorized operational testing; EHR validation and OPTN/HRSA reporting
+         workflows remain future pilot dependencies.
       </p>
     </div>
   </div>
@@ -826,12 +827,12 @@
       <tr>
         <td><strong>Post-donation</strong></td>
         <td>2-year OPTN follow-up ends. PCP has never managed a prior donor. Donor falls through cracks - only 59% get year-2 follow-up</td>
-        <td>LifeAfter extends check-ins for life. PCP Clarity Tool prints out who manages what. PHQ-2 screener catches depression early. FHIR export automates HRSA reporting</td>
+        <td>LifeAfter extends check-ins for life. PCP Clarity Tool prints out who manages what. PHQ-2 screener supports early review. FHIR export is available for authorized testing; HRSA reporting is not automated.</td>
       </tr>
       <tr>
         <td><strong>EHR integration</strong></td>
         <td>Every donor tool is a separate silo. Clinicians context-switch between 3-5 portals per patient</td>
-        <td>SMART on FHIR embeds LivingLink inside Epic and Cerner. CDS Hooks delivers alerts without leaving the chart</td>
+        <td>SMART on FHIR and CDS Hooks provide prototype integration scaffolding; approved EHR sandbox validation is still required.</td>
       </tr>
     </tbody>
   </table>
@@ -989,14 +990,47 @@
     </div>
   </div>
 
-  <div class="callout callout-navy" style="margin-top:1rem;">
+  <div class="section-divider"><span>Social Media Awareness</span></div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:0.6rem;">
+    <div>
+      <p style="font-size:0.85rem; margin-bottom:0.5rem;">
+        Every authenticated donor has access to a <strong>Share &amp; Spread Awareness</strong> tool on their dashboard.
+        It generates a ready-to-post 1080x1080 social card and pre-fills a caption with relevant hashtags.
+        One click downloads the image and opens X/Twitter with the caption pre-loaded.
+      </p>
+      <ul class="feature-list">
+        <li><strong>4 card templates</strong> - Awareness, My Journey, Did You Know?, Call to Action - each rendered to a 1080x1080 Canvas PNG at full Instagram resolution</li>
+        <li><strong>One-click X/Twitter share</strong> - downloads card image and opens <code>twitter.com/intent/tweet</code> with caption pre-filled</li>
+        <li><strong>Instagram download</strong> - saves 1080x1080 PNG optimised for Stories and Feed posts</li>
+        <li><strong>Copy caption</strong> - clipboard-ready text with hashtags: <code>#KidneyDonation #LivingDonor #SaveALife #OrganDonation</code></li>
+        <li>Turns every donor into an awareness ambassador - reaches their personal networks organically</li>
+      </ul>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="background:linear-gradient(135deg,#1e40af,#7c3aed); border-radius:8px; padding:14px; color:white; text-align:center; flex:1;">
+        <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; opacity:0.75; margin-bottom:6px;">Sample Caption - Awareness Template</div>
+        <p style="font-size:0.75rem; line-height:1.55; font-style:italic; opacity:0.92; margin:0;">
+          "100,000 people are waiting for a kidney. One living donor can change that. Learn more about living kidney donation at LivingLink. #KidneyDonation #LivingDonor #SaveALife"
+        </p>
+      </div>
+      <div style="background:linear-gradient(135deg,#065f46,#0369a1); border-radius:8px; padding:10px; color:white; text-align:center;">
+        <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; opacity:0.75; margin-bottom:4px;">Sample Caption - My Journey Template</div>
+        <p style="font-size:0.72rem; line-height:1.5; font-style:italic; opacity:0.9; margin:0;">
+          "I'm exploring living kidney donation with @LivingLink. Join me in learning how one person can change everything. #LivingDonor #KidneyDonation"
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-navy" style="margin-top:0rem;">
     <div class="callout-title">Why This Matters for EMPOWER Scoring</div>
     <p>
       The EMPOWER prize prioritizes <strong>donor experience (35 pts)</strong>. Starting the donor
       journey with zero friction directly increases the addressable population. Every person who
       uses <code>/could-i-qualify</code> or <code>/ripple</code> without an account is a potential
-      donor that would have bounced from a login-first experience. This design is a deliberate,
-      evidence-informed conversion strategy.
+      donor that would have bounced from a login-first experience. The social sharing tool then turns
+      every donor into an organic awareness ambassador - reaching networks no ad budget can buy.
     </p>
   </div>
 
@@ -1291,7 +1325,7 @@ flowchart LR
         <li>Multi-axis matching: donation type (laparoscopic, open, directed, non-directed, paired exchange), language, and specialty area</li>
         <li>Specialty areas: financial concerns, parenting logistics, anxiety management, recovery, employer relations, spouse/partner dynamics</li>
         <li>AI-assisted initial match ranking (GPT-4o) followed by coordinator-facilitated confirmation</li>
-        <li>HIPAA-compliant in-app messaging thread with app-layer encryption before database storage</li>
+        <li>Private prototype messaging with selected app-layer encryption before database storage; HIPAA compliance is not claimed</li>
         <li>Become-a-Mentor application flow for prior donors to give back to the community</li>
         <li>Message read receipts and notification system</li>
       </ul>
@@ -1439,7 +1473,7 @@ flowchart LR
     OPTN data shows that only 59% of living donors receive nephrologist follow-up at two years.
     The mandatory OPTN Policy 18 reporting window ends at two years, but kidney function can
     decline for decades. LifeAfter extends structured follow-up to a lifetime horizon with
-    automated OPTN/HRSA reporting, mental health screening, and a tool that finally answers
+     pseudonymized FHIR export for authorized testing, mental health screening, and a tool that answers
     the question "who does what" for both the donor and their PCP.
   </p>
 
@@ -1486,7 +1520,7 @@ flowchart LR
         <li>PHQ-2 validated 2-question depression screener at every check-in. Scores 3 or higher trigger automatic coordinator escalation alert</li>
         <li>PCP Clarity Tool - disambiguates nephrologist vs. PCP responsibilities with a printable responsibility matrix. Addresses the "my PCP had no idea what to do" problem directly</li>
         <li>Parent-donor specific pathway with tailored emotional support prompts</li>
-        <li>FHIR Bulk Export for automated OPTN Policy 18 outcomes reporting to HRSA (de-identified NDJSON)</li>
+        <li>FHIR Bulk Export for authorized operational testing using pseudonymized NDJSON; OPTN/HRSA reporting is not automated</li>
       </ul>
 
       <h3>FHIR Resources</h3>
@@ -1595,7 +1629,7 @@ flowchart LR
         Supports <code>_since</code> parameter for incremental exports.
         De-identifies before export: removes name, DOB, phone; hashes IDs.
         Outputs NDJSON: Patient, Observation, QuestionnaireResponse, CarePlan.
-        Satisfies OPTN Policy 18 mandatory 2-year follow-up reporting requirement automatically.
+        Provides an export prototype for follow-up data; it does not by itself satisfy or automate OPTN Policy 18 reporting.
       </p>
     </div>
     <div class="callout callout-navy">
@@ -1631,7 +1665,7 @@ flowchart LR
         <li>Append-only pgAudit log - every PHI-touching API route logged; log rows can never be updated or deleted</li>
         <li>MFA enforced for coordinator and clinician roles via Clerk</li>
         <li>Session expiry after 24 hours of inactivity</li>
-        <li>BAAs obtained from Vercel, Neon, Railway, Clerk, and OpenAI Enterprise DPA</li>
+        <li>Vendor BAAs and data-processing agreements remain deployment and legal-review dependencies</li>
         <li>PHI minimized in all GPT-4o prompts: no SSN, full DOB, or insurance IDs</li>
         <li>AI conversations not persisted (transient only)</li>
       </ul>
@@ -1657,7 +1691,7 @@ flowchart LR
       </ul>
     </div>
     <div>
-      <h3>WCAG 2.1 AA / Section 508</h3>
+      <h3>Accessibility Assessment In Progress</h3>
       <ul class="feature-list">
         <li>Semantic HTML with ARIA roles throughout all components</li>
         <li>aria-live regions on all AI chat, toast alerts, and dynamic content</li>
@@ -1775,14 +1809,14 @@ flowchart LR
           <strong>Donor Experience</strong>
         </td>
         <td class="score-cell" style="text-align:center;">35 / 35</td>
-        <td>5 donor-facing modules. Zero-login public tools. AI conversation practice simulator. Financial advocacy suite covering NLDAC, FMLA, tax credits, and insurance disputes. HIPAA-compliant peer mentorship. Post-donation lifetime follow-up with PHQ-2 mental health screening. All co-designed with 3 prior donors.</td>
+        <td>5 donor-facing modules. Zero-login public tools. AI conversation practice simulator. Financial advocacy suite covering NLDAC, FMLA, tax credits, and insurance disputes. Peer mentorship prototype. Post-donation follow-up with PHQ-2 screening. Co-design evidence is retained for the documented sessions.</td>
       </tr>
       <tr>
         <td>
           <strong>Clinical Feasibility</strong>
         </td>
         <td class="score-cell" style="text-align:center;">25 / 25</td>
-        <td>SMART on FHIR embeds LivingLink inside Epic App Orchard and Cerner App Market with no additional hardware. CDS Hooks delivers alerts in existing EHR workflows. No specialized equipment required. OPTN Policy 18 reporting fully automated via FHIR Bulk Export. Co-designed with a veteran coordinator and a nephrologist.</td>
+        <td>SMART on FHIR and CDS Hooks integration scaffolding is included for future EHR sandbox validation. No specialized equipment is required. FHIR export supports authorized testing; OPTN Policy 18 reporting is not automated.</td>
       </tr>
       <tr>
         <td>
@@ -1796,7 +1830,7 @@ flowchart LR
           <strong>EMPOWER Alignment</strong>
         </td>
         <td class="score-cell" style="text-align:center;">15 / 15</td>
-        <td>All 5 EMPOWER focus areas covered by a dedicated module. Cites Executive Order 13879 (Advancing American Kidney Health). Aligns with ONC interoperability mandate. Supports CMS's chronic kidney disease goals. Only submission with native EHR integration via SMART on FHIR.</td>
+        <td>All 5 EMPOWER focus areas are covered by a dedicated prototype module. The project is designed to align with interoperability goals; EHR validation and comparative claims remain future work.</td>
       </tr>
     </tbody>
   </table>
@@ -1838,10 +1872,42 @@ flowchart LR
     </div>
   </div>
 
+  <!-- AIM + MEASURABLE TARGETS -->
+  <div style="border:1.5px solid var(--teal-mid); border-radius:8px; padding:10px 14px; margin-bottom:0.7rem;">
+    <div style="font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--teal); margin-bottom:5px;">Our Aim</div>
+    <p style="font-size:0.88rem; font-weight:600; color:var(--navy); margin-bottom:8px; line-height:1.45;">
+      Get more willing living kidney donors across the finish line by removing every barrier between
+      "I'm curious about donating" and "I donated and I'm healthy years later."
+    </p>
+    <div style="font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--teal); margin-bottom:5px;">Measurable Success Targets</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px;">
+      <div style="background:var(--teal-lt); border-radius:6px; padding:7px 9px; text-align:center;">
+        <div style="font-size:0.62rem; color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px;">NLDAC Completion</div>
+        <div style="font-size:1.1rem; font-weight:800; color:var(--navy); line-height:1;">26% <span style="font-size:0.7rem; font-weight:400;">to</span> 75%</div>
+        <div style="font-size:0.6rem; color:var(--gray-3); margin-top:2px;">DonorShield</div>
+      </div>
+      <div style="background:var(--teal-lt); border-radius:6px; padding:7px 9px; text-align:center;">
+        <div style="font-size:0.62rem; color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px;">Donor Withdrawal</div>
+        <div style="font-size:1.1rem; font-weight:800; color:var(--navy); line-height:1;">-20%</div>
+        <div style="font-size:0.6rem; color:var(--gray-3); margin-top:2px;">MentorMatch (RCT backed)</div>
+      </div>
+      <div style="background:var(--teal-lt); border-radius:6px; padding:7px 9px; text-align:center;">
+        <div style="font-size:0.62rem; color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px;">Eval Duration</div>
+        <div style="font-size:1.1rem; font-weight:800; color:var(--navy); line-height:1;">-6 weeks</div>
+        <div style="font-size:0.6rem; color:var(--gray-3); margin-top:2px;">CenterFlow bottleneck fix</div>
+      </div>
+      <div style="background:var(--teal-lt); border-radius:6px; padding:7px 9px; text-align:center;">
+        <div style="font-size:0.62rem; color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px;">2-yr Follow-up</div>
+        <div style="font-size:1.1rem; font-weight:800; color:var(--navy); line-height:1;">59% <span style="font-size:0.7rem; font-weight:400;">to</span> 85%</div>
+        <div style="font-size:0.6rem; color:var(--gray-3); margin-top:2px;">LifeAfter lifetime check-ins</div>
+      </div>
+    </div>
+  </div>
+
   <div class="callout callout-teal" style="margin-top:0.6rem;">
     <div class="callout-title">Grand Prize Argument</div>
     <p style="font-size:0.8rem;">
-      LivingLink is the only Track B submission addressing all 5 EMPOWER friction points with dedicated co-designed modules, native EHR integration via SMART on FHIR (zero hardware), automated OPTN Policy 18 reporting, zero sign-up barrier for public tools, and a fully MIT open-source codebase so every prize dollar multiplies through community adoption.
+      LivingLink is a Track B prototype addressing all 5 EMPOWER friction points with dedicated modules, prototype SMART on FHIR integration scaffolding, authorized FHIR export testing, zero sign-up public tools, and an MIT open-source codebase.
       <strong>Contact: Richard Horsley - rhorsley2@gmail.com</strong>
     </p>
     <div style="margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid rgba(26,158,140,0.3); display:flex; align-items:center; gap:12px;">

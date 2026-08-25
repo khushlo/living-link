@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
+import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     const mentorProfile = await prisma.mentorProfile.findUnique({
       where: { id: parsed.data.mentorId },
-      select: { userId: true, isAvailable: true },
+      select: { userId: true, isAvailable: true, isVerified: true, trainingAcknowledgedAt: true },
     });
     if (!mentorProfile) return NextResponse.json({ error: "Mentor not found" }, { status: 404 });
     if (mentorProfile.userId === candidate.id) {
@@ -29,6 +30,9 @@ export async function POST(req: NextRequest) {
     }
     if (!mentorProfile.isAvailable) {
       return NextResponse.json({ error: "This mentor is currently unavailable" }, { status: 409 });
+    }
+    if (!mentorProfile.isVerified || !mentorProfile.trainingAcknowledgedAt) {
+      return NextResponse.json({ error: "This mentor is not approved for matching" }, { status: 409 });
     }
 
     const existingMatch = await prisma.mentorMatch.findFirst({
@@ -52,6 +56,7 @@ export async function POST(req: NextRequest) {
       });
       return createdMatch;
     });
+    await recordAuditEvent(req, userId!, "CREATE", "MentorMatch", match.id);
 
     return NextResponse.json(match, { status: 201 });
   } catch {

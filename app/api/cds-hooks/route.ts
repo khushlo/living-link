@@ -14,8 +14,15 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
+
+function hasAuthorizedServiceToken(req: NextRequest) {
+  const expectedToken = process.env.CDS_HOOKS_BEARER_TOKEN;
+  if (!expectedToken) return false;
+  return req.headers.get("authorization") === `Bearer ${expectedToken}`;
+}
 
 // ─── Discovery ────────────────────────────────────────────────────────────────
 
@@ -47,11 +54,15 @@ export async function GET() {
 // ─── Hook Handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  if (!hasAuthorizedServiceToken(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ cards: [] });
 
   const hookId    = body.hookInstance as string | undefined;
   const patientId = body.context?.patientId as string | undefined;
+  await recordAuditEvent(req, null, "READ", "CDSHook", undefined, { hookReceived: true });
 
   const cards: object[] = [];
 
@@ -89,40 +100,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Card 2: Check for any stalled evaluations at this patient's center
-    const stalledEval = await prisma.donorEvaluation.findFirst({
-      where: { isStalled: true },
-    }).catch(() => null);
-
-    if (stalledEval) {
-      cards.push({
-        summary: `LivingLink: Stalled Evaluation - ${stalledEval.stage}`,
-        detail: `A living donor evaluation has been stalled at stage "${stalledEval.stage}". Review required in CenterFlow.`,
-        indicator: "warning",
-        source: {
-          label: "LivingLink CenterFlow",
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/coordinator/center-flow`,
-        },
-        suggestions: [
-          {
-            label: "View evaluation in CenterFlow",
-            uuid:  crypto.randomUUID(),
-            actions: [
-              {
-                type:        "create",
-                description: "Open LivingLink CenterFlow",
-                resource: {
-                  resourceType: "Task",
-                  status:       "requested",
-                  intent:       "proposal",
-                  description:  "Review stalled living donor evaluation in LivingLink",
-                },
-              },
-            ],
-          },
-        ],
-      });
-    }
+    // Stalled evaluations stay disabled until the CDS request can be scoped to a
+    // verified center-to-patient relationship. A service token alone is not enough.
   } catch {
     // Fail gracefully - CDS card failure must not break EHR workflow
     return NextResponse.json({ cards: [] });

@@ -136,6 +136,8 @@ export default async function DonorDashboard() {
         </p>
         <ShareAwarenessCard />
       </div>
+
+      <p className="mt-6 text-center text-sm text-gray-500"><Link href="/privacy" className="text-blue-600 hover:underline">Manage privacy and data requests</Link></p>
     </div>
   );
 }

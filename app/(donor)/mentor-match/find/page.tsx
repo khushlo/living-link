@@ -233,7 +233,7 @@ export default function FindMentorPage() {
       )}
 
       <p className="text-xs text-gray-400">
-        All mentors are verified living donors. Messages are private and HIPAA-compliant. Neither party shares PHI unless they choose to.
+         Approved mentors are prior living donors who acknowledge platform boundaries. Messages are private to matched users; do not share medical emergencies or identifying health information.
       </p>
     </div>
   );

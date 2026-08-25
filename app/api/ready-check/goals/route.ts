@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
+import { decryptField } from "@/lib/field-encryption";
+import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId, error } = await requireAuth();
   if (error) return error;
 
@@ -23,7 +25,13 @@ export async function GET() {
         },
       },
     });
-    return NextResponse.json(user?.donorProfile?.healthGoals ?? []);
+    await recordAuditEvent(req, userId!, "READ", "HealthGoal");
+    return NextResponse.json(
+      (user?.donorProfile?.healthGoals ?? []).map((goal) => ({
+        ...goal,
+        progressLogs: goal.progressLogs.map((log) => ({ ...log, note: decryptField(log.note) })),
+      }))
+    );
   } catch {
     return NextResponse.json({ error: "Failed to fetch goals" }, { status: 500 });
   }
@@ -58,6 +66,7 @@ export async function POST(req: NextRequest) {
         targetDate: parsed.data.targetDate ? new Date(parsed.data.targetDate) : undefined,
       },
     });
+    await recordAuditEvent(req, userId!, "CREATE", "HealthGoal", goal.id);
     return NextResponse.json(goal, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create goal" }, { status: 500 });
