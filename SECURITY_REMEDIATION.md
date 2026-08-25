@@ -10,7 +10,7 @@ This document is the implementation source of truth. Public material must descri
 
 The prototype code is buildable. The following gates currently prevent a pilot-readiness or production-compliance claim:
 
-- **Database deployment:** the local `kidney-x` database is now synchronized with the Prisma schema, the append-only audit triggers are installed, and all seven migration entries are reconciled. Production still requires a backed-up, reviewed, environment-specific migration deployment; no reset is approved.
+- **Database deployment:** the local `kidney-x` and approved Neon production database are synchronized with the Prisma schema, the append-only audit triggers are installed, and all seven migration entries are reconciled. The production database was explicitly reset per owner instruction; future deployments still require backups and reviewed, environment-specific migration procedures.
 - **Vendor and legal approval:** BAAs/data-processing agreements, AI PHI approval, privacy review, retention terms, and incident ownership are not repository-only changes.
 - **Clinical operations:** an accountable clinical owner, on-call recipient, escalation SLA, and pilot-center agreements are not assigned.
 - **Independent assurance:** penetration testing, EHR sandbox/profile validation, accessibility testing, and VPAT/ACR evidence are outstanding.

@@ -1,4 +1,4 @@
-﻿import { auth } from "@clerk/nextjs/server";
+﻿import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/shared/sidebar";
 import { AIAssistant } from "@/components/shared/ai-assistant";
@@ -10,9 +10,14 @@ export default async function DonorLayout({ children }: { children: React.ReactN
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const user = await prisma.user.findUnique({
+  const clerkUser = await currentUser();
+  const email = clerkUser?.primaryEmailAddress?.emailAddress ?? clerkUser?.emailAddresses[0]?.emailAddress;
+  if (!email) redirect("/sign-in?error=missing_email");
+  const user = await prisma.user.upsert({
     where: { clerkId: userId },
-    select: { role: true, mentorProfile: { select: { id: true } } },
+    update: { firstName: clerkUser.firstName, lastName: clerkUser.lastName },
+    create: { clerkId: userId, email, firstName: clerkUser.firstName, lastName: clerkUser.lastName },
+    select: { role: true },
   });
 
   return (
