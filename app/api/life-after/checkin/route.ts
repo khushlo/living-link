@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   try {
     const user = await prisma.user.findUnique({
       where: { clerkId: userId! },
-      include: { donorProfile: { include: { checkins: true, phq2Responses: true } } },
+      include: { donorProfile: { include: { checkins: true, phq2Responses: true, lifeAfterReminders: true } } },
     });
 
     const milestones = ["WEEK_2", "MONTH_1", "MONTH_3", "MONTH_6", "YEAR_1", "YEAR_2_PLUS"];
@@ -32,6 +32,8 @@ export async function GET(req: NextRequest) {
     const timeline = milestones.map((week) => ({
       week,
       completed: completedWeeks.has(week as any),
+      phq2Completed: user?.donorProfile?.phq2Responses.some((response) => response.week === week) ?? false,
+      reminder: user?.donorProfile?.lifeAfterReminders.find((reminder) => reminder.week === week) ?? null,
       checkin: user?.donorProfile?.checkins.find((c) => c.week === week) ?? null,
     }));
     await recordAuditEvent(req, userId!, "READ", "PostDonationCheckin");
@@ -42,7 +44,16 @@ export async function GET(req: NextRequest) {
         checkin: entry.checkin ? { ...entry.checkin, notes: decryptField(entry.checkin.notes) } : null,
       })),
       phq2Count: user?.donorProfile?.phq2Responses.length ?? 0,
+      isParentDonor: user?.donorProfile?.isParentDonor ?? false,
     });
+    if (user?.donorProfile) {
+      const base = user.donorProfile.donatedAt ?? new Date();
+      const offsets: Record<string, number> = { WEEK_2: 14, MONTH_1: 30, MONTH_3: 90, MONTH_6: 180, YEAR_1: 365, YEAR_2_PLUS: 730 };
+      await prisma.lifeAfterReminder.createMany({
+        data: Object.entries(offsets).map(([week, days]) => ({ donorProfileId: user.donorProfile!.id, week: week as any, dueAt: new Date(base.getTime() + days * 86400000) })),
+        skipDuplicates: true,
+      });
+    }
   } catch {
     return NextResponse.json({ error: "Failed to fetch timeline" }, { status: 500 });
   }
@@ -63,12 +74,23 @@ export async function POST(req: NextRequest) {
     });
     if (!user?.donorProfile) return NextResponse.json({ error: "Donor profile not found" }, { status: 404 });
 
-    const checkin = await prisma.postDonationCheckin.create({
-      data: {
+    const checkin = await prisma.postDonationCheckin.upsert({
+      where: { donorProfileId_week: { donorProfileId: user.donorProfile.id, week: parsed.data.week } },
+      update: {
+        ...(parsed.data as any),
+        notes: encryptField(parsed.data.notes),
+      },
+      create: {
         donorProfileId: user.donorProfile.id,
         ...(parsed.data as any),
         notes: encryptField(parsed.data.notes),
       },
+    });
+    const offsets: Record<string, number> = { WEEK_2: 14, MONTH_1: 30, MONTH_3: 90, MONTH_6: 180, YEAR_1: 365, YEAR_2_PLUS: 730 };
+    await prisma.lifeAfterReminder.upsert({
+      where: { donorProfileId_week: { donorProfileId: user.donorProfile.id, week: parsed.data.week } },
+      update: { completedAt: new Date() },
+      create: { donorProfileId: user.donorProfile.id, week: parsed.data.week, dueAt: new Date(Date.now() + offsets[parsed.data.week] * 86400000), completedAt: new Date() },
     });
     await recordAuditEvent(req, userId, "CREATE", "PostDonationCheckin", checkin.id);
     return NextResponse.json(checkin, { status: 201 });

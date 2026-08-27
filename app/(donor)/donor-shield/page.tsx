@@ -32,7 +32,7 @@ export default function DonorShieldPage() {
           { href: "/donor-shield/fmla-letter",         icon: FileText,     label: "FMLA letter",           color: "text-blue-600",   bg: "bg-blue-50"   },
           { href: "/donor-shield/employer-packet",     icon: Briefcase,    label: "Employer packet",       color: "text-blue-600",   bg: "bg-blue-50"   },
           { href: "/donor-shield/insurance",           icon: Shield,       label: "Insurance tracker",     color: "text-red-600",    bg: "bg-red-50"    },
-          { href: "https://nldac.org",                 icon: ExternalLink, label: "NLDAC website",         color: "text-yellow-600", bg: "bg-yellow-50" },
+          { href: "https://www.livingdonorassistance.org",                 icon: ExternalLink, label: "NLDAC website",         color: "text-yellow-600", bg: "bg-yellow-50" },
         ].map((link) => (
           <a key={link.label} href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined}
             rel={link.href.startsWith("http") ? "noreferrer" : undefined}

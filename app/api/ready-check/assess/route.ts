@@ -19,6 +19,31 @@ const checkSchema = z.object({
   age: z.number().min(18).max(80).optional(),
 });
 
+function buildDeterministicSummary(metrics: z.infer<typeof checkSchema>) {
+  const discussionTopics: string[] = [];
+  const strengths: string[] = [];
+  if (metrics.bmi != null) {
+    (metrics.bmi >= 18.5 && metrics.bmi < 30 ? strengths : discussionTopics).push("your BMI");
+  }
+  if (metrics.bpSystolic != null || metrics.bpDiastolic != null) {
+    const systolic = metrics.bpSystolic ?? 0;
+    const diastolic = metrics.bpDiastolic ?? 0;
+    (systolic < 130 && diastolic < 80 ? strengths : discussionTopics).push("your blood pressure");
+  }
+  if (metrics.egfr != null) (metrics.egfr >= 90 ? strengths : discussionTopics).push("your kidney function estimate");
+  if (metrics.smokingStatus === "never" || metrics.smokingStatus === "former") strengths.push("your smoking history");
+  if (metrics.smokingStatus === "current") discussionTopics.push("smoking cessation");
+  if (metrics.hasDiabetes) discussionTopics.push("blood sugar management");
+
+  const lines = [
+    "This is a preliminary review of the information you entered, not a medical diagnosis or donation decision.",
+    strengths.length ? `Areas that look encouraging from your answers: ${strengths.join(", ")}.` : "There is not enough information to identify an encouraging area yet.",
+    discussionTopics.length ? `Topics to discuss with a clinician: ${discussionTopics.join(", ")}.` : "A transplant team will still need to review your full health history and testing.",
+    "Next step: share these results with a transplant center or your clinician and ask what testing is needed.",
+  ];
+  return lines.join(" ");
+}
+
 export async function POST(req: NextRequest) {
   const { userId, error } = await requireAuth();
   if (error) return error;
@@ -50,13 +75,14 @@ Keep response under 150 words. Be warm and encouraging. End with one specific ne
 
     // Health metrics are PHI when linked to an authenticated donor. Keep the
     // default deployment deterministic until an approved AI PHI configuration exists.
-    const aiSummary = process.env.ALLOW_PHI_TO_AI === "true"
+    const useApprovedAI = process.env.ALLOW_PHI_TO_AI === "true" && Boolean(process.env.OPENAI_API_KEY);
+    const aiSummary = useApprovedAI
       ? (await new OpenAI({ apiKey: process.env.OPENAI_API_KEY }).chat.completions.create({
           model: process.env.OPENAI_MODEL || "gpt-4o",
           messages: [{ role: "user", content: prompt }],
           max_tokens: 200,
         })).choices[0]?.message?.content ?? ""
-      : "This self-reported information cannot determine whether you can donate. A transplant team must review your health history and testing. Discuss your blood pressure, kidney function, and other results with a clinician and ask a transplant center about the next step.";
+      : buildDeterministicSummary(parsed.data);
 
     const check = await prisma.eligibilityCheck.create({
       data: { donorProfileId: user.donorProfile.id, ...parsed.data, aiSummary },
@@ -79,7 +105,7 @@ Keep response under 150 words. Be warm and encouraging. End with one specific ne
     }
     await recordAuditEvent(req, userId, "CREATE", "EligibilityCheck", check.id);
 
-    return NextResponse.json({ check, aiSummary, fhirWrite }, { status: 201 });
+    return NextResponse.json({ check, aiSummary, summarySource: useApprovedAI ? "approved-ai" : "deterministic-guidance", fhirWrite }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Assessment failed" }, { status: 500 });
   }

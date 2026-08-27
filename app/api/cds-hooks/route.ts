@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
   if (!body) return NextResponse.json({ cards: [] });
 
   const hookId    = body.hookInstance as string | undefined;
+  const serviceId = body.service as string | undefined;
   const patientId = body.context?.patientId as string | undefined;
   await recordAuditEvent(req, null, "READ", "CDSHook", undefined, { hookReceived: true });
 
@@ -98,10 +99,27 @@ export async function POST(req: NextRequest) {
           },
         ],
       });
-    }
 
-    // Stalled evaluations stay disabled until the CDS request can be scoped to a
-    // verified center-to-patient relationship. A service token alone is not enough.
+      if (serviceId === "livinglink-stalled-evaluation") {
+        const stalled = await prisma.donorEvaluation.findFirst({
+          where: {
+            donorRef: patientId,
+            stage: { notIn: ["APPROVED", "DECLINED"] },
+            updatedAt: { lt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },
+          },
+          select: { id: true, stage: true, daysElapsed: true },
+        });
+        if (stalled) {
+          cards.push({
+            summary: "LivingLink: Evaluation is stalled",
+            detail: `This donor evaluation has been in ${stalled.stage} for ${stalled.daysElapsed} days. Review CenterFlow for the blocked step.`,
+            indicator: "warning",
+            source: { label: "LivingLink", url: `${process.env.NEXT_PUBLIC_APP_URL}/coordinator/center-flow` },
+            links: [{ label: "Open CenterFlow", url: `${process.env.NEXT_PUBLIC_APP_URL}/coordinator/center-flow`, type: "absolute" }],
+          });
+        }
+      }
+    }
   } catch {
     // Fail gracefully - CDS card failure must not break EHR workflow
     return NextResponse.json({ cards: [] });

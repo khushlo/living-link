@@ -22,7 +22,7 @@ const GOAL_META: Record<string, { label: string; unit: string; color: string }> 
 export default function ReadyCheckPage() {
   const [step, setStep] = useState<"intro" | "form" | "results">("intro");
   const [form, setForm] = useState({ bmi: "", bpSystolic: "", bpDiastolic: "", egfr: "", smokingStatus: "never", hasDiabetes: false, age: "" });
-  const [result, setResult] = useState<{ aiSummary: string } | null>(null);
+  const [result, setResult] = useState<{ aiSummary: string; summarySource?: string } | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -164,6 +164,9 @@ export default function ReadyCheckPage() {
               <h2 className="font-semibold text-green-900">Your ReadyCheck Summary</h2>
             </div>
             <p className="text-sm text-green-800 leading-relaxed whitespace-pre-wrap">{result.aiSummary}</p>
+            <p className="mt-3 text-xs text-green-700" aria-live="polite">
+              {result.summarySource === "approved-ai" ? "Generated with the approved AI health-coach configuration." : "Generated from your answers using local, non-diagnostic guidance."}
+            </p>
           </div>
           <div className="flex gap-3">
             <button onClick={() => setStep("intro")} className="flex-1 rounded-md border border-gray-300 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">

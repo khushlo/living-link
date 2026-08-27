@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Heart, ArrowRight, CheckCircle, XCircle, AlertCircle, ChevronRight, ArrowLeft } from "lucide-react";
-import { SignUpButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
 import { PublicPageShell } from "@/components/shared/public-page-shell";
 
 type Step = "welcome" | "q1" | "q2" | "q3" | "q4" | "q5" | "result";
@@ -23,28 +23,23 @@ const initialAnswers: Answers = {
   interest: "",
 };
 
-function scoreAnswers(a: Answers): "great" | "possible" | "work-on-it" {
+function screenAnswers(a: Answers): "explore" | "review" | "prepare" {
   let score = 0;
-
   if (a.age === "18-59") score += 2;
   else if (a.age === "60-70") score += 1;
-  else if (a.age === "under18" || a.age === "over70") score -= 2;
-
+  else score -= 2;
   if (a.bmiRange === "18-30") score += 2;
   else if (a.bmiRange === "31-35") score += 1;
   else if (a.bmiRange === "over35") score -= 1;
-
   if (a.generalHealth === "excellent" || a.generalHealth === "good") score += 2;
   else if (a.generalHealth === "fair") score += 1;
   else score -= 1;
-
   if (a.chronicConditions === "none") score += 2;
   else if (a.chronicConditions === "managed") score += 1;
   else score -= 1;
-
-  if (score >= 7) return "great";
-  if (score >= 4) return "possible";
-  return "work-on-it";
+  if (score >= 7) return "explore";
+  if (score >= 4) return "review";
+  return "prepare";
 }
 
 const steps: Step[] = ["welcome", "q1", "q2", "q3", "q4", "q5", "result"];
@@ -58,7 +53,13 @@ export default function CouldIQualifyPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  const result = scoreAnswers(answers);
+  const discussionTopics = [
+    answers.age === "under18" || answers.age === "over70" ? "Age requirements and center-specific policies" : null,
+    answers.bmiRange === "over35" || answers.bmiRange === "unsure" ? "BMI and whether additional measurements are needed" : null,
+    answers.generalHealth === "fair" || answers.generalHealth === "poor" ? "Current health conditions and available support" : null,
+    answers.chronicConditions !== "none" ? "How your conditions are managed and what testing may be needed" : null,
+  ].filter((topic): topic is string => Boolean(topic));
+  const result = screenAnswers(answers);
   const progress = ((steps.indexOf(step)) / (steps.length - 1)) * 100;
 
   return (
@@ -90,8 +91,8 @@ export default function CouldIQualifyPage() {
               <span className="text-blue-600">living kidney donor?</span>
             </h1>
             <p className="text-lg text-gray-600 max-w-xl mx-auto">
-              Over 100,000 Americans are waiting for a kidney right now. 5 quick questions will show you
-              whether donation could be an option for you - and what your first step looks like.
+               5 quick questions can help you prepare for a conversation with a transplant team. They cannot
+               determine whether you are eligible, but they can highlight topics to discuss.
             </p>
             <div className="flex flex-col items-center gap-3">
               <button
@@ -105,9 +106,9 @@ export default function CouldIQualifyPage() {
             </div>
             <div className="grid grid-cols-3 gap-4 pt-4">
               {[
-                { value: "100K+", label: "People waiting" },
-                { value: "13", label: "People die daily waiting" },
-                { value: "95%", label: "Donors lead normal lives" },
+                 { value: "60 sec", label: "Informational screener" },
+                 { value: "5", label: "Topics to consider" },
+                 { value: "Free", label: "No account required" },
               ].map(({ value, label }) => (
                 <div key={label} className="rounded-xl bg-gray-50 border border-gray-100 p-4 text-center">
                   <p className="text-2xl font-bold text-blue-600">{value}</p>
@@ -270,22 +271,22 @@ export default function CouldIQualifyPage() {
         {/* Result */}
         {step === "result" && (
           <div className="space-y-8">
-            {result === "great" && (
+            {result === "explore" && (
               <>
                 <div className="rounded-2xl bg-green-50 border-2 border-green-300 p-8 text-center">
                   <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" aria-hidden="true" />
-                  <h2 className="text-2xl font-bold text-green-900 mb-2">You may be a great candidate!</h2>
+                   <h2 className="text-2xl font-bold text-green-900 mb-2">You may be a potential donor</h2>
                   <p className="text-green-800">
-                    Based on your answers, you have the profile of someone many transplant centers would want to hear from.
-                    The next step is a free initial consultation - it costs nothing and commits you to nothing.
+                     Your answers line up with several common starting factors transplant teams consider. This is
+                     only an initial screen, not an eligibility decision. A transplant center evaluation is the only way to know.
                   </p>
                 </div>
                 <div className="rounded-xl bg-white border border-gray-200 p-6 space-y-3">
                   <h3 className="font-semibold text-gray-900">Your recommended next steps</h3>
                   {[
-                    "Create a free LivingLink account to run your full ReadyCheck with personalized health goals",
+                     "Create a free LivingLink account to organize questions and health information for a transplant team",
                     "Connect with a real donor who matches your background through Mentor Match",
-                    "Check your financial protection options - most out-of-pocket costs are reimbursable",
+                     "Review possible financial support and reimbursement programs before making decisions",
                   ].map((s, i) => (
                     <div key={i} className="flex gap-3 text-sm text-gray-700">
                       <span className="flex-shrink-0 h-5 w-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs font-bold">{i + 1}</span>
@@ -296,20 +297,21 @@ export default function CouldIQualifyPage() {
               </>
             )}
 
-            {result === "possible" && (
+            {result === "review" && (
               <>
                 <div className="rounded-2xl bg-blue-50 border-2 border-blue-300 p-8 text-center">
                   <AlertCircle className="h-12 w-12 text-blue-600 mx-auto mb-4" aria-hidden="true" />
-                  <h2 className="text-2xl font-bold text-blue-900 mb-2">Donation may be possible for you</h2>
+                   <h2 className="text-2xl font-bold text-blue-900 mb-2">Donation may be possible</h2>
                   <p className="text-blue-800">
-                    Your answers suggest some areas to discuss with a transplant team - but many people in your situation
-                    go on to donate successfully. There's only one way to know for sure.
-                  </p>
+                     Your answers suggest that donation may be worth exploring, with some topics to review with a
+                     transplant team. This screen cannot confirm eligibility or predict an evaluation outcome.
+                   </p>
+                   {discussionTopics.length > 0 && <div className="mt-4 rounded-lg bg-white/70 p-4 text-left"><h3 className="font-semibold text-blue-900">Topics to ask about</h3><ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-blue-800">{discussionTopics.map((topic) => <li key={topic}>{topic}</li>)}</ul></div>}
                 </div>
                 <div className="rounded-xl bg-white border border-gray-200 p-6 space-y-3">
                   <h3 className="font-semibold text-gray-900">What to do next</h3>
                   {[
-                    "Use LivingLink's ReadyCheck to get specific, AI-guided health goals before your evaluation",
+                     "Use LivingLink's ReadyCheck to organize non-diagnostic health goals before your evaluation",
                     "Talk to a prior donor who had similar questions - they've been through it",
                     "A transplant center evaluation is free and you can stop at any point",
                   ].map((s, i) => (
@@ -322,22 +324,22 @@ export default function CouldIQualifyPage() {
               </>
             )}
 
-            {result === "work-on-it" && (
+            {result === "prepare" && (
               <>
                 <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-8 text-center">
                   <XCircle className="h-12 w-12 text-amber-600 mx-auto mb-4" aria-hidden="true" />
-                  <h2 className="text-2xl font-bold text-amber-900 mb-2">Some things to work on first</h2>
+                   <h2 className="text-2xl font-bold text-amber-900 mb-2">You may need more review first</h2>
                   <p className="text-amber-800">
-                    Based on your answers, there are a few health or age factors that transplant centers would likely
-                    want to address first. That doesn't mean donation is impossible - but starting with your health is the right move.
+                     Your answers point to age or health topics that may need closer review. This does not mean
+                     donation is impossible, and you should not change treatment based on this screen.
                   </p>
                 </div>
                 <div className="rounded-xl bg-white border border-gray-200 p-6 space-y-3">
                   <h3 className="font-semibold text-gray-900">How LivingLink can help</h3>
                   {[
                     "ReadyCheck gives you a personalized health roadmap with measurable goals",
-                    "Our AI coach explains what each metric means in plain language - no medical degree needed",
-                    "Many donors who were initially told 'not yet' went on to donate after working on specific goals",
+                     "Use plain-language education to prepare questions for your clinician",
+                     "Ask a transplant team what evaluation steps and support are available for you",
                   ].map((s, i) => (
                     <div key={i} className="flex gap-3 text-sm text-gray-700">
                       <span className="flex-shrink-0 h-5 w-5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">{i + 1}</span>
@@ -355,12 +357,20 @@ export default function CouldIQualifyPage() {
                 LivingLink gives you everything you need - health goals, financial protection,
                 peer mentorship, and lifetime support.
               </p>
-              <SignUpButton mode="modal">
-                <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white hover:bg-blue-500 transition-colors mx-auto focus:outline-none focus:ring-2 focus:ring-blue-400">
-                  Create your free account
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </SignUpButton>
+               <SignedIn>
+                 <Link href="/dashboard" className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white hover:bg-blue-500 transition-colors mx-auto focus:outline-none focus:ring-2 focus:ring-blue-400">
+                   Continue to your dashboard
+                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                 </Link>
+               </SignedIn>
+               <SignedOut>
+                 <SignUpButton mode="modal">
+                   <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white hover:bg-blue-500 transition-colors mx-auto focus:outline-none focus:ring-2 focus:ring-blue-400">
+                     Create your free account
+                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                   </button>
+                 </SignUpButton>
+               </SignedOut>
               <p className="text-xs text-gray-500">Free · No credit card · No commitment</p>
             </div>
 

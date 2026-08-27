@@ -7,8 +7,14 @@ import { z } from "zod";
 export const dynamic = "force-dynamic";
 
 const stageSchema = z.object({
+  id: z.string().uuid(),
   stage: z.enum(["INITIAL_INQUIRY", "BLOODWORK", "IMAGING", "CARDIAC_EVAL", "PSYCH_EVAL", "FINAL_REVIEW", "APPROVED", "DECLINED"]),
   notes: z.string().optional(),
+});
+const createSchema = z.object({
+  donorRef: z.string().min(1).max(120),
+  stage: z.enum(["INITIAL_INQUIRY", "BLOODWORK", "IMAGING", "CARDIAC_EVAL", "PSYCH_EVAL", "FINAL_REVIEW", "APPROVED", "DECLINED"]).optional(),
+  notes: z.string().max(5000).optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -41,19 +47,42 @@ export async function GET(req: NextRequest) {
   }
 }
 
+export async function POST(req: NextRequest) {
+  const { userId, error } = await requireAuth();
+  if (error || !userId) return error;
+  const parsed = createSchema.safeParse(await req.json());
+  if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 });
+  try {
+    const user = await prisma.user.findUnique({ where: { clerkId: userId }, include: { center: true } });
+    if (!user?.center || user.role !== "COORDINATOR") return NextResponse.json({ error: "Coordinator access required" }, { status: 403 });
+    const evaluation = await prisma.donorEvaluation.create({
+      data: {
+        centerId: user.center.centerId,
+        donorRef: parsed.data.donorRef,
+        stage: parsed.data.stage ?? "INITIAL_INQUIRY",
+        notes: parsed.data.notes,
+        stageHistory: [{ from: null, to: parsed.data.stage ?? "INITIAL_INQUIRY", changedAt: new Date().toISOString(), changedBy: userId }],
+      },
+    });
+    await recordAuditEvent(req, userId, "CREATE", "DonorEvaluation", evaluation.id, { centerId: user.center.centerId });
+    return NextResponse.json(evaluation, { status: 201 });
+  } catch {
+    return NextResponse.json({ error: "Failed to create evaluation" }, { status: 500 });
+  }
+}
+
 export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest
 ) {
   const { userId, error } = await requireAuth();
   if (error || !userId) return error;
 
-  const { id } = await params;
   const body = await req.json();
   const parsed = stageSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 });
 
   try {
+    const { id, ...changes } = parsed.data;
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
       include: { center: true },
@@ -73,15 +102,15 @@ export async function PATCH(
     const evaluation = await prisma.donorEvaluation.update({
       where: { id },
       data: {
-        stage: parsed.data.stage as any,
-        notes: parsed.data.notes,
+        stage: changes.stage as any,
+        notes: changes.notes,
         isStalled: false,
-        stageHistory: [...history, { from: current?.stage ?? null, to: parsed.data.stage, changedAt: new Date().toISOString(), changedBy: userId }],
+        stageHistory: [...history, { from: current?.stage ?? null, to: changes.stage, changedAt: new Date().toISOString(), changedBy: userId }],
       },
     });
     await recordAuditEvent(req, userId, "UPDATE", "DonorEvaluation", evaluation.id, {
       centerId: user.center.centerId,
-      stage: parsed.data.stage,
+      stage: changes.stage,
     });
     return NextResponse.json(evaluation);
   } catch {

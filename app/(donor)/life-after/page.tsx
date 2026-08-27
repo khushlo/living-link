@@ -14,14 +14,15 @@ const MILESTONES = [
 
 export default function LifeAfterPage() {
   const [timeline, setTimeline] = useState<any[]>([]);
+  const [isParentDonor, setIsParentDonor] = useState(false);
   const [showCheckin, setShowCheckin] = useState<string | null>(null);
   const [checkinForm, setCheckinForm] = useState({ bpSystolic: "", bpDiastolic: "", weightKg: "", moodScore: "7", energyScore: "7", notes: "" });
-  const [phq2, setPhq2] = useState({ q1: "0", q2: "0" });
+  const [phq2, setPhq2] = useState({ q1: "0", q2: "0", week: "WEEK_2" });
   const [phq2Result, setPhq2Result] = useState<any>(null);
   const [trends, setTrends] = useState<any>(null);
 
   useEffect(() => {
-    fetch("/api/life-after/timeline").then((r) => r.json()).then(setTimeline).catch(() => {});
+    fetch("/api/life-after/timeline").then((r) => r.json()).then((data) => { setTimeline(data.timeline ?? []); setIsParentDonor(data.isParentDonor === true); }).catch(() => {});
     fetch("/api/life-after/trends").then((r) => r.json()).then(setTrends).catch(() => {});
   }, []);
 
@@ -37,12 +38,14 @@ export default function LifeAfterPage() {
         moodScore: Number(checkinForm.moodScore), energyScore: Number(checkinForm.energyScore),
       }),
     });
+    const timelineResponse = await fetch("/api/life-after/timeline");
+    if (timelineResponse.ok) setTimeline((await timelineResponse.json()).timeline ?? []);
     setShowCheckin(null);
   }
 
   async function submitPHQ2(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch("/api/life-after/phq2", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ q1Score: Number(phq2.q1), q2Score: Number(phq2.q2) }) });
+    const res = await fetch("/api/life-after/phq2", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ q1Score: Number(phq2.q1), q2Score: Number(phq2.q2), week: phq2.week }) });
     const data = await res.json();
     setPhq2Result(data);
   }
@@ -67,7 +70,7 @@ export default function LifeAfterPage() {
                   {done ? <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" aria-label="Completed" /> : <Clock className="h-5 w-5 text-gray-400 flex-shrink-0" aria-label="Pending" />}
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{m.label}</p>
-                    <p className="text-xs text-gray-500">{m.desc}</p>
+                  <p className="text-xs text-gray-500">{m.desc}{entry?.reminder?.dueAt && !done ? ` · Reminder due ${new Date(entry.reminder.dueAt).toLocaleDateString()}` : ""}</p>
                   </div>
                 </div>
                 {!done && (
@@ -80,6 +83,17 @@ export default function LifeAfterPage() {
           })}
         </div>
       </section>
+
+      {timeline.some((entry: any) => entry.phq2Completed === false) && (
+        <p className="text-sm text-gray-600">Each follow-up milestone includes a brief mental well-being check. Complete the PHQ-2 after your check-in when it applies.</p>
+      )}
+
+      {isParentDonor && (
+        <section className="rounded-xl border border-purple-200 bg-purple-50 p-5" aria-labelledby="parent-support-heading">
+          <h2 id="parent-support-heading" className="font-semibold text-purple-900">Support for parent donors</h2>
+          <p className="mt-1 text-sm text-purple-800">Recovery can include complex emotions when a child is involved. Consider asking your care team about family counseling, age-appropriate communication, and support groups. This guidance is educational, not medical advice.</p>
+        </section>
+      )}
 
       {/* Check-in form */}
       {showCheckin && (
@@ -121,21 +135,45 @@ export default function LifeAfterPage() {
       )}
 
       {/* Mood/Energy trend chart */}
-      {trends?.mood?.length > 0 && (
+      {trends && (
         <section aria-labelledby="trends-heading">
           <h2 id="trends-heading" className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-hope-600" aria-hidden="true" /> Health Trends
           </h2>
-          <div className="rounded-xl border border-gray-200 p-4">
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={trends.mood}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="week" tick={{ fontSize: 11 }} />
-                <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="value" stroke="#2563eb" name="Mood" strokeWidth={2} dot />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="grid gap-4 md:grid-cols-2">
+            {[
+              { key: "mood", label: "Mood", color: "#2563eb", domain: [0, 10] },
+              { key: "energy", label: "Energy", color: "#16a34a", domain: [0, 10] },
+              { key: "weight", label: "Weight (kg)", color: "#9333ea", domain: ["auto", "auto"] },
+            ].map((chart) => trends[chart.key]?.length > 0 && (
+              <div key={chart.key} className="rounded-xl border border-gray-200 p-4">
+                <h3 className="mb-2 text-sm font-medium text-gray-700">{chart.label}</h3>
+                <ResponsiveContainer width="100%" height={180}>
+                  <LineChart data={trends[chart.key]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="week" tick={{ fontSize: 11 }} />
+                    <YAxis domain={chart.domain as any} tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="value" stroke={chart.color} name={chart.label} strokeWidth={2} dot />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ))}
+            {trends.bloodPressure?.some((v: any) => v.systolic || v.diastolic) && (
+              <div className="rounded-xl border border-gray-200 p-4">
+                <h3 className="mb-2 text-sm font-medium text-gray-700">Blood pressure</h3>
+                <ResponsiveContainer width="100%" height={180}>
+                  <LineChart data={trends.bloodPressure}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="week" tick={{ fontSize: 11 }} />
+                    <YAxis domain={["auto", "auto"]} tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="systolic" stroke="#dc2626" name="Systolic" strokeWidth={2} dot />
+                    <Line type="monotone" dataKey="diastolic" stroke="#f97316" name="Diastolic" strokeWidth={2} dot />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -148,7 +186,13 @@ export default function LifeAfterPage() {
         </div>
         <p className="text-sm text-gray-600 mb-4">Over the past 2 weeks, how often have you been bothered by...</p>
         {!phq2Result ? (
-          <form onSubmit={submitPHQ2} className="space-y-4">
+            <form onSubmit={submitPHQ2} className="space-y-4">
+              <div>
+                <label htmlFor="phq2-week" className="block text-sm font-medium text-gray-700">Follow-up milestone</label>
+                <select id="phq2-week" value={phq2.week} onChange={(e) => setPhq2({ ...phq2, week: e.target.value })} className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                  {MILESTONES.map((m) => <option key={m.week} value={m.week}>{m.label}</option>)}
+                </select>
+              </div>
             {[{ id: "q1", label: "Little interest or pleasure in doing things?" }, { id: "q2", label: "Feeling down, depressed, or hopeless?" }].map((q) => (
               <div key={q.id}>
                 <label htmlFor={q.id} className="block text-sm font-medium text-gray-700">{q.label}</label>

@@ -22,6 +22,16 @@ export default function NLDACWizardPage() {
     hasSurgeryDate: null,
     grossIncome: "",
   });
+  const [saved, setSaved] = useState(false);
+
+  async function saveApplication() {
+    const response = await fetch("/api/donor-shield/nldac", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...answers, status: eligible ? "ready" : "draft", grossIncome: Number(answers.grossIncome) }),
+    });
+    setSaved(response.ok);
+  }
 
   function restart() {
     setStep("employment");
@@ -226,6 +236,9 @@ export default function NLDACWizardPage() {
                 </ol>
               </div>
               <div className="flex flex-wrap gap-3">
+                <button onClick={saveApplication} className="inline-flex items-center gap-2 rounded-md border border-green-300 px-4 py-2 text-sm font-medium text-green-800 hover:bg-green-100">
+                  {saved ? "Application saved" : "Save application progress"}
+                </button>
                 <a
                   href="https://nldac.org/apply"
                   target="_blank"
@@ -264,7 +277,7 @@ export default function NLDACWizardPage() {
                 </div>
               </div>
               <a
-                href="https://nldac.org"
+                href="https://www.livingdonorassistance.org/"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -285,7 +298,7 @@ export default function NLDACWizardPage() {
       {/* Disclaimer */}
       <p className="text-xs text-gray-400">
         This wizard is for informational purposes only and does not constitute a formal NLDAC determination.
-        Contact NLDAC at 1-877-696-2110 or nldac.org for official eligibility review.
+        Contact NLDAC at 1-877-696-2110 or <a href="https://www.livingdonorassistance.org/" target="_blank" rel="noreferrer" className="underline">livingdonorassistance.org</a> for official eligibility review.
       </p>
     </div>
   );

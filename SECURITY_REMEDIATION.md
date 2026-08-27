@@ -1,84 +1,366 @@
-# LivingLink Security and Pilot Readiness Remediation
+# LivingLink Security and Prototype Gap Register
 
-Status labels: `not started`, `in progress`, `complete`, or `external dependency`.
+This document compares the submitted LivingLink prototype PDF with the current repository implementation. It is the authoritative list of remaining work.
 
-`in progress` means repository controls exist but still need implementation, testing, deployment, or evidence. It does not mean the entire item is blocked. An item is `external dependency` only when completion requires an owner, contract, environment, or assessment outside this repository.
+Status terms:
 
-This document is the implementation source of truth. Public material must describe only controls marked `complete` and backed by code, configuration, or signed evidence.
+- **Missing:** no implementation was found.
+- **Partial:** some code exists, but the PDF capability is incomplete.
+- **Broken:** code exists but the current workflow does not work as intended.
+- **Unverified:** implementation exists, but deployment, testing, or external evidence is missing.
+- **External dependency:** completion requires a vendor, clinical owner, pilot center, contract, or independent assessment.
 
-## Current Gate
+The project should be described as a **feature-rich prototype with controls in progress**, not as a production-ready HIPAA-compliant, WCAG-certified, Epic/Cerner-integrated platform. Items marked complete below were implemented in the current remediation pass; deployment and external-assurance items remain open.
 
-The prototype code is buildable. The following gates currently prevent a pilot-readiness or production-compliance claim:
+## Priority 0: Fix Before Demonstration or Pilot
 
-- **Database deployment:** the local `kidney-x` and approved Neon production database are synchronized with the Prisma schema, the append-only audit triggers are installed, and all seven migration entries are reconciled. The production database was explicitly reset per owner instruction; future deployments still require backups and reviewed, environment-specific migration procedures.
-- **Vendor and legal approval:** BAAs/data-processing agreements, AI PHI approval, privacy review, retention terms, and incident ownership are not repository-only changes.
-- **Clinical operations:** an accountable clinical owner, on-call recipient, escalation SLA, and pilot-center agreements are not assigned.
-- **Independent assurance:** penetration testing, EHR sandbox/profile validation, accessibility testing, and VPAT/ACR evidence are outstanding.
+### 1. Fix LifeAfter timeline persistence
 
-Repository work can continue independently on purge-job design, key-rotation/recovery tests, accessibility coverage, and moderation/revocation UI. Automated authorization tests are deferred by product decision and must not be described as passing evidence.
+- **Status:** Complete
+- The UI stores the complete API response as the timeline array.
+- The API returns `{ timeline, phq2Count }`, so completed milestones may continue appearing as pending.
+- **Evidence:** `app/(donor)/life-after/page.tsx:23-26`; `app/api/life-after/checkin/route.ts`.
 
-The LifeAfter timeline endpoint consumed by the donor UI is now wired to the authenticated check-in read path, so the page no longer falls through to the API catch-all.
+### 2. Fix CenterFlow stage updates
 
-The admin portal at `/admin/dashboard` provides server-side role-gated access to the normal donor modules plus a separate Admin navigation section for review queues, PHQ-2 escalation acknowledgment, the recent audit-log viewer, and audited pseudonymized FHIR export download. Authenticated public-tool pages resolve the same local database role so this Admin section remains available there.
+- **Status:** Complete
+- The UI sends `{ id, stage }` to `/api/center-flow/evaluations`.
+- The API expects the ID in a dynamic route parameter and rejects the body because its schema does not accept `id`.
+- **Evidence:** `app/(coordinator)/coordinator/center-flow/page.tsx:67-70`; `app/api/center-flow/evaluations/route.ts:44-54`.
 
-The public stories API ships only two clearly labeled `Test1`/`Test2` demonstration records for prototype testing. Real public content requires consent, review, and an explicit publication step.
+### 3. Remove misleading production claims
 
-## 1. Claims and Product Positioning
+- **Status:** Partial
+- HIPAA compliance, WCAG 2.1 AA, Section 508, Epic/Cerner integration, automated HRSA reporting, and vendor BAAs are not fully evidenced.
+- Label these capabilities as `prototype`, `in progress`, or `planned for pilot` until evidence exists.
+- **Evidence:** `SECURITY_REMEDIATION.md` was previously tracking these gaps; PDF pages 8-11 make the claims.
 
-- [ ] **in progress** Replace production-compliance claims with "prototype" or "planned for pilot" language on the website, slides, and future documents. Landing page, mentor UI, narrative, compliance plan, PDF template, and regenerated tracked submission PDF use corrected language; independent artifact review remains before release.
-- [x] **complete** Add an MIT `LICENSE` file. Verify the intended public repository before claiming the project is publicly available.
-- [ ] **not started** Verify every outcome statistic against a primary source and retain the source URL, date, and relevant page or table.
-- [ ] **in progress** Remove claims of native Epic/Cerner integration, marketplace availability, automated OPTN/HRSA reporting, or vendor BAAs until independently verified. Landing page, planning documents, PDF template, and regenerated submission PDF now use prototype/dependency language; independent artifact review remains.
+### 4. Replace CenterFlow demo fallback with a real workflow
 
-## 2. PHI and AI
+- **Status:** Partial
+- Empty or failed API responses display six hardcoded candidates.
+- Implement center onboarding, evaluation creation, live center data, loading/error states, and production-safe empty states.
+- **Evidence:** `app/(coordinator)/coordinator/center-flow/page.tsx:29-35, 50-54, 100-104`.
 
-- [x] **complete** Add a PHI warning, request-size limits, basic identifier detection, and in-memory abuse controls to the public conversation-practice endpoint.
-- [x] **complete** Default authenticated AI and health-assessment PHI processing to deny; enable only through explicit approved deployment configuration. The enabled path also rejects caller-supplied system prompts, restricts history roles/length, bounds message size, and records non-content request audits.
-- [ ] **in progress** Decide whether authenticated AI features may process PHI. ReadyCheck uses deterministic guidance by default and authenticated AI is deny-by-default; an approved vendor agreement, risk assessment, and final product decision remain.
-- [ ] **external dependency** Execute a BAA or other approved data-processing agreement for each vendor that will handle PHI, then document the exact service configuration and retention terms.
-- [ ] **not started** Perform prompt-injection, data-leakage, and model-output safety testing before pilot use.
+### 5. Implement the advertised stalled-evaluation CDS Hook
 
-## 3. Identity, Authorization, and Auditability
+- **Status:** Partial
+- The service is advertised in CDS discovery but explicitly disabled.
+- Add verified center-to-patient authorization and center scoping before returning stalled-evaluation data.
+- **Evidence:** `app/api/cds-hooks/route.ts:41-48, 103-105`.
 
-- [x] **complete** Correct consent persistence to use the internal user identifier required by Prisma relations.
-- [x] **complete** Record audit events for consent actions without storing sensitive request content in the audit metadata.
-- [x] **complete** Enforce coordinator-only, center-scoped mutation of evaluation records.
-- [x] **complete** Require a configured bearer token for CDS Hooks requests that can disclose patient-associated information.
-- [x] **complete** Restrict cross-center FHIR bulk export to explicitly provisioned administrators until donor-to-center export scoping exists.
-- [x] **complete** Add audit events to additional clinical, financial, goal, and mentor-message writes/reads.
-- [ ] **in progress** Apply audit logging and server-side authorization consistently to every PHI-touching route. Authenticated clinical, financial, goal, notification, mentor, consent, export, safety, CDS, and admin-review routes now emit non-content audit events and enforce ownership, role, or service-token checks; center-scoped CDS evaluation alerts remain disabled until a verified center-to-patient mapping exists, and failure monitoring remains.
-- [ ] **not started** Add automated authorization tests proving a user cannot read or mutate another donor's or center's data. Deferred by product decision; server-side ownership and center checks remain implemented, but this prototype has no automated authorization-test evidence.
-- [ ] **in progress** Configure database-level immutable audit retention and monitor audit-log delivery failures. Local append-only update/delete triggers and an admin audit-log viewer are implemented; database retention policy and audit-delivery failure monitoring remain.
+### 6. Correct CDS Hooks endpoint structure
 
-## 4. Data Protection
+- **Status:** Complete
+- Documentation advertises `/api/cds-hooks/patient-view`, but only `/api/cds-hooks` exists.
+- Implement service-specific CDS Hooks endpoints or update the discovery and integration contract.
+- **Evidence:** `app/api/cds-hooks/route.ts:10-13`.
 
-- [ ] **in progress** Implement authenticated field-level encryption for sensitive free text and documents using managed keys and key rotation. AES-256-GCM is implemented for mentor messages, LifeAfter notes, expense descriptions, health-goal notes, deletion-request reasons, and mentor-report details; deployment key management, rotation, migration of existing plaintext, document encryption, and recovery testing remain.
-- [ ] **not started** Implement private object storage, malware scanning, short-lived signed download URLs, and upload authorization for receipts and documents.
-- [ ] **in progress** Establish retention, deletion, backup restoration, and breach-response procedures, then test them. Donors can submit and track deletion requests from the authenticated Privacy & Data page, and an admin workflow is implemented; purge jobs, backup restore drills, and incident testing remain.
-- [ ] **in progress** Provide donor data access/export without exposing cross-center bulk data. Donors can now download scoped JSON and FHIR exports of their own records from the normal user area; the former admin FHIR page is no longer available. Formal access-request procedures, export completeness review, and retention/legal review remain. The cross-center bulk FHIR export remains admin-only.
-- [ ] **in progress** Replace the current pseudonymized export labeling with a HIPAA Safe Harbor or expert-determination process before calling exports de-identified. Export Patient, Observation, QuestionnaireResponse, and CarePlan references now consistently use the pseudonymous patient ID; formal de-identification remains required.
+### 7. Complete clinical escalation operations
 
-## 5. Clinical Safety and Consent
+- **Status:** Partial / external dependency
+- PHQ-2 escalation currently notifies administrators rather than a designated clinical recipient.
+- Add ownership, on-call routing, response SLA, acknowledgment workflow, urgent-care guidance, and monitoring.
+- **Evidence:** `SECURITY_REMEDIATION.md` prior status; `app/api/life-after/phq2/route.ts`.
 
-- [ ] **in progress** Create a PHQ-2 escalation workflow with an authorized recipient, acknowledgment, response expectation, and urgent-care instructions. Escalations now create an auditable record, notify provisioned administrators, expose an admin-only acknowledgment endpoint, and show 988/emergency guidance. The local schema and migration history are synchronized; production deployment, center assignment, on-call ownership, SLA monitoring, and clinical approval remain.
-- [ ] **in progress** Add granular, versioned consent for platform use, AI processing, mentor messaging, research, and EHR exchange, including revocation. Each submission now creates immutable purpose-specific history records with grant/revocation timestamps, the consent page loads current settings and supports revocation, and EHR writes require current `ehr_exchange` consent; production migration deployment, retention policy, and a dedicated settings route remain.
-- [ ] **in progress** Implement mentor training, verification, reporting, moderation, and emergency-use boundaries. Mentor boundary acknowledgment, verified/trained matching gates, safety reports, admin notifications, admin-only moderation status endpoints, and non-emergency language are implemented. The admin review page now handles story submissions, mentor safety reports, and deletion-request status updates; training evidence and operational moderation ownership remain pending.
+## Priority 1: Core PDF Features
 
-## 6. Interoperability and Accessibility
+### 8. Complete ReadyCheck AI coaching
 
-- [ ] **in progress** Complete FHIR resource writes and validate against the profiles actually claimed by the product. ReadyCheck now creates a gated FHIR transaction bundle for Patient, BMI, BP, and eGFR resources only after EHR-exchange consent, with an environment-managed bearer token and timeout; profile validation, additional module writes, and EHR-sandbox testing remain.
-- [ ] **in progress** Harden SMART-on-FHIR with issuer allowlisting, PKCE, encrypted server-side token storage, and no PHI in URLs. Issuer allowlisting, PKCE, HTTPS endpoint validation in production, validated token responses, server-side encrypted token/patient context, secure cookies, reduced read-only scopes, local session revocation, and URL cleanup are implemented; migration application, provider token revocation, scheduled expired-session cleanup, EHR sandbox validation, production key-management review, and center-scoped CDS evaluation alert validation remain.
-- [ ] **external dependency** Test with an approved EHR sandbox and complete any marketplace onboarding before claiming Epic or Cerner integration.
-- [ ] **not started** Expand accessibility coverage to authenticated flows, charts, form errors, keyboard operation, screen readers, mobile targets, and generated PDFs.
-- [ ] **external dependency** Complete a VPAT/ACR assessment before claiming Section 508 or WCAG 2.1 AA conformance.
+- **Status:** Partial
+- GPT-4o is disabled by default; the app now generates personalized, bounded deterministic guidance locally and labels its source. OpenAI is used only when `ALLOW_PHI_TO_AI=true` and an API key is configured.
+- Finalize AI vendor approval, PHI policy, risk assessment, prompt safety testing, and approved deployment configuration.
+- **Evidence:** `app/api/ready-check/assess/route.ts:51-59`.
 
-## 7. Governance and Pilot Gate
+### 9. Add ReadyCheck 30/60/90-day plans
 
-- [ ] **external dependency** Designate privacy and security officers, complete HIPAA risk analysis, and document incident response.
-- [ ] **external dependency** Complete penetration testing and remediate material findings.
-- [ ] **external dependency** Obtain pilot-center agreements, data-use agreements, and clinical escalation ownership.
-- [ ] **external dependency** Complete documented co-design sessions with donors, clinicians, coordinators, and disabled users.
+- **Status:** Partial
+- The goal UI now provides 30/60/90-day target presets. Milestone reminders and adherence automation remain.
+
+### 10. Add ReadyCheck trend charts
+
+- **Status:** Partial
+- Recharts progress charts exist on the dedicated goals page. A summary chart on the main ReadyCheck page and expanded accessibility evidence remain.
+- **Evidence:** `app/(donor)/ready-check/page.tsx`.
+
+### 11. Implement DonorShield receipt upload
+
+- **Status:** Missing
+- Add receipt photo upload, private encrypted AWS S3 storage, malware scanning, upload authorization, and short-lived signed download URLs.
+- **Evidence:** `app/(donor)/donor-shield/expenses/page.tsx`; `app/api/donor-shield/records/route.ts`.
+
+### 12. Implement reimbursement tracking
+
+- **Status:** Partial
+- Expense records now persist reimbursement status, paid amount, and notes, with donor-scoped updates at `/api/donor-shield/nldac/reimbursements`. Receipt upload and official claim submission remain.
+- **Evidence:** `prisma/schema.prisma`; `app/api/donor-shield/nldac/reimbursements/route.ts`.
+
+### 13. Complete the NLDAC application workflow
+
+- **Status:** Partial
+- The wizard now saves a donor-scoped application draft/ready record and links to the official NLDAC application. Requirement guidance, document checklist, and official submission integration remain.
+- Add requirement-by-requirement guidance, income verification, employment status, transplant-center confirmation, document checklist, and pre-filled PDF application generation.
+- **Evidence:** `app/(donor)/donor-shield/nldac/page.tsx`.
+
+### 14. Validate and maintain tax-credit data
+
+- **Status:** Partial
+- The 27-state table is hardcoded and lacks primary-source links per state, effective dates, annual update ownership, and validation.
+- **Evidence:** `app/(donor)/donor-shield/tax-credits/page.tsx`.
+
+### 15. Upgrade the FMLA letter generator
+
+- **Status:** Partial
+- The current implementation invokes browser printing instead of generating a real accessible PDF.
+- Obtain legal/template review and implement downloadable, tagged PDF output.
+- **Evidence:** `app/(donor)/donor-shield/fmla-letter/page.tsx:32-50`.
+
+### 16. Implement a persistent Insurance Issue Tracker
+
+- **Status:** Complete
+- Current issues exist only in React state and disappear on refresh.
+- Add a database model, API routes, coordinator escalation, status history, notifications, and audit logging.
+- **Evidence:** `app/(donor)/donor-shield/insurance/page.tsx:34-60`; no insurance API route exists.
+
+### 17. Complete MentorMatch AI ranking
+
+- **Status:** Partial
+- Matching currently uses database filters only.
+- Add GPT-4o compatibility ranking, explainable match scores, coordinator confirmation, and a real 48-hour operational SLA.
+- **Evidence:** `app/api/mentor-match/profiles/route.ts`; `app/api/mentor-match/request/route.ts`.
+
+### 18. Populate the donor story library
+
+- **Status:** Partial
+- Public stories currently contain only `Test1` and `Test2` demonstration records.
+- Add consented, reviewed, verified stories and persist helpful votes.
+- **Evidence:** `app/api/stories/route.ts:17-45`; `app/stories/page.tsx:155-177`.
+
+### 19. Add CORS to the stories API
+
+- **Status:** Complete
+- The PDF claims cross-site embedding support, but the stories response does not return `Access-Control-Allow-Origin`.
+- **Evidence:** `app/api/stories/route.ts:48-60`.
+
+### 20. Implement all LifeAfter trend charts
+
+- **Status:** Complete at prototype level
+- The UI now renders BP, weight, mood, and energy charts when data is available.
+- **Evidence:** `app/(donor)/life-after/page.tsx`; `app/api/life-after/trends/route.ts`.
+
+### 21. Tie PHQ-2 to milestones
+
+- **Status:** Partial
+- PHQ-2 is currently one independent form, not a required assessment attached to each LifeAfter milestone.
+- Add milestone/check-in association and enforce screening at the required check-ins.
+- **Evidence:** `app/(donor)/life-after/page.tsx:143-172`; `app/api/life-after/phq2/route.ts`.
+
+### 22. Add LifeAfter reminders and lifetime automation
+
+- **Status:** Partial
+- LifeAfter creates milestone reminder records, closes them when the check-in or PHQ-2 is completed, and the admin maintenance endpoint sends due notifications. Scheduler invocation, retries, delivery status, and monitoring remain.
+
+### 23. Complete the parent-donor pathway
+
+- **Status:** Partial
+- The LifeAfter page now shows parent-donor-specific emotional-support guidance when `DonorProfile.isParentDonor` is enabled. Dedicated content, referral routing, profile controls, and tests remain.
+
+## Priority 2: FHIR and EHR Interoperability
+
+### 24. Expand FHIR writes beyond ReadyCheck
+
+- **Status:** Partial
+- Only Patient, BMI, BP, and eGFR resources are currently written.
+- Add validated writes for DonorShield Coverage/Claim/ExplanationOfBenefit; MentorMatch de-identified Patient/Communication; CenterFlow Organization/PractitionerRole/Task/ServiceRequest/Procedure; and LifeAfter CarePlan/Observation/Appointment/QuestionnaireResponse/DiagnosticReport.
+- **Evidence:** `app/api/ready-check/assess/route.ts:64-77`; `lib/fhir/mappers.ts`; PDF pages 6-10.
+
+### 25. Validate FHIR resources against claimed profiles
+
+- **Status:** Missing
+- Add validator dependencies, fixtures, CI validation, and evidence for HL7 FHIR R4, US Core, Da Vinci PDex, and Bulk Data profiles.
+- **Evidence:** `ARCHITECTURE.md:270-279`; `SECURITY_REMEDIATION.md` prior status.
+
+### 26. Complete SMART on FHIR end-to-end integration
+
+- **Status:** Partial
+- OAuth launch/callback scaffolding exists, but no clinical UI consumes the stored token and patient context.
+- Add EHR launch-context routing, token use, logout/revocation, and sandbox tests.
+
+### 27. Bind SMART sessions to local users
+
+- **Status:** Partial
+- The callback stores EHR token/session data without clearly binding the SMART session to an authenticated local user.
+- Add identity linking and authorization checks.
+- **Evidence:** `app/api/fhir/smart/callback/route.ts`.
+
+### 28. Validate Epic and Cerner integration
+
+- **Status:** External dependency
+- No EHR sandbox testing, App Orchard submission, Cerner onboarding, or marketplace evidence exists.
+- **Evidence:** `SECURITY_REMEDIATION.md` prior status; PDF pages 3, 8-10.
+
+### 29. Complete standard FHIR Bulk Data export
+
+- **Status:** Partial
+- The current implementation is a synchronous custom `POST /api/fhir/export`.
+- Implement asynchronous kickoff, status polling, manifest/output URLs, lifecycle management, and system/group/patient `$export` operations.
+- Correct `_since` handling so individual child-resource changes are not missed.
+- **Evidence:** `app/api/fhir/export/route.ts:41-167`.
+
+### 30. Correct Bulk Export role behavior
+
+- **Status:** Partial
+- The PDF claims admin, clinician, and coordinator access, but code permits only `ADMIN`.
+- Implement center-scoped clinician/coordinator access or correct the documented claim.
+- **Evidence:** `app/api/fhir/export/route.ts:45-50`.
+
+### 31. Complete the de-identification process
+
+- **Status:** Unverified / external dependency
+- Current export is pseudonymized, not formally HIPAA Safe Harbor or expert-determination de-identified.
+- Add formal methodology, review, documentation, and release approval.
+- **Evidence:** `app/api/fhir/export/route.ts:32-39`; prior remediation status.
+
+## Priority 3: Security, Compliance, and Operations
+
+### 32. Complete private document controls
+
+- **Status:** Missing
+- Implement private object storage, malware scanning, upload authorization, encrypted documents, and signed download URLs.
+
+### 33. Complete encryption key management
+
+- **Status:** Partial
+- AES-256-GCM exists for selected text fields, but managed keys, rotation, plaintext migration, backup recovery, and document encryption remain incomplete.
+- **Evidence:** `lib/field-encryption.ts`; `SECURITY_REMEDIATION.md` prior status.
+
+### 34. Make audit logging fail-safe
+
+- **Status:** Partial
+- Audit failures are logged but swallowed, allowing requests to continue.
+- Add failure monitoring, alerting, retention policy, and operational review.
+- **Evidence:** `lib/audit.ts:30-33`.
+
+### 35. Finish database audit immutability deployment
+
+- **Status:** Partial
+- Local append-only migration triggers exist, but production synchronization, retention, backups, and monitoring are incomplete.
+- **Evidence:** `prisma/migrations/20260824003000_make_audit_log_immutable/migration.sql`; `docker/postgres/init.sql`.
+
+### 36. Add automated authorization tests
+
+- **Status:** Missing
+- Test cross-donor, cross-center, coordinator, clinician, admin, CDS, SMART, and export access boundaries.
+- **Evidence:** no authorization test suite; prior remediation status.
+
+### 37. Complete consent/settings management
+
+- **Status:** Partial
+- Consent history and revocation exist, but a dedicated settings route, production migration deployment, and retention policy remain needed.
+
+### 38. Complete mentor safety operations
+
+- **Status:** Partial / external dependency
+- Reporting and moderation endpoints exist, but mentor training evidence, moderation ownership, response SLAs, and revocation procedures remain incomplete.
+
+### 39. Complete HIPAA and operational governance
+
+- **Status:** External dependency
+- Required work includes vendor BAAs/DPAs, HIPAA risk analysis, privacy/security officers, incident response, breach testing, clinical escalation ownership, pilot-center agreements, data-use agreements, and penetration testing.
+
+## Priority 4: Accessibility, Data Quality, and Release Readiness
+
+### 40. Expand accessibility testing
+
+- **Status:** Partial
+- Current axe coverage tests only home and sign-in.
+- Add authenticated donor, patient, clinician, coordinator, admin, charts, form errors, dialogs, keyboard navigation, screen readers, and mobile viewport testing.
+- **Evidence:** `tests/accessibility.spec.ts`; `.github/workflows/ci.yml:23-55`.
+
+### 41. Make charts and PDFs accessible
+
+- **Status:** Missing / partial
+- Add accessible chart data tables or summaries and tagged, keyboard-readable PDFs.
+
+### 42. Complete VPAT/ACR assessment
+
+- **Status:** External dependency
+- Do not claim Section 508 or WCAG 2.1 AA conformance until an independent VPAT/ACR assessment is complete.
+
+### 43. Replace static waitlist explorer data
+
+- **Status:** Partial
+- The current feature is a searchable hardcoded list, not a verified map or authoritative OPTN/SRTR data explorer.
+- Add authoritative source data, update metadata, map visualization, and validation.
+- **Evidence:** `app/waitlist-map/page.tsx`.
+
+### 44. Validate Ripple calculator assumptions
+
+- **Status:** Partial
+- Outputs use hardcoded assumptions for dialysis, life expectancy, graft longevity, and savings.
+- Add source citations, methodology, disclaimers, and validation.
+- **Evidence:** `app/ripple/page.tsx`.
+
+### 45. Fix architecture and documentation drift
+
+- **Status:** Partial
+- README and architecture describe a Turborepo with `apps/web`, `apps/api`, Express, AWS RDS, and ECS.
+- The actual project is a root Next.js app with Next API routes, Prisma, and root-level `app`, `lib`, and `prisma` directories.
+- Update documentation to match the repository.
+- **Evidence:** `README.md:32-44`; `ARCHITECTURE.md:20-23`; `package.json`.
+
+### 46. Align production environment configuration
+
+- **Status:** Partial
+- `.env.production.example` omits variables required by current code, including FHIR write/token settings, SMART issuer allowlisting, encryption keys, and CDS authorization.
+- **Evidence:** `.env.production.example`; `app/api/fhir/smart/launch/route.ts`; `lib/fhir/write.ts`.
+
+### 47. Add HSTS
+
+- **Status:** Missing
+- The PDF claims HSTS/TLS controls, but Vercel configuration does not set `Strict-Transport-Security`.
+- **Evidence:** `vercel.json:6-18`.
+
+### 48. Complete CI/CD pipeline
+
+- **Status:** Partial
+- Current CI performs lint, type-check, build, limited axe testing, and optional tests.
+- Add FHIR validation, Docker build verification, authorization/integration tests, migration checks, security scanning, and deployment steps.
+- **Evidence:** `.github/workflows/ci.yml`; `ARCHITECTURE.md:270-285`.
+
+### 49. Add reproducible deployment configuration
+
+- **Status:** Missing
+- Add Railway configuration, production HAPI FHIR deployment, Dockerfile, backup procedure, and migration deployment procedure.
+- **Evidence:** no Railway or production HAPI deployment configuration was found.
+
+## Features Substantially Present at Prototype Level
+
+- Five module pages and role-based navigation
+- ReadyCheck intake and basic goal tracking
+- DonorShield wage calculator, NLDAC prototype, expenses, tax table, and FMLA page
+- Mentor filtering, requests, messaging, and safety reporting
+- CenterFlow protocol library and evaluation model
+- LifeAfter check-ins, PHQ-2, and PCP Clarity page
+- Consent persistence and revocation history
+- Selected AES-256-GCM field encryption
+- Basic audit logging and immutable audit migration
+- SMART OAuth/PKCE scaffolding
+- ReadyCheck FHIR transaction write scaffolding
+- Custom pseudonymized FHIR export
+- Basic public tools and public AI conversation endpoint
+
+## Recommended Execution Order
+
+1. Fix the broken LifeAfter and CenterFlow workflows.
+2. Remove or qualify unsupported PDF claims.
+3. Implement persistent Insurance Tracker, receipt storage, NLDAC application output, and LifeAfter reminders.
+4. Implement and test center-scoped CDS Hooks and SMART patient-context workflows.
+5. Add authorization, integration, FHIR profile, and accessibility tests.
+6. Expand FHIR writes and replace the custom export with a standards-aligned export workflow.
+7. Complete key management, audit monitoring, retention, incident response, BAAs, clinical ownership, and independent assessments.
+8. Align documentation, environment configuration, deployment configuration, and CI/CD with the actual application.
 
 ## Claiming Rule
 
-Before any future statement says a control is "implemented," retain evidence of the deployed configuration, a passing test or review, and the responsible owner. "Designed for," "planned," and "prototype" are appropriate until then.
+Before stating that a control or feature is implemented, retain evidence of deployed configuration, a passing test or review, and a responsible owner. Use **designed for**, **planned**, **prototype**, or **in progress** until that evidence exists.

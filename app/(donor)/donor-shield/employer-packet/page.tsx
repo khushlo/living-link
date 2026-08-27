@@ -104,7 +104,7 @@ NLDAC federal reimbursement covers: $${Math.min(nldacCoverage, totalWageLoss).to
 Estimated net employer cost (if you provide full pay): $${employerGap.toLocaleString()}
 
 THE NATIONAL LIVING DONOR ASSISTANCE CENTER (NLDAC)
-NLDAC (nldac.org | 1-888-870-5002) is a federal program that reimburses living kidney donors for:
+NLDAC (livingdonorassistance.org | 1-888-870-5002) is a federal program that reimburses living kidney donors for:
 • Lost wages: up to $420/day (2024 rate)
 • Travel expenses
 • Lodging and meals
@@ -119,7 +119,7 @@ RECOMMENDED EMPLOYER ACTIONS
 4. Celebrate this employee's decision publicly if they consent - donor-supportive culture attracts talent
 
 RESOURCES
-• NLDAC: nldac.org
+• NLDAC: livingdonorassistance.org
 • HRSA living donation info: organdonor.gov
 • FMLA guidance: dol.gov/agencies/whd/fmla
 

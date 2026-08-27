@@ -122,6 +122,9 @@ model DonorProfile {
   eligibilityChecks EligibilityCheck[]
   healthGoals       HealthGoal[]
   financialRecords  FinancialRecord[]
+  nldacApplications NLDACApplication[]
+  lifeAfterReminders LifeAfterReminder[]
+  insuranceIssues   InsuranceIssue[]
   checkins          PostDonationCheckin[]
   phq2Responses     PHQ2Response[]
   consentRecords    ConsentRecord[]
@@ -224,11 +227,49 @@ model FinancialRecord {
   receiptS3Key      String?   @map("receipt_s3_key")
   isReimbursed      Boolean   @default(false) @map("is_reimbursed")
   reimbursedAmount  Float?    @map("reimbursed_amount")
+  reimbursementStatus String  @default("not_submitted") @map("reimbursement_status")
+  reimbursementNotes String? @map("reimbursement_notes")
   createdAt         DateTime  @default(now()) @map("created_at")
 
   donorProfile      DonorProfile @relation(fields: [donorProfileId], references: [id])
 
   @@map("financial_records")
+}
+
+model NLDACApplication {
+  id              String    @id @default(uuid())
+  donorProfileId  String    @map("donor_profile_id")
+  status          String    @default("draft")
+  employmentType  String?   @map("employment_type")
+  isUSResident    Boolean?  @map("is_us_resident")
+  hasSurgeryDate  Boolean?  @map("has_surgery_date")
+  grossIncome     Float?    @map("gross_income")
+  centerConfirmed Boolean   @default(false) @map("center_confirmed")
+  applicationRef  String?   @map("application_ref")
+  submittedAt     DateTime? @map("submitted_at")
+  notes           String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  donorProfile DonorProfile @relation(fields: [donorProfileId], references: [id])
+  @@index([donorProfileId, updatedAt])
+  @@map("nldac_applications")
+}
+
+model InsuranceIssue {
+  id             String   @id @default(uuid())
+  donorProfileId String   @map("donor_profile_id")
+  type           String
+  description    String
+  status         String   @default("open") // open, in_progress, escalated, resolved
+  notes          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  donorProfile DonorProfile @relation(fields: [donorProfileId], references: [id])
+
+  @@index([donorProfileId, createdAt])
+  @@map("insurance_issues")
 }
 
 // ─── MENTOR MATCH ─────────────────────────────────────────────────────────────
@@ -421,6 +462,7 @@ model PostDonationCheckin {
 
   donorProfile   DonorProfile @relation(fields: [donorProfileId], references: [id])
 
+  @@unique([donorProfileId, week])
   @@map("post_donation_checkins")
 }
 
@@ -431,12 +473,28 @@ model PHQ2Response {
   q2Score        Int      @map("q2_score")  // 0-3
   totalScore     Int      @map("total_score")
   isEscalated    Boolean  @default(false) @map("is_escalated")
+  week           CheckinWeek? @map("checkin_week")
   completedAt    DateTime @default(now()) @map("completed_at")
 
   donorProfile   DonorProfile @relation(fields: [donorProfileId], references: [id])
   escalation     SafetyEscalation?
 
   @@map("phq2_responses")
+}
+
+model LifeAfterReminder {
+  id             String      @id @default(uuid())
+  donorProfileId String      @map("donor_profile_id")
+  week           CheckinWeek
+  dueAt          DateTime    @map("due_at")
+  sentAt         DateTime?   @map("sent_at")
+  completedAt    DateTime?   @map("completed_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  donorProfile DonorProfile @relation(fields: [donorProfileId], references: [id])
+  @@unique([donorProfileId, week])
+  @@index([dueAt, sentAt])
+  @@map("life_after_reminders")
 }
 
 model SafetyEscalation {

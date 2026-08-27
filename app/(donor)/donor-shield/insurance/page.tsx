@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Shield, Plus, AlertCircle, CheckCircle, Clock, ChevronDown, Phone, ExternalLink } from "lucide-react";
 import { BackToModule } from "@/components/shared/back-to-module";
 
@@ -31,33 +31,41 @@ const STATUS_META: Record<string, { label: string; color: string; icon: typeof C
   resolved:    { label: "Resolved",    color: "bg-green-100 text-green-700", icon: CheckCircle },
 };
 
-let idCounter = 0;
-function newId() { return `issue-${++idCounter}-${Date.now()}`; }
-
 export default function InsurancePage() {
-  const [issues, setIssues] = useState<Issue[]>([
-    { id: newId(), type: "Claim denied", description: "Surgery claim denied - coded as cosmetic procedure", status: "escalated", createdAt: new Date(Date.now() - 86400000 * 5).toISOString(), notes: "Coordinator contacted. Appeal filed 5/18." },
-  ]);
+  const [issues, setIssues] = useState<Issue[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [form, setForm] = useState({ type: ISSUE_TYPES[0], description: "", notes: "" });
+  const [error, setError] = useState<string | null>(null);
 
-  function addIssue(e: React.FormEvent) {
+  useEffect(() => {
+    fetch("/api/donor-shield/insurance")
+      .then(async (response) => { if (!response.ok) throw new Error(); return response.json(); })
+      .then(setIssues)
+      .catch(() => setError("Unable to load insurance issues."));
+  }, []);
+
+  async function addIssue(e: React.FormEvent) {
     e.preventDefault();
-    setIssues((prev) => [
-      { id: newId(), type: form.type, description: form.description, notes: form.notes, status: "open", createdAt: new Date().toISOString() },
-      ...prev,
-    ]);
+    setError(null);
+    const response = await fetch("/api/donor-shield/insurance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    if (!response.ok) { setError("Unable to save insurance issue."); return; }
+    const issue = await response.json();
+    setIssues((prev) => [issue, ...prev]);
     setForm({ type: ISSUE_TYPES[0], description: "", notes: "" });
     setShowForm(false);
   }
 
-  function updateStatus(id: string, status: Issue["status"]) {
-    setIssues((prev) => prev.map((i) => i.id === id ? { ...i, status } : i));
+  async function updateIssue(id: string, changes: { status?: Issue["status"]; notes?: string }) {
+    setError(null);
+    const response = await fetch("/api/donor-shield/insurance", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ issueId: id, ...changes }) });
+    if (!response.ok) { setError("Unable to update insurance issue."); return; }
+    const updated = await response.json();
+    setIssues((prev) => prev.map((issue) => issue.id === id ? updated : issue));
   }
 
-  function escalate(id: string) { updateStatus(id, "escalated"); }
-  function resolve(id: string)  { updateStatus(id, "resolved"); }
+  function escalate(id: string) { void updateIssue(id, { status: "escalated" }); }
+  function resolve(id: string)  { void updateIssue(id, { status: "resolved" }); }
 
   const openCount     = issues.filter((i) => i.status === "open").length;
   const escalatedCount = issues.filter((i) => i.status === "escalated").length;
@@ -76,6 +84,7 @@ export default function InsurancePage() {
           <Plus className="h-4 w-4" aria-hidden="true" /> Log issue
         </button>
       </div>
+      {error && <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{error}</p>}
 
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4">
@@ -191,7 +200,7 @@ export default function InsurancePage() {
                     )}
                     <div className="flex flex-wrap gap-2">
                       {issue.status !== "in_progress" && issue.status !== "resolved" && (
-                        <button onClick={() => updateStatus(issue.id, "in_progress")}
+                        <button onClick={() => void updateIssue(issue.id, { status: "in_progress" })}
                           className="rounded-md bg-blue-50 border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100">
                           Mark in progress
                         </button>

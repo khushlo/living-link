@@ -57,5 +57,14 @@ export async function GET(req: NextRequest) {
   if (tag) stories = stories.filter((story) => story.tags.some((value) => value.toLowerCase().includes(tag)));
   stories.sort((a, b) => b.helpful - a.helpful);
 
-  return NextResponse.json({ stories, total: stories.length });
+  return NextResponse.json({ stories, total: stories.length }, {
+    headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" },
+  });
+}
+
+export function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" },
+  });
 }

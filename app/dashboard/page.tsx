@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 // Redirect /dashboard to the role-specific portal
 export default async function DashboardRedirect() {

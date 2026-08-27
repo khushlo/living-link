@@ -6,7 +6,11 @@ import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
-const phq2Schema = z.object({ q1Score: z.number().min(0).max(3), q2Score: z.number().min(0).max(3) });
+const phq2Schema = z.object({
+  q1Score: z.number().min(0).max(3),
+  q2Score: z.number().min(0).max(3),
+  week: z.enum(["WEEK_2", "MONTH_1", "MONTH_3", "MONTH_6", "YEAR_1", "YEAR_2_PLUS"]).optional(),
+});
 
 export async function POST(req: NextRequest) {
   const { userId, error } = await requireAuth();
@@ -22,6 +26,7 @@ export async function POST(req: NextRequest) {
       include: { donorProfile: true },
     });
     if (!user?.donorProfile) return NextResponse.json({ error: "Donor profile not found" }, { status: 404 });
+    if (!parsed.data.week) return NextResponse.json({ error: "Select a follow-up milestone" }, { status: 400 });
 
     const total = parsed.data.q1Score + parsed.data.q2Score;
     const isEscalated = total >= 3;
@@ -33,7 +38,13 @@ export async function POST(req: NextRequest) {
         q2Score: parsed.data.q2Score,
         totalScore: total,
         isEscalated,
+        week: parsed.data.week,
       },
+    });
+    await prisma.lifeAfterReminder.upsert({
+      where: { donorProfileId_week: { donorProfileId: user.donorProfile.id, week: parsed.data.week } },
+      update: { completedAt: new Date() },
+      create: { donorProfileId: user.donorProfile.id, week: parsed.data.week, dueAt: new Date(), completedAt: new Date() },
     });
     let escalationId: string | null = null;
     if (isEscalated) {

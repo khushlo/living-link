@@ -34,6 +34,7 @@ export default function GoalsPage() {
     metric: "BMI",
     targetValue: "",
     targetDate: "",
+    horizon: "custom",
   });
   const [logForm, setLogForm] = useState({ value: "", note: "" });
   const [saving, setSaving] = useState(false);
@@ -60,11 +61,13 @@ export default function GoalsPage() {
         body: JSON.stringify({
           metric: createForm.metric,
           targetValue: Number(createForm.targetValue),
-          targetDate: createForm.targetDate ? new Date(createForm.targetDate).toISOString() : undefined,
+          targetDate: createForm.horizon !== "custom"
+            ? new Date(Date.now() + Number(createForm.horizon) * 86400000).toISOString()
+            : createForm.targetDate ? new Date(createForm.targetDate).toISOString() : undefined,
         }),
       });
       setShowCreate(false);
-      setCreateForm({ metric: "BMI", targetValue: "", targetDate: "" });
+      setCreateForm({ metric: "BMI", targetValue: "", targetDate: "", horizon: "custom" });
       await load();
     } finally {
       setSaving(false);
@@ -145,6 +148,15 @@ export default function GoalsPage() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="horizon">Planning horizon</label>
+                <select id="horizon" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" value={createForm.horizon} onChange={(e) => setCreateForm((f) => ({ ...f, horizon: e.target.value }))}>
+                  <option value="custom">Choose a target date</option>
+                  <option value="30">30-day target</option>
+                  <option value="60">60-day target</option>
+                  <option value="90">90-day target</option>
+                </select>
+              </div>
+              {createForm.horizon === "custom" && <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="targetDate">Target date (optional)</label>
                 <input
                   id="targetDate"
@@ -153,7 +165,7 @@ export default function GoalsPage() {
                   value={createForm.targetDate}
                   onChange={(e) => setCreateForm((f) => ({ ...f, targetDate: e.target.value }))}
                 />
-              </div>
+              </div>}
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={saving} className="flex-1 rounded-md bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60">
                   {saving ? "Saving…" : "Create goal"}
