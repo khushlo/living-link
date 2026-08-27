@@ -4,14 +4,14 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 173 80% 30%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
@@ -22,8 +22,8 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --ring: 173 80% 30%;
+    --radius: 1rem;
   }
 
   .dark {
@@ -52,6 +52,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
   }
   /* Section 508: visible focus indicators */
   *:focus-visible {
@@ -81,4 +82,64 @@
   .text-accessible-muted {
     color: hsl(215.4 16.3% 36%); /* WCAG AA on white */
   }
+}
+
+/* Shared visual language for feature pages that predate the current shell. */
+:where(.portal-content, .public-content) :where(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  border-color: rgb(203 213 225);
+  border-radius: 0.75rem;
+  background-color: white;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+:where(.portal-content, .public-content) :where(input:not([type="range"]), select, textarea):focus {
+  border-color: rgb(13 148 136);
+  box-shadow: 0 0 0 3px rgb(20 184 166 / 0.14);
+}
+
+:where(.portal-content, .public-content) .bg-blue-600 {
+  background-color: rgb(15 118 110);
+}
+
+:where(.portal-content, .public-content) .text-blue-600,
+:where(.portal-content, .public-content) .text-blue-700 {
+  color: rgb(15 118 110);
+}
+
+:where(.portal-content, .public-content) .bg-blue-50 {
+  background-color: rgb(240 253 250);
+}
+
+:where(.portal-content, .public-content) .border-blue-200 {
+  border-color: rgb(153 246 228);
+}
+
+:where(.portal-content, .public-content) :where(.rounded-xl, .rounded-2xl).border.bg-white {
+  border-color: rgb(226 232 240 / 0.9);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
+}
+
+.portal-content h1,
+.public-content h1 {
+  color: rgb(15 23 42);
+  letter-spacing: -0.035em;
+}
+
+.portal-content h2,
+.public-content h2 {
+  letter-spacing: -0.015em;
+}
+
+.portal-content table thead {
+  background-color: rgb(248 250 252);
+  color: rgb(71 85 105);
+}
+
+.portal-content table tbody tr {
+  transition: background-color 150ms ease;
+}
+
+.portal-content table tbody tr:hover {
+  background-color: rgb(248 250 252 / 0.8);
 }

@@ -16,15 +16,15 @@ export default async function CoordinatorDashboard() {
       </div>
       <div className="grid gap-4 md:grid-cols-3 mb-8">
         {[
-          { label: "Pending evaluations", value: "", icon: Clock, color: "text-orange-600" },
-          { label: "Stalled > 14 days", value: "", icon: AlertCircle, color: "text-red-600" },
-          { label: "Donors in pipeline", value: "", icon: Users, color: "text-blue-600" },
+          { label: "Pending evaluations", value: "—", icon: Clock, color: "text-amber-700", bg: "bg-amber-50" },
+          { label: "Stalled > 14 days", value: "—", icon: AlertCircle, color: "text-rose-700", bg: "bg-rose-50" },
+          { label: "Donors in pipeline", value: "—", icon: Users, color: "text-teal-700", bg: "bg-teal-50" },
         ].map((s) => {
           const Icon = s.icon;
           return (
-            <Card key={s.label}>
-              <CardContent className="p-4 flex items-center gap-3">
-                <Icon className={`h-8 w-8 ${s.color}`} />
+            <Card key={s.label} className="bg-white/80">
+              <CardContent className="flex items-center gap-3 p-5">
+                <span className={`grid h-10 w-10 place-items-center rounded-xl ${s.bg}`}><Icon className={`h-5 w-5 ${s.color}`} /></span>
                 <div>
                   <p className="text-2xl font-bold">{s.value}</p>
                   <p className="text-xs text-gray-500">{s.label}</p>
@@ -34,7 +34,7 @@ export default async function CoordinatorDashboard() {
           );
         })}
       </div>
-      <Card>
+      <Card className="overflow-hidden transition-shadow hover:shadow-lg hover:shadow-slate-900/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-orange-600" />

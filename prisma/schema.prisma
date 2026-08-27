@@ -259,6 +259,7 @@ model HealthGoal {
   donorProfile   DonorProfile @relation(fields: [donorProfileId], references: [id])
   progressLogs   GoalProgressLog[]
 
+  @@unique([donorProfileId, metric])
   @@map("health_goals")
 }
 

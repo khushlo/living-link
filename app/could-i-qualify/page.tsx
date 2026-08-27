@@ -69,7 +69,7 @@ export default function CouldIQualifyPage() {
 
   return (
     <PublicPageShell>
-      <div className="mx-auto max-w-2xl px-6 py-12">
+      <div className="mx-auto max-w-3xl px-5 py-14 sm:px-6 sm:py-20">
         {step !== "welcome" && step !== "result" && (
           <div className="mb-8">
             <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
@@ -87,13 +87,13 @@ export default function CouldIQualifyPage() {
 
         {/* Welcome */}
         {step === "welcome" && (
-          <div className="text-center space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-200 px-4 py-1.5 text-sm font-medium text-blue-700">
+          <div className="space-y-8 rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-xl shadow-slate-900/5 sm:p-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-4 py-1.5 text-sm font-semibold text-teal-800">
               60-second check · No account needed
             </div>
-             <h1 ref={headingRef} tabIndex={-1} className="text-4xl font-bold text-gray-900 leading-tight">
+             <h1 ref={headingRef} tabIndex={-1} className="text-4xl font-bold leading-tight tracking-[-0.035em] text-slate-950 sm:text-5xl">
               Could you be a<br />
-              <span className="text-blue-600">living kidney donor?</span>
+              <span className="text-teal-700">living kidney donor?</span>
             </h1>
             <p className="text-lg text-gray-600 max-w-xl mx-auto">
                5 quick questions can help you prepare for a conversation with a transplant team. They cannot
@@ -102,7 +102,7 @@ export default function CouldIQualifyPage() {
             <div className="flex flex-col items-center gap-3">
               <button
                 onClick={() => next("q1")}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-4 text-base font-semibold text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex items-center gap-2 rounded-xl bg-slate-950 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-slate-900/15 transition-colors hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
               >
                 Find out in 60 seconds
                 <ArrowRight className="h-5 w-5" aria-hidden="true" />
@@ -396,17 +396,6 @@ export default function CouldIQualifyPage() {
         )}
       </div>
 
-      <footer className="border-t border-gray-100 py-6 mt-8">
-        <div className="mx-auto max-w-3xl px-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <Link href="/" className="hover:text-blue-600">Home</Link>
-            <Link href="/ripple" className="hover:text-blue-600">Ripple Calculator</Link>
-            <Link href="/stories" className="hover:text-blue-600">Donor Stories</Link>
-            <Link href="/waitlist-map" className="hover:text-blue-600">Waitlist Map</Link>
-          </div>
-          <p className="text-xs text-gray-400">© 2026 LivingLink · Not a medical service</p>
-        </div>
-      </footer>
     </PublicPageShell>
   );
 }

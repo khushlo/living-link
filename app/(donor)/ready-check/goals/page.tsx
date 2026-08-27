@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Target, TrendingUp, Plus, CheckCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Target, TrendingUp, Plus, CheckCircle, Clock, RotateCcw } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine,
 } from "recharts";
@@ -12,6 +12,7 @@ type Goal = {
   targetValue: number;
   currentValue: number | null;
   targetDate: string | null;
+  status: "ACTIVE" | "ACHIEVED" | "PAUSED";
   progressLogs: { id: string; value: number; note: string | null; loggedAt: string }[];
 };
 
@@ -26,7 +27,6 @@ const METRIC_META: Record<string, { label: string; unit: string; color: string; 
 export default function GoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [logGoalId, setLogGoalId] = useState<string | null>(null);
 
@@ -38,6 +38,19 @@ export default function GoalsPage() {
   });
   const [logForm, setLogForm] = useState({ value: "", note: "" });
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
+
+  const availableMetrics = Object.entries(METRIC_META).filter(
+    ([metric]) => !goals.some((goal) => goal.metric === metric)
+  );
+
+  function openCreateGoal() {
+    const firstMetric = availableMetrics[0]?.[0];
+    if (!firstMetric) return;
+    setFormError("");
+    setCreateForm({ metric: firstMetric, targetValue: "", targetDate: "", horizon: "custom" });
+    setShowCreate(true);
+  }
 
   async function load() {
     setLoading(true);
@@ -54,8 +67,9 @@ export default function GoalsPage() {
   async function createGoal(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setFormError("");
     try {
-      await fetch("/api/ready-check/goals", {
+      const response = await fetch("/api/ready-check/goals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -66,6 +80,10 @@ export default function GoalsPage() {
             : createForm.targetDate ? new Date(createForm.targetDate).toISOString() : undefined,
         }),
       });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error ?? "Unable to create goal");
+      }
       setShowCreate(false);
       setCreateForm({ metric: "BMI", targetValue: "", targetDate: "", horizon: "custom" });
       await load();
@@ -79,11 +97,14 @@ export default function GoalsPage() {
     if (!logGoalId) return;
     setSaving(true);
     try {
-      await fetch(`/api/ready-check/goals/${logGoalId}/log`, {
+      const today = new Date();
+      const loggedOn = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      const response = await fetch(`/api/ready-check/goals/${logGoalId}/log`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value: Number(logForm.value), note: logForm.note || undefined }),
+        body: JSON.stringify({ value: Number(logForm.value), note: logForm.note || undefined, loggedOn }),
       });
+      if (!response.ok) throw new Error("Unable to save today's reading");
       setLogGoalId(null);
       setLogForm({ value: "", note: "" });
       await load();
@@ -92,10 +113,22 @@ export default function GoalsPage() {
     }
   }
 
-  const pct = (goal: Goal) => {
-    if (!goal.currentValue || !goal.targetValue) return 0;
-    return Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100));
-  };
+  async function updateStatus(goal: Goal) {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/ready-check/goals/${goal.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: goal.status === "ACHIEVED" ? "ACTIVE" : "ACHIEVED" }),
+      });
+      if (!res.ok) throw new Error("Unable to update goal status");
+      await load();
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Unable to create goal");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="max-w-3xl space-y-8">
@@ -106,10 +139,11 @@ export default function GoalsPage() {
           <p className="mt-1 text-gray-600">Track your progress toward donation readiness milestones.</p>
         </div>
         <button
-          onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          onClick={openCreateGoal}
+          disabled={availableMetrics.length === 0}
+          className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
-          <Plus className="h-4 w-4" aria-hidden="true" /> New goal
+          <Plus className="h-4 w-4" aria-hidden="true" /> {availableMetrics.length === 0 ? "All metrics added" : "New goal"}
         </button>
       </div>
 
@@ -127,7 +161,7 @@ export default function GoalsPage() {
                   value={createForm.metric}
                   onChange={(e) => setCreateForm((f) => ({ ...f, metric: e.target.value }))}
                 >
-                  {Object.entries(METRIC_META).map(([k, v]) => (
+                  {availableMetrics.map(([k, v]) => (
                     <option key={k} value={k}>{v.label}</option>
                   ))}
                 </select>
@@ -166,6 +200,7 @@ export default function GoalsPage() {
                   onChange={(e) => setCreateForm((f) => ({ ...f, targetDate: e.target.value }))}
                 />
               </div>}
+              {formError && <p role="alert" className="text-sm text-red-600">{formError}</p>}
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={saving} className="flex-1 rounded-md bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60">
                   {saving ? "Saving…" : "Create goal"}
@@ -196,6 +231,7 @@ export default function GoalsPage() {
                   value={logForm.value}
                   onChange={(e) => setLogForm((f) => ({ ...f, value: e.target.value }))}
                 />
+                <p className="mt-1 text-xs text-slate-500">Logging again today replaces today&apos;s existing reading for this metric.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="log-note">Note (optional)</label>
@@ -231,14 +267,18 @@ export default function GoalsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {goals.map((goal) => {
+          {goals.map((goal, goalIndex) => {
             const meta = METRIC_META[goal.metric] ?? { label: goal.metric, unit: "", color: "#6b7280", ideal: "" };
-            const expanded = expandedId === goal.id;
-            const progress = pct(goal);
-            const chartData = goal.progressLogs.map((l) => ({
+            const metricGoals = goals.filter((item) => item.metric === goal.metric);
+            const metricLogs = metricGoals
+              .flatMap((item) => item.progressLogs)
+              .sort((a, b) => new Date(a.loggedAt).getTime() - new Date(b.loggedAt).getTime());
+            const chartData = metricLogs.map((l) => ({
               date: new Date(l.loggedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
               value: l.value,
             }));
+            const showsMetricGraph = goals.findIndex((item) => item.metric === goal.metric) === goalIndex;
+            const targetGoal = metricGoals.find((item) => item.status === "ACTIVE") ?? metricGoals[0];
 
             return (
               <div key={goal.id} className="rounded-xl border border-gray-200 overflow-hidden">
@@ -249,6 +289,9 @@ export default function GoalsPage() {
                         <Target className="h-4 w-4 text-gray-400" aria-hidden="true" />
                         <span className="font-semibold text-gray-900">{meta.label}</span>
                         <span className="text-xs text-gray-400">Ideal: {meta.ideal}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${goal.status === "ACHIEVED" ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}>
+                          {goal.status === "ACHIEVED" ? "Completed" : "Active"}
+                        </span>
                       </div>
                       <p className="text-sm text-gray-600">
                         Target: <strong>{goal.targetValue} {meta.unit}</strong>
@@ -259,23 +302,7 @@ export default function GoalsPage() {
                           <> · By {new Date(goal.targetDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</>
                         )}
                       </p>
-                      {/* Progress bar */}
-                      <div className="mt-3" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={`${meta.label} progress`}>
-                        <div className="flex justify-between text-xs text-gray-400 mb-1">
-                          <span>{progress}% toward target</span>
-                          {progress >= 100 && (
-                            <span className="flex items-center gap-1 text-green-600 font-medium">
-                              <CheckCircle className="h-3 w-3" /> Goal reached!
-                            </span>
-                          )}
-                        </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all"
-                            style={{ width: `${progress}%`, backgroundColor: meta.color }}
-                          />
-                        </div>
-                      </div>
+                      <p className="mt-3 text-xs text-slate-500">Readings update the chart only. You decide when this goal is complete.</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button
@@ -285,30 +312,29 @@ export default function GoalsPage() {
                         Log
                       </button>
                       <button
-                        onClick={() => setExpandedId(expanded ? null : goal.id)}
-                        aria-expanded={expanded}
-                        aria-label="Toggle chart"
-                        className="rounded-md border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"
+                        onClick={() => updateStatus(goal)}
+                        disabled={saving}
+                        className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-60 ${goal.status === "ACHIEVED" ? "border-slate-200 text-slate-600 hover:bg-slate-50" : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"}`}
                       >
-                        {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        {goal.status === "ACHIEVED" ? <><RotateCcw className="h-3.5 w-3.5" /> Reopen</> : <><CheckCircle className="h-3.5 w-3.5" /> Complete</>}
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Chart */}
-                {expanded && (
+                {/* One combined chart for every reading of this metric. */}
+                {showsMetricGraph && (
                   <div className="border-t border-gray-100 bg-gray-50 p-5">
-                    {chartData.length < 2 ? (
+                    {chartData.length === 0 ? (
                       <div className="flex items-center gap-2 text-sm text-gray-500">
                         <Clock className="h-4 w-4" aria-hidden="true" />
-                        Log at least 2 readings to see your trend chart.
+                        Log your first reading to start the value chart.
                       </div>
                     ) : (
                       <>
                         <div className="flex items-center gap-2 mb-3">
                           <TrendingUp className="h-4 w-4 text-gray-500" aria-hidden="true" />
-                          <span className="text-sm font-medium text-gray-700">Progress over time</span>
+                          <span className="text-sm font-medium text-gray-700">All {meta.label} readings</span>
                         </div>
                         <ResponsiveContainer width="100%" height={180}>
                           <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
@@ -316,7 +342,7 @@ export default function GoalsPage() {
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                             <YAxis tick={{ fontSize: 11 }} />
                             <Tooltip />
-                            <ReferenceLine y={goal.targetValue} stroke={meta.color} strokeDasharray="4 4" label={{ value: "Target", fontSize: 10, fill: meta.color }} />
+                            <ReferenceLine y={targetGoal.targetValue} stroke={meta.color} strokeDasharray="4 4" label={{ value: "Active target", fontSize: 10, fill: meta.color }} />
                             <Line
                               type="monotone"
                               dataKey="value"
@@ -327,9 +353,9 @@ export default function GoalsPage() {
                             />
                           </LineChart>
                         </ResponsiveContainer>
-                        {goal.progressLogs.slice(-1)[0]?.note && (
-                          <p className="mt-2 text-xs text-gray-400 italic">Last note: &ldquo;{goal.progressLogs.slice(-1)[0].note}&rdquo;</p>
-                        )}
+                        <ol className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white px-4" aria-label={`${meta.label} reading history`}>
+                          {metricLogs.map((log) => <li key={log.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"><span className="font-semibold text-slate-800">{log.value} {meta.unit}</span><span className="text-xs text-slate-500">{new Date(log.loggedAt).toLocaleString()}</span>{log.note && <span className="w-full text-xs text-slate-500">{log.note}</span>}</li>)}
+                        </ol>
                       </>
                     )}
                   </div>

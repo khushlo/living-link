@@ -19,6 +19,9 @@ import {
   Menu,
   X,
   UserCircle,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Fragment, useState } from "react";
@@ -36,9 +39,17 @@ interface SidebarProps {
   role: string;
   isMentor?: boolean;
   includeAdmin?: boolean;
+  collapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
 }
 
-export function Sidebar({ navItems, role, isMentor = false, includeAdmin = false }: SidebarProps) {
+export function Sidebar({
+  navItems,
+  role,
+  includeAdmin = false,
+  collapsed = false,
+  onCollapsedChange,
+}: SidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const resolvedNavItems = includeAdmin
@@ -46,34 +57,37 @@ export function Sidebar({ navItems, role, isMentor = false, includeAdmin = false
     : navItems ?? donorNavItems;
 
   const roleBadgeColor: Record<string, string> = {
-    donor: "bg-blue-100 text-blue-700",
-    patient: "bg-green-100 text-green-700",
-    coordinator: "bg-orange-100 text-orange-700",
-    clinician: "bg-purple-100 text-purple-700",
-    admin: "bg-slate-200 text-slate-800",
+    donor: "bg-teal-400/15 text-teal-200 ring-teal-400/20",
+    patient: "bg-emerald-400/15 text-emerald-200 ring-emerald-400/20",
+    coordinator: "bg-amber-400/15 text-amber-200 ring-amber-400/20",
+    clinician: "bg-violet-400/15 text-violet-200 ring-violet-400/20",
+    admin: "bg-slate-400/15 text-slate-200 ring-slate-400/20",
   };
 
-  const sidebarContent = (
+  const sidebarContent = (compact = false) => (
     <div className="flex h-full flex-col">
-      {/* Logo */}
-      <div className="flex h-16 items-center gap-2 border-b px-6">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Heart className="h-5 w-5 fill-blue-600 text-blue-600" aria-hidden="true" />
-          <span className="font-bold text-gray-900">LivingLink</span>
+      <div className={cn("flex h-[4.5rem] items-center border-b border-white/10 px-5", compact && "justify-center px-3")}>
+        <Link href="/" className="flex min-w-0 items-center gap-3 transition-opacity hover:opacity-80" aria-label="LivingLink home">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-teal-400 text-slate-950 shadow-lg shadow-teal-950/30">
+            <Heart className="h-[18px] w-[18px] fill-current" aria-hidden="true" />
+          </span>
+          {!compact && <span className="text-[15px] font-bold tracking-tight text-white">LivingLink</span>}
         </Link>
-        <span
+        {!compact && <span
           className={cn(
-            "ml-auto rounded-full px-2 py-0.5 text-xs font-medium capitalize",
-            roleBadgeColor[role] ?? "bg-gray-100 text-gray-700"
+            "ml-auto rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ring-1 ring-inset",
+            roleBadgeColor[role] ?? "bg-slate-400/15 text-slate-200 ring-slate-400/20"
           )}
         >
           {role}
-        </span>
+        </span>}
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4" aria-label="Sidebar navigation">
-        <ul className="space-y-1 px-3">
+      <div className={cn("px-5 pb-2 pt-5", compact && "px-3 text-center")}>
+        {compact ? <Sparkles className="mx-auto h-4 w-4 text-teal-300" aria-hidden="true" /> : <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Your journey</p>}
+      </div>
+      <nav className="flex-1 overflow-y-auto px-3 pb-4" aria-label="Sidebar navigation">
+        <ul className="space-y-1">
           {resolvedNavItems.map((item, index) => {
             const Icon = item.icon;
             const isActive =
@@ -81,27 +95,29 @@ export function Sidebar({ navItems, role, isMentor = false, includeAdmin = false
             return (
               <Fragment key={item.href}>
                 {item.badge && resolvedNavItems[index - 1]?.badge !== item.badge && (
-                  <li aria-hidden="true" className="my-3 flex items-center gap-2 px-3">
-                    <span className="h-px flex-1 bg-gray-200" />
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-gray-400">{item.badge}</span>
-                    <span className="h-px flex-1 bg-gray-200" />
+                  <li aria-hidden="true" className={cn("mb-2 mt-5 flex items-center gap-2 px-3", compact && "justify-center px-0")}>
+                    {!compact && <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">{item.badge}</span>}
+                    <span className="h-px flex-1 bg-white/10" />
                   </li>
                 )}
                 <li>
                   <Link
                     href={item.href}
+                    title={compact ? item.label : undefined}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                      "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+                      "focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-slate-950",
+                      compact && "justify-center px-2",
                       isActive
-                        ? "bg-blue-50 text-blue-700"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        ? "bg-teal-400 text-slate-950 shadow-md shadow-black/15"
+                        : "text-slate-400 hover:bg-white/[0.07] hover:text-white"
                     )}
                     aria-current={isActive ? "page" : undefined}
                     onClick={() => setMobileOpen(false)}
                   >
-                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    {item.label}
+                    <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                    {!compact && <span className="truncate">{item.label}</span>}
+                    {compact && <span className="sr-only">{item.label}</span>}
                   </Link>
                 </li>
               </Fragment>
@@ -110,11 +126,10 @@ export function Sidebar({ navItems, role, isMentor = false, includeAdmin = false
         </ul>
       </nav>
 
-      {/* User */}
-      <div className="border-t p-4">
-        <div className="flex items-center gap-3">
+      <div className="border-t border-white/10 p-3">
+        <div className={cn("flex items-center gap-3 rounded-xl bg-white/[0.05] p-2", compact && "justify-center bg-transparent")}>
           <UserButton afterSignOutUrl="/" />
-          <span className="text-xs text-gray-500">Account settings</span>
+          {!compact && <div className="min-w-0"><p className="text-xs font-medium text-slate-200">Your account</p><p className="text-[10px] text-slate-500">Profile & settings</p></div>}
         </div>
       </div>
     </div>
@@ -125,17 +140,28 @@ export function Sidebar({ navItems, role, isMentor = false, includeAdmin = false
       <NotificationBell />
       {/* Desktop sidebar */}
       <aside
-        className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col border-r bg-white"
+        className={cn(
+          "hidden bg-slate-950 transition-[width] duration-300 lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-[17rem] lg:flex-col",
+          collapsed && "lg:w-[5.5rem]"
+        )}
         aria-label="Main sidebar"
       >
-        {sidebarContent}
+        {sidebarContent(collapsed)}
+        <button
+          type="button"
+          onClick={() => onCollapsedChange?.(!collapsed)}
+          className="absolute -right-3 top-24 grid h-7 w-7 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md transition-colors hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <PanelLeftOpen className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
+        </button>
       </aside>
 
       {/* Mobile toggle */}
-      <div className="fixed top-4 left-4 z-50 lg:hidden">
+       <div className={cn("fixed top-4 z-[60] transition-[left] lg:hidden", mobileOpen ? "left-[14.75rem]" : "left-4")}>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="rounded-lg border bg-white p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
           aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={mobileOpen}
           aria-controls="mobile-sidebar"
@@ -152,16 +178,16 @@ export function Sidebar({ navItems, role, isMentor = false, includeAdmin = false
       {mobileOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm lg:hidden"
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
           <aside
             id="mobile-sidebar"
-            className="fixed inset-y-0 left-0 z-50 w-72 flex flex-col bg-white lg:hidden"
+            className="fixed inset-y-0 left-0 z-50 flex w-[18rem] flex-col bg-slate-950 shadow-2xl lg:hidden"
             aria-label="Mobile navigation"
           >
-            {sidebarContent}
+            {sidebarContent(false)}
           </aside>
         </>
       )}

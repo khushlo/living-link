@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Sidebar, clinicianNavItems } from "@/components/shared/sidebar";
+import { clinicianNavItems } from "@/components/shared/sidebar";
+import { AppShell } from "@/components/shared/app-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -9,13 +10,6 @@ export default async function ClinicianLayout({ children }: { children: React.Re
   if (!userId) redirect("/sign-in");
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar navItems={clinicianNavItems} role="clinician" />
-      <div className="lg:pl-64">
-        <main id="main-content" className="p-6 lg:p-8" tabIndex={-1}>
-          {children}
-        </main>
-      </div>
-    </div>
+    <AppShell navItems={clinicianNavItems} role="clinician">{children}</AppShell>
   );
 }

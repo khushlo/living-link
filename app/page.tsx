@@ -2,6 +2,7 @@
 import { SignInButton, SignUpButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { ArrowRight, Heart, Shield, Users, Activity, CheckCircle, Map, TrendingUp, MessageSquare, BookOpen } from "lucide-react";
 import { PublicNav } from "@/components/shared/public-nav";
+import { PublicFooter } from "@/components/shared/public-footer";
 
 const modules = [
   {
@@ -75,37 +76,38 @@ const stats = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-slate-50">
       <PublicNav />
 
-      <main>
+      <main id="main-content" className="public-content" tabIndex={-1}>
         {/* Hero */}
-        <section className="mx-auto max-w-6xl px-6 py-24 text-center" aria-labelledby="hero-heading">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 mb-6 border border-blue-200">
+        <section className="relative isolate overflow-hidden px-6 py-24 text-center sm:py-32" aria-labelledby="hero-heading">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,rgba(45,212,191,0.18),transparent_42%)]" aria-hidden="true" />
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white/80 px-4 py-1.5 text-sm font-semibold text-teal-800 shadow-sm">
             <span>KidneyX EMPOWER Prize Submission</span>
           </div>
           <h1
             id="hero-heading"
-            className="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl"
+            className="mx-auto max-w-5xl text-5xl font-bold tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-7xl"
           >
             Living kidney donation,{" "}
-            <span className="text-blue-600">reimagined</span>
+            <span className="text-teal-700">made clearer</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-xl text-gray-600">
+          <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
             LivingLink is a prototype platform supporting donors, patients, and transplant centers
             throughout the donation journey. FHIR-ready. AI features are disabled by default for PHI.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <SignedOut>
               <SignUpButton mode="modal">
-                <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-4 text-base font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors shadow-lg shadow-blue-200">
+                <button className="flex items-center gap-2 rounded-xl bg-slate-950 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-slate-900/15 transition-colors hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
                   Start your journey
                   <ArrowRight className="h-5 w-5" aria-hidden="true" />
                 </button>
               </SignUpButton>
               <Link
                 href="#modules"
-                className="rounded-xl border border-gray-200 bg-white px-8 py-4 text-base font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="rounded-xl border border-slate-200 bg-white px-8 py-4 text-base font-semibold text-slate-700 shadow-sm transition-colors hover:border-teal-200 hover:text-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
               >
                 Explore modules
               </Link>
@@ -113,7 +115,7 @@ export default function LandingPage() {
             <SignedIn>
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-4 text-base font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors shadow-lg shadow-blue-200"
+                className="flex items-center gap-2 rounded-xl bg-slate-950 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-slate-900/15 transition-colors hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
               >
                 Go to your dashboard
                 <ArrowRight className="h-5 w-5" aria-hidden="true" />
@@ -123,12 +125,12 @@ export default function LandingPage() {
         </section>
 
         {/* Stats */}
-        <section className="border-y border-gray-100 bg-gray-50 py-12" aria-label="Impact statistics">
+        <section className="border-y border-slate-200/70 bg-white py-12" aria-label="Impact statistics">
           <div className="mx-auto max-w-6xl px-6">
             <dl className="grid grid-cols-2 gap-8 lg:grid-cols-4">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
-                  <dt className="text-3xl font-bold text-blue-600">{stat.value}</dt>
+                  <dt className="text-3xl font-bold tracking-tight text-teal-700">{stat.value}</dt>
                   <dd className="mt-1 text-sm text-gray-600">{stat.label}</dd>
                 </div>
               ))}
@@ -137,7 +139,7 @@ export default function LandingPage() {
         </section>
 
         {/* Modules */}
-        <section id="modules" className="mx-auto max-w-6xl px-6 py-24" aria-labelledby="modules-heading">
+        <section id="modules" className="mx-auto max-w-6xl px-6 py-24 sm:py-28" aria-labelledby="modules-heading">
           <h2 id="modules-heading" className="text-center text-3xl font-bold text-gray-900 mb-4">
             Five modules. One journey.
           </h2>
@@ -152,7 +154,7 @@ export default function LandingPage() {
                 <div
                   key={module.name}
                   id={module.name.toLowerCase().replace(" ", "-")}
-                  className={`rounded-2xl border p-6 ${module.color}`}
+                  className={`rounded-2xl border p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5 ${module.color}`}
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <Icon className={`h-6 w-6 ${module.iconColor}`} aria-hidden="true" />
@@ -324,17 +326,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-gray-100 py-8">
-        <div className="mx-auto max-w-6xl px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Heart className="h-4 w-4 fill-blue-600 text-blue-600" aria-hidden="true" />
-            <span className="text-sm font-semibold text-gray-700">LivingLink</span>
-          </div>
-          <p className="text-xs text-gray-500">
-            LivingLink is not a medical service. Always consult with your transplant team. © 2026 LivingLink.
-          </p>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

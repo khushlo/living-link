@@ -143,18 +143,19 @@ export default function StartConversationPage() {
 
   return (
     <PublicPageShell>
-      <div className="mx-auto max-w-3xl px-6 py-12 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Start the Conversation</h1>
-          <p className="mt-1 text-gray-600">
+      <div className="mx-auto max-w-5xl space-y-8 px-5 py-14 sm:px-6 sm:py-20">
+        <div className="max-w-3xl">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Private practice space</p>
+          <h1 className="text-4xl font-bold tracking-[-0.035em] text-slate-950 sm:text-5xl">Say the hard thing with confidence.</h1>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
             Talking about donation can be hard. Practice here - with an AI playing the person you need to talk to - before the real conversation.
           </p>
         </div>
 
         {/* Info banner */}
-        <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 flex gap-3">
-          <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-          <p className="text-sm text-blue-800">
+        <div className="flex gap-3 rounded-2xl border border-teal-200 bg-teal-50 p-5">
+          <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-700" aria-hidden="true" />
+          <p className="text-sm leading-6 text-teal-900">
             This is a safe space to rehearse. The AI plays a realistic character based on common reactions.
             What you say here is never saved. Try it as many times as you need. No account required.
           </p>

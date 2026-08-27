@@ -23,11 +23,29 @@ export default function DonorProfilePage() {
   }
 
   useEffect(() => {
-    fetch("/api/donor/profile", { cache: "no-store" }).then(async (response) => {
+    const controller = new AbortController();
+    let active = true;
+    const timeout = window.setTimeout(() => controller.abort(), 10000);
+
+    fetch("/api/donor/profile", { cache: "no-store", signal: controller.signal }).then(async (response) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Unable to load your profile");
-      setProfile(data);
-    }).catch((reason) => setError(reason instanceof Error ? reason.message : "Unable to load your profile")).finally(() => setLoading(false));
+      if (active) setProfile(data);
+    }).catch((reason) => {
+      if (!active) return;
+      setError(reason instanceof DOMException && reason.name === "AbortError"
+        ? "Unable to load your profile."
+        : reason instanceof Error ? reason.message : "Unable to load your profile");
+    }).finally(() => {
+      window.clearTimeout(timeout);
+      if (active) setLoading(false);
+    });
+
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
   }, []);
 
   async function save(event: FormEvent) {

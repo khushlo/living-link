@@ -37,7 +37,7 @@ function StoryCard({ story, onHelpful }: { story: Story; onHelpful: (id: string)
   const displayBody = expanded || !isLong ? story.body : story.body.slice(0, 200) + "…";
 
   return (
-    <article className="rounded-2xl border border-gray-200 bg-white p-6 space-y-4 hover:shadow-md transition-shadow">
+    <article className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/5">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -167,10 +167,11 @@ export default function StoriesPage() {
     <PublicPageShell>
       <div>
         {/* Hero */}
-        <section className="mx-auto max-w-4xl px-6 py-16 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <section className="relative isolate overflow-hidden border-b border-slate-200 px-5 py-20 text-center sm:px-6 sm:py-24">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,rgba(45,212,191,0.16),transparent_45%)]" />
+          <h1 className="mb-5 text-5xl font-bold tracking-[-0.04em] text-slate-950 sm:text-6xl">
             Real donors.<br />
-            <span className="text-blue-600">Real stories.</span>
+            <span className="text-teal-700">Real stories.</span>
           </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
              Demonstration stories are shown below for prototype testing. Real donor stories will appear here only after they are submitted with consent, reviewed, and explicitly published by LivingLink administrators.
@@ -311,17 +312,6 @@ export default function StoriesPage() {
         </section>
       </div>
 
-      <footer className="border-t border-gray-100 py-6">
-        <div className="mx-auto max-w-5xl px-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <Link href="/" className="hover:text-blue-600">Home</Link>
-            <Link href="/could-i-qualify" className="hover:text-blue-600">Could I qualify?</Link>
-            <Link href="/ripple" className="hover:text-blue-600">Ripple Calculator</Link>
-            <Link href="/waitlist-map" className="hover:text-blue-600">Waitlist Map</Link>
-          </div>
-          <p className="text-xs text-gray-400">© 2026 LivingLink · Stories are anonymized and shared with consent</p>
-        </div>
-      </footer>
     </PublicPageShell>
   );
 }

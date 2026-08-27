@@ -11,76 +11,108 @@ import {
   MessageCircle,
   Menu,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const PUBLIC_LINKS = [
-  { href: "/could-i-qualify", label: "Could I qualify?",  icon: CheckCircle  },
-  { href: "/ripple",          label: "Ripple effect",     icon: TrendingUp   },
-  { href: "/waitlist-map",    label: "Waitlist map",      icon: Map          },
-  { href: "/stories",         label: "Donor stories",     icon: BookOpen     },
-  { href: "/start-conversation", label: "Practice conversation", icon: MessageCircle },
+  { href: "/could-i-qualify", label: "Eligibility check", description: "A private 60-second screener", icon: CheckCircle, group: "Get started" },
+  { href: "/start-conversation", label: "Conversation practice", description: "Prepare for a meaningful talk", icon: MessageCircle, group: "Get started" },
+  { href: "/ripple", label: "Ripple effect", description: "See the impact of one donation", icon: TrendingUp, group: "Explore & learn" },
+  { href: "/waitlist-map", label: "Waitlist explorer", description: "Understand need across the U.S.", icon: Map, group: "Explore & learn" },
+  { href: "/stories", label: "Donor stories", description: "Learn from people who donated", icon: BookOpen, group: "Explore & learn" },
 ];
 
 export function PublicNav({ currentPath }: { currentPath?: string }) {
   const pathname = usePathname();
   const active = currentPath ?? pathname;
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const exploreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!mobileOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMobileOpen(false);
+        setExploreOpen(false);
         menuButtonRef.current?.focus();
       }
     };
+    const onPointerDown = (event: PointerEvent) => {
+      if (exploreRef.current && !exploreRef.current.contains(event.target as Node)) setExploreOpen(false);
+    };
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [mobileOpen]);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setExploreOpen(false);
+  }, [pathname]);
+
+  const isExploreActive = PUBLIC_LINKS.some(({ href }) => active === href || active.startsWith(`${href}/`));
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-slate-50/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Heart className="h-5 w-5 fill-blue-600 text-blue-600" aria-hidden="true" />
-            <span className="font-bold text-gray-900">LivingLink</span>
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-teal-600 text-white shadow-sm shadow-teal-900/20"><Heart className="h-[18px] w-[18px] fill-current" aria-hidden="true" /></span>
+            <span className="font-bold tracking-tight text-slate-950">LivingLink</span>
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Public tools navigation">
-            {PUBLIC_LINKS.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                   aria-current={active === href ? "page" : undefined}
-                   className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                  active === href
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                )}
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Public navigation">
+            <Link href="/" className={cn("rounded-lg px-3 py-2 text-sm font-medium transition-colors", active === "/" ? "bg-white text-slate-950 shadow-sm" : "text-slate-600 hover:bg-white hover:text-slate-950")}>Home</Link>
+            <div className="relative" ref={exploreRef}>
+              <button
+                type="button"
+                onClick={() => setExploreOpen((open) => !open)}
+                aria-expanded={exploreOpen}
+                aria-controls="explore-menu"
+                className={cn("flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors", isExploreActive ? "bg-teal-50 text-teal-800" : "text-slate-600 hover:bg-white hover:text-slate-950")}
               >
-                {label}
-              </Link>
-            ))}
+                Explore <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", exploreOpen && "rotate-180")} aria-hidden="true" />
+              </button>
+              {exploreOpen && (
+                <div id="explore-menu" className="absolute left-1/2 top-full mt-3 w-[34rem] -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl shadow-slate-900/10">
+                  <div className="grid grid-cols-2 gap-2">
+                    {["Get started", "Explore & learn"].map((group) => (
+                      <div key={group}>
+                        <p className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">{group}</p>
+                        {PUBLIC_LINKS.filter((item) => item.group === group).map(({ href, label, description, icon: Icon }) => (
+                          <Link key={href} href={href} className={cn("group flex gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50", (active === href || active.startsWith(`${href}/`)) && "bg-teal-50")}>
+                            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600 group-hover:bg-teal-100 group-hover:text-teal-800"><Icon className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+                            <span><span className="block text-sm font-semibold text-slate-900">{label}</span><span className="mt-0.5 block text-xs leading-4 text-slate-500">{description}</span></span>
+                          </Link>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <Link href="/stories" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white hover:text-slate-950">Stories</Link>
           </nav>
 
           {/* Auth buttons */}
           <div className="flex items-center gap-2 shrink-0">
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="hidden md:block text-sm font-medium text-gray-600 hover:text-blue-600 px-3 py-1.5 rounded-md transition-colors">
+                <button className="hidden rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-teal-700 lg:block">
                   Sign in
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="hidden md:block rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+                <button className="hidden rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 lg:block">
                   Get started free
                 </button>
               </SignUpButton>
@@ -88,7 +120,7 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
             <SignedIn>
               <Link
                 href="/dashboard"
-                className="hidden md:block rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                className="hidden rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 lg:block"
               >
                 Dashboard
               </Link>
@@ -97,7 +129,7 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
             {/* Mobile menu toggle — always visible on small screens */}
             <button
                ref={menuButtonRef}
-               className="md:hidden rounded-lg border border-gray-200 p-1.5 ml-1 bg-white"
+               className="ml-1 rounded-xl border border-slate-200 bg-white p-2 lg:hidden"
               onClick={() => setMobileOpen(!mobileOpen)}
                aria-label={mobileOpen ? "Close menu" : "Open menu"}
                aria-expanded={mobileOpen}
@@ -110,22 +142,23 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
 
         {/* Mobile dropdown */}
         {mobileOpen && (
-          <div id="public-mobile-menu" className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1" aria-label="Mobile public tools menu">
-            {PUBLIC_LINKS.map(({ href, label, icon: Icon }) => (
+          <div id="public-mobile-menu" className="space-y-1 border-t border-slate-200 bg-white px-4 py-3 lg:hidden" aria-label="Mobile public tools menu">
+            <p className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Explore LivingLink</p>
+            {PUBLIC_LINKS.map(({ href, label, description, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMobileOpen(false)}
-                   aria-current={active === href ? "page" : undefined}
+                   aria-current={active === href || active.startsWith(`${href}/`) ? "page" : undefined}
                    className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  active === href
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100"
+                   active === href || active.startsWith(`${href}/`)
+                    ? "bg-teal-50 text-teal-800"
+                    : "text-slate-600 hover:bg-slate-50"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                {label}
+                <span><span className="block">{label}</span><span className="block text-xs font-normal text-slate-400">{description}</span></span>
               </Link>
             ))}
 
@@ -143,7 +176,7 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
                 <SignUpButton mode="modal">
                   <button
                     onClick={() => setMobileOpen(false)}
-                    className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors text-left"
+                    className="w-full rounded-xl bg-slate-950 px-4 py-2.5 text-left text-sm font-medium text-white transition-colors hover:bg-teal-800"
                   >
                     Get started free
                   </button>
@@ -153,7 +186,7 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileOpen(false)}
-                  className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors text-center"
+                  className="w-full rounded-xl bg-slate-950 px-4 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-teal-800"
                 >
                   Go to dashboard
                 </Link>

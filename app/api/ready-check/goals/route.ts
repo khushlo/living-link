@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
 import { decryptField } from "@/lib/field-encryption";
 import { recordAuditEvent } from "@/lib/audit";
+import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,15 @@ export async function POST(req: NextRequest) {
     });
     if (!user?.donorProfile) return NextResponse.json({ error: "Donor profile not found" }, { status: 404 });
 
+    const existing = await prisma.healthGoal.findFirst({
+      where: {
+        donorProfileId: user.donorProfile.id,
+        metric: parsed.data.metric,
+      },
+      select: { id: true },
+    });
+    if (existing) return NextResponse.json({ error: "A goal already exists for this metric" }, { status: 409 });
+
     const goal = await prisma.healthGoal.create({
       data: {
         donorProfileId: user.donorProfile.id,
@@ -68,7 +78,10 @@ export async function POST(req: NextRequest) {
     });
     await recordAuditEvent(req, userId!, "CREATE", "HealthGoal", goal.id);
     return NextResponse.json(goal, { status: 201 });
-  } catch {
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ error: "A goal already exists for this metric" }, { status: 409 });
+    }
     return NextResponse.json({ error: "Failed to create goal" }, { status: 500 });
   }
 }

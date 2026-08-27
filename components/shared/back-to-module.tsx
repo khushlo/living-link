@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 
 export function BackToModule({ href, label }: { href: string; label: string }) {
   return (
-    <Link href={href} className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 hover:underline">
+    <Link href={href} className="inline-flex items-center gap-1.5 rounded-lg text-sm font-medium text-slate-500 transition-colors hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
       <ArrowLeft className="h-4 w-4" aria-hidden="true" />
       {label}
     </Link>

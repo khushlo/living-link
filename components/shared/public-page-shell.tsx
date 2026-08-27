@@ -3,7 +3,9 @@
 import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { PublicNav } from "@/components/shared/public-nav";
-import { Sidebar, donorNavItems } from "@/components/shared/sidebar";
+import { donorNavItems } from "@/components/shared/sidebar";
+import { AppShell } from "@/components/shared/app-shell";
+import { PublicFooter } from "@/components/shared/public-footer";
 import { AIAssistant } from "@/components/shared/ai-assistant";
 
 interface PublicPageShellProps {
@@ -33,21 +35,17 @@ export function PublicPageShell({ children }: PublicPageShellProps) {
     return (
       <div className="min-h-screen bg-white">
         <PublicNav />
-        <main id="main-content" tabIndex={-1}>{children}</main>
+        <main id="main-content" className="public-content" tabIndex={-1}>{children}</main>
+        <PublicFooter />
       </div>
     );
   }
 
   // Authenticated: full portal experience with sidebar
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar navItems={donorNavItems} role={role} includeAdmin={role === "admin"} />
-      <div className="lg:pl-64">
-        <main id="main-content" tabIndex={-1}>
-          {children}
-        </main>
-      </div>
+    <AppShell navItems={donorNavItems} role={role} includeAdmin={role === "admin"} mainClassName="p-0 pt-[4.5rem] lg:pt-0">
+      {children}
       <AIAssistant />
-    </div>
+    </AppShell>
   );
 }

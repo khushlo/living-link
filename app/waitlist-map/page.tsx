@@ -106,11 +106,11 @@ export default function WaitlistMapPage() {
     <PublicPageShell>
       <div>
         {/* Hero */}
-        <section className="bg-gray-900 text-white py-16">
+        <section className="relative overflow-hidden bg-slate-950 py-20 text-white">
           <div className="mx-auto max-w-4xl px-6 text-center">
-            <h1 className="text-4xl font-bold mb-4">
+            <h1 className="mb-5 text-4xl font-bold tracking-[-0.035em] !text-white sm:text-5xl">
               The kidney waitlist is not abstract.<br />
-              <span className="text-blue-400">It's your neighbors.</span>
+              <span className="text-teal-300">It&apos;s your neighbors.</span>
             </h1>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
               {NATIONAL_TOTAL.toLocaleString()} Americans are waiting right now. Explore where they live -
@@ -344,17 +344,6 @@ export default function WaitlistMapPage() {
         </section>
       </div>
 
-      <footer className="border-t border-gray-100 py-6">
-        <div className="mx-auto max-w-6xl px-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <Link href="/" className="hover:text-blue-600">Home</Link>
-            <Link href="/could-i-qualify" className="hover:text-blue-600">Could I qualify?</Link>
-            <Link href="/ripple" className="hover:text-blue-600">Ripple Calculator</Link>
-            <Link href="/stories" className="hover:text-blue-600">Donor Stories</Link>
-          </div>
-          <p className="text-xs text-gray-400">© 2026 LivingLink · Data: OPTN/SRTR 2024</p>
-        </div>
-      </footer>
     </PublicPageShell>
   );
 }

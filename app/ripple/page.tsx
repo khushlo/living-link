@@ -1,7 +1,7 @@
 ﻿"use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Heart, ArrowRight, Clock, Calendar, TrendingUp, Share2 } from "lucide-react";
+import { Heart, ArrowRight, Clock, Calendar, TrendingUp, Share2, DollarSign, Sparkles, Waves } from "lucide-react";
 import { SignUpButton } from "@clerk/nextjs";
 import { PublicPageShell } from "@/components/shared/public-page-shell";
 
@@ -53,6 +53,7 @@ function AnimatedNumber({ target, duration = 1500 }: { target: number; duration?
   useEffect(() => {
     start.current = display;
     startTime.current = null;
+    let frame: number;
 
     function animate(timestamp: number) {
       if (!startTime.current) startTime.current = timestamp;
@@ -61,10 +62,11 @@ function AnimatedNumber({ target, duration = 1500 }: { target: number; duration?
       // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplay(Math.round(start.current + (target - start.current) * eased));
-      if (progress < 1) requestAnimationFrame(animate);
+      if (progress < 1) frame = requestAnimationFrame(animate);
     }
 
-    requestAnimationFrame(animate);
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target]);
 
@@ -87,232 +89,98 @@ export default function RipplePage() {
 
   return (
     <PublicPageShell>
-      <div>
-        {/* Hero */}
-        <section className="mx-auto max-w-4xl px-6 py-20 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-red-50 border border-red-200 px-4 py-1.5 text-sm font-medium text-red-700 mb-6">
-            <Heart className="h-4 w-4 fill-red-500" aria-hidden="true" />
-            One donation. A lifetime of ripples.
-          </div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            See what your donation<br />
-            <span className="text-red-500">would actually mean</span>
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Dialysis steals 13+ hours every week. A living kidney donation gives those hours back -
-            for years. Enter someone's situation and see the real math.
-          </p>
-        </section>
-
-        {/* Calculator */}
-        <section className="mx-auto max-w-2xl px-6 pb-16">
-          <div className="rounded-2xl border-2 border-gray-200 bg-gray-50 p-8 space-y-8">
-            <h2 className="text-lg font-bold text-gray-900">Personalize the calculation</h2>
-
-            {/* Wait time slider */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label htmlFor="waitYears" className="text-sm font-medium text-gray-700">
-                  Years on the kidney waitlist
-                </label>
-                <span className="text-2xl font-bold text-blue-600">{stats.waitYears} yr{stats.waitYears !== 1 ? "s" : ""}</span>
+      <div className="overflow-hidden bg-slate-50">
+        <section className="relative isolate border-b border-slate-200 px-5 py-16 sm:px-6 sm:py-24">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_20%,rgba(45,212,191,0.2),transparent_30%),radial-gradient(circle_at_10%_80%,rgba(14,116,144,0.12),transparent_35%)]" aria-hidden="true" />
+          <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.05fr_.95fr]">
+            <div>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white/80 px-4 py-1.5 text-sm font-semibold text-teal-800 shadow-sm">
+                <Waves className="h-4 w-4" aria-hidden="true" /> One gift, years of impact
               </div>
-              <input
-                id="waitYears"
-                type="range"
-                min={1}
-                max={10}
-                value={stats.waitYears}
-                onChange={(e) => setStats({ ...stats, waitYears: Number(e.target.value) })}
-                className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-blue-600"
-                aria-label="Years on waitlist"
-              />
-              <div className="flex justify-between text-xs text-gray-400">
-                <span>1 year</span>
-                <span className="text-gray-500">National avg: ~5 years</span>
-                <span>10 years</span>
-              </div>
-            </div>
-
-            {/* Recipient age slider */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label htmlFor="recipientAge" className="text-sm font-medium text-gray-700">
-                  Recipient's current age
-                </label>
-                <span className="text-2xl font-bold text-blue-600">{stats.recipientAge} yrs old</span>
-              </div>
-              <input
-                id="recipientAge"
-                type="range"
-                min={18}
-                max={75}
-                value={stats.recipientAge}
-                onChange={(e) => setStats({ ...stats, recipientAge: Number(e.target.value) })}
-                className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-blue-600"
-                aria-label="Recipient age"
-              />
-              <div className="flex justify-between text-xs text-gray-400">
-                <span>18</span>
-                <span>75</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleCalculate}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 text-base font-semibold text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg shadow-blue-200"
-            >
-              Calculate the ripple effect
-              <ArrowRight className="h-5 w-5" aria-hidden="true" />
-            </button>
-          </div>
-        </section>
-
-        {/* Results */}
-        {hasCalculated && (
-           <section ref={resultsRef} id="results" className="bg-gray-900 py-20" aria-live="polite">
-            <div className="mx-auto max-w-4xl px-6">
-               <h2 tabIndex={-1} className="text-center text-3xl font-bold text-white mb-3">
-                Your donation's ripple effect
-              </h2>
-              <p className="text-center text-gray-400 mb-12">
-                For a {stats.recipientAge}-year-old who has been waiting {stats.waitYears} year{stats.waitYears !== 1 ? "s" : ""}
+              <h1 className="max-w-3xl text-5xl font-bold tracking-[-0.045em] text-slate-950 sm:text-6xl">
+                A kidney gives back more than time.
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
+                It gives back school mornings, family dinners, workdays, and plans. Personalize the story to see how one donation can reshape everyday life.
               </p>
-
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
-                {/* Hours reclaimed */}
-                <div className="rounded-2xl bg-blue-600 p-6 text-center text-white">
-                  <Clock className="h-8 w-8 mx-auto mb-3 opacity-80" aria-hidden="true" />
-                  <p className="text-5xl font-bold mb-2">
-                    <AnimatedNumber target={ripple.dialysisHoursReclaimed} />
-                  </p>
-                  <p className="text-blue-200 text-sm font-medium">hours of life reclaimed</p>
-                  <p className="text-blue-300 text-xs mt-2">
-                    {Math.round(ripple.dialysisHoursReclaimed / 24)} full days no longer spent in a dialysis chair
-                  </p>
-                </div>
-
-                {/* Sessions avoided */}
-                <div className="rounded-2xl bg-green-600 p-6 text-center text-white">
-                  <Calendar className="h-8 w-8 mx-auto mb-3 opacity-80" aria-hidden="true" />
-                  <p className="text-5xl font-bold mb-2">
-                    <AnimatedNumber target={ripple.dialysisSessionsAvoided} />
-                  </p>
-                  <p className="text-green-200 text-sm font-medium">dialysis sessions avoided</p>
-                  <p className="text-green-300 text-xs mt-2">
-                    {stats.waitYears} year{stats.waitYears !== 1 ? "s" : ""} × 3 sessions/week = freedom from a machine
-                  </p>
-                </div>
-
-                {/* Years with a kidney */}
-                <div className="rounded-2xl bg-purple-600 p-6 text-center text-white">
-                  <TrendingUp className="h-8 w-8 mx-auto mb-3 opacity-80" aria-hidden="true" />
-                  <p className="text-5xl font-bold mb-2">
-                    ~<AnimatedNumber target={ripple.yearsWithKidney} />
-                  </p>
-                  <p className="text-purple-200 text-sm font-medium">years with your kidney</p>
-                  <p className="text-purple-300 text-xs mt-2">
-                    Living donor kidneys last ~20 years vs. ~13 for deceased donors
-                  </p>
-                </div>
-
-                {/* Extra graft years */}
-                <div className="rounded-2xl bg-white/10 border border-white/20 p-6 text-center text-white">
-                  <Heart className="h-8 w-8 mx-auto mb-3 fill-red-400 text-red-400" aria-hidden="true" />
-                  <p className="text-5xl font-bold mb-2">
-                    +<AnimatedNumber target={ripple.extraGraftYears} />
-                  </p>
-                  <p className="text-gray-300 text-sm font-medium">extra years vs. waitlist kidney</p>
-                  <p className="text-gray-400 text-xs mt-2">
-                    A living donor kidney outlasts the next best option by ~7 years on average
-                  </p>
-                </div>
-
-                {/* Cost avoided */}
-                <div className="rounded-2xl bg-white/10 border border-white/20 p-6 text-center text-white">
-                  <div className="text-2xl mb-2" aria-hidden="true">💰</div>
-                  <p className="text-4xl font-bold mb-2">
-                    $<AnimatedNumber target={Math.round(ripple.dialysisCostAvoided / 1000)} />K
-                  </p>
-                  <p className="text-gray-300 text-sm font-medium">in dialysis costs avoided</p>
-                  <p className="text-gray-400 text-xs mt-2">
-                    Dialysis costs ~$91,000/year (USRDS 2024). Transplant costs less over time.
-                  </p>
-                </div>
-
-                {/* Share card */}
-                <div className="rounded-2xl bg-red-600 p-6 text-center text-white flex flex-col items-center justify-center gap-4">
-                  <p className="text-lg font-bold">Could you be the one to make this happen?</p>
-                  <Link
-                    href="/could-i-qualify"
-                    className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    Check if you qualify
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <button
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({
-                          title: "The ripple effect of kidney donation",
-                          text: `A kidney donation could give someone back ${ripple.dialysisHoursReclaimed.toLocaleString()} hours of their life. See what yours could mean.`,
-                          url: window.location.href,
-                        });
-                      }
-                    }}
-                    className="flex items-center gap-2 text-sm text-red-200 hover:text-white"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    Share this
-                  </button>
-                </div>
+              <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-600">
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">3 dialysis sessions each week</span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">~6 hours per visit</span>
               </div>
+            </div>
 
-              <div className="rounded-xl bg-white/5 border border-white/10 p-4 text-center">
-                <p className="text-xs text-gray-500">
-                  Statistics based on USRDS 2024 Annual Report, OPTN data, and peer-reviewed literature.
-                  Individual outcomes vary. This calculator is for awareness purposes only.
-                </p>
+            <div className="relative mx-auto aspect-square w-full max-w-[29rem]" aria-hidden="true">
+              {["inset-0 border-teal-200/60", "inset-[12%] border-teal-300/70", "inset-[24%] border-teal-400/70"].map((style) => <div key={style} className={`absolute rounded-full border ${style}`} />)}
+              <div className="absolute inset-[36%] grid place-items-center rounded-full bg-slate-950 text-white shadow-2xl shadow-teal-900/30">
+                <Heart className="h-12 w-12 fill-teal-400 text-teal-400" />
               </div>
+              <div className="absolute right-[2%] top-[22%] rounded-2xl border border-white/80 bg-white/90 p-4 shadow-xl backdrop-blur">
+                <p className="text-2xl font-bold text-slate-950">{ripple.dialysisHoursReclaimed.toLocaleString()}</p><p className="text-xs font-medium text-slate-500">hours reclaimed</p>
+              </div>
+              <div className="absolute bottom-[8%] left-[2%] rounded-2xl border border-white/80 bg-white/90 p-4 shadow-xl backdrop-blur">
+                <p className="text-2xl font-bold text-teal-700">~{ripple.yearsWithKidney} years</p><p className="text-xs font-medium text-slate-500">with a living-donor kidney</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
+          <div className="grid gap-8 lg:grid-cols-[.8fr_1.2fr] lg:items-start">
+            <div className="lg:sticky lg:top-24">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Personalize the ripple</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">Make the numbers human</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Use a recipient’s approximate age and expected wait. These estimates are educational, not a prediction of an individual outcome.</p>
+            </div>
+            <div className="space-y-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-8">
+              <div className="space-y-4">
+                <div className="flex items-end justify-between gap-4"><label htmlFor="waitYears" className="text-sm font-semibold text-slate-800">Expected years waiting</label><span className="text-3xl font-bold tracking-tight text-teal-700">{stats.waitYears} <span className="text-sm font-medium text-slate-500">year{stats.waitYears !== 1 ? "s" : ""}</span></span></div>
+                <input id="waitYears" type="range" min={1} max={10} value={stats.waitYears} onChange={(e) => setStats({ ...stats, waitYears: Number(e.target.value) })} className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-teal-600" />
+                <div className="flex justify-between text-xs text-slate-400"><span>1 year</span><span>National average ~5 years</span><span>10 years</span></div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-end justify-between gap-4"><label htmlFor="recipientAge" className="text-sm font-semibold text-slate-800">Recipient’s current age</label><span className="text-3xl font-bold tracking-tight text-teal-700">{stats.recipientAge} <span className="text-sm font-medium text-slate-500">years old</span></span></div>
+                <input id="recipientAge" type="range" min={18} max={75} value={stats.recipientAge} onChange={(e) => setStats({ ...stats, recipientAge: Number(e.target.value) })} className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-teal-600" />
+                <div className="flex justify-between text-xs text-slate-400"><span>18</span><span>75</span></div>
+              </div>
+              <button onClick={handleCalculate} className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-4 text-base font-semibold text-white shadow-lg shadow-slate-900/15 transition-colors hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
+                Show this person’s ripple <ArrowRight className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {hasCalculated && (
+          <section ref={resultsRef} id="results" className="bg-slate-950 py-20 text-white" aria-live="polite">
+            <div className="mx-auto max-w-6xl px-5 sm:px-6">
+              <div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+                <div><div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-teal-300"><Sparkles className="h-4 w-4" /> Personalized impact</div><h2 tabIndex={-1} className="text-3xl font-bold tracking-tight sm:text-4xl">What changes when waiting ends</h2><p className="mt-3 text-slate-400">For someone age {stats.recipientAge}, facing an estimated {stats.waitYears}-year wait.</p></div>
+                <button onClick={() => navigator.share?.({ title: "The ripple effect of kidney donation", text: `A kidney donation could give someone back ${ripple.dialysisHoursReclaimed.toLocaleString()} hours of life.`, url: window.location.href })} className="flex w-fit items-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold text-slate-200 hover:bg-white/10"><Share2 className="h-4 w-4" /> Share this ripple</button>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { icon: Clock, value: <AnimatedNumber target={ripple.dialysisHoursReclaimed} />, label: "hours reclaimed", note: `${Math.round(ripple.dialysisHoursReclaimed / 24)} full days`, accent: "bg-teal-400 text-slate-950" },
+                  { icon: Calendar, value: <AnimatedNumber target={ripple.dialysisSessionsAvoided} />, label: "sessions avoided", note: "Freedom from a machine", accent: "bg-sky-400 text-slate-950" },
+                  { icon: TrendingUp, value: <>~<AnimatedNumber target={ripple.yearsWithKidney} /></>, label: "years with the kidney", note: `About ${ripple.extraGraftYears} more graft years`, accent: "bg-violet-400 text-slate-950" },
+                  { icon: DollarSign, value: <>$<AnimatedNumber target={Math.round(ripple.dialysisCostAvoided / 1000)} />K</>, label: "dialysis costs avoided", note: "Estimated system cost", accent: "bg-amber-300 text-slate-950" },
+                ].map(({ icon: Icon, value, label, note, accent }) => <article key={label} className="rounded-2xl border border-white/10 bg-white/[0.06] p-5"><span className={`grid h-10 w-10 place-items-center rounded-xl ${accent}`}><Icon className="h-5 w-5" /></span><p className="mt-6 text-4xl font-bold tracking-tight">{value}</p><p className="mt-2 text-sm font-semibold text-white">{label}</p><p className="mt-1 text-xs text-slate-400">{note}</p></article>)}
+              </div>
+              <div className="mt-8 flex flex-col items-start justify-between gap-5 rounded-2xl border border-teal-300/20 bg-teal-300/10 p-6 sm:flex-row sm:items-center"><div><p className="font-semibold">Could you start a ripple like this?</p><p className="mt-1 text-sm text-slate-400">Take the private 60-second eligibility check.</p></div><Link href="/could-i-qualify" className="flex shrink-0 items-center gap-2 rounded-xl bg-teal-400 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-teal-300">Check eligibility <ArrowRight className="h-4 w-4" /></Link></div>
+              <p className="mt-7 text-center text-xs leading-5 text-slate-500">Based on USRDS 2024, OPTN data, and peer-reviewed literature. Individual outcomes vary; this tool is for awareness only.</p>
             </div>
           </section>
         )}
 
-        {/* CTA */}
-        <section className="mx-auto max-w-2xl px-6 py-24 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Numbers become people</h2>
-          <p className="text-gray-600 mb-8">
-            Behind every statistic is a real person - a parent, a teacher, a neighbor -
-            spending 13 hours a week in a dialysis chair. LivingLink connects you with that person's community.
-          </p>
+        <section className="mx-auto max-w-3xl px-5 py-24 text-center sm:px-6">
+          <h2 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Every number belongs to a person</h2>
+          <p className="mx-auto mb-8 mt-4 max-w-2xl leading-7 text-slate-600">Meet people who chose to donate, learn what surprised them, and understand what life looked like on the other side.</p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/stories"
-              className="flex items-center gap-2 rounded-xl border-2 border-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 hover:border-blue-400 hover:text-blue-600 transition-colors"
-            >
-              Read donor stories
-            </Link>
+            <Link href="/stories" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:border-teal-200 hover:text-teal-800">Read donor stories</Link>
             <SignUpButton mode="modal">
-              <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
-                Start my journey
-                <ArrowRight className="h-4 w-4" />
-              </button>
+              <button className="flex items-center gap-2 rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 hover:bg-teal-800">Start my journey <ArrowRight className="h-4 w-4" /></button>
             </SignUpButton>
           </div>
         </section>
       </div>
-
-      <footer className="border-t border-gray-100 py-6">
-        <div className="mx-auto max-w-5xl px-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <Link href="/" className="hover:text-blue-600">Home</Link>
-            <Link href="/could-i-qualify" className="hover:text-blue-600">Could I qualify?</Link>
-            <Link href="/waitlist-map" className="hover:text-blue-600">Waitlist Map</Link>
-            <Link href="/stories" className="hover:text-blue-600">Donor Stories</Link>
-          </div>
-          <p className="text-xs text-gray-400">© 2026 LivingLink · Not a medical service</p>
-        </div>
-      </footer>
     </PublicPageShell>
   );
 }

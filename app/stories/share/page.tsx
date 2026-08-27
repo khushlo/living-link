@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { PublicPageShell } from "@/components/shared/public-page-shell";
 
 export default function ShareStoryPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -26,20 +27,20 @@ export default function ShareStoryPage() {
 
   if (submitted) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16">
+      <PublicPageShell><div className="mx-auto max-w-2xl px-6 py-16">
         <h1 className="text-3xl font-bold text-gray-900">Thank you for sharing</h1>
         <p className="mt-4 text-gray-600">Your story was submitted for review. It will not be published until it has been reviewed and you have given final approval.</p>
         <Link href="/stories" className="mt-8 inline-block text-blue-600 hover:underline">Back to stories</Link>
-      </main>
+      </div></PublicPageShell>
     );
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12">
+    <PublicPageShell><div className="mx-auto max-w-2xl px-6 py-16">
       <Link href="/stories" className="text-sm text-blue-600 hover:underline">Back to stories</Link>
       <h1 className="mt-6 text-3xl font-bold text-gray-900">Share your donation story</h1>
       <p className="mt-3 text-gray-600">Stories are reviewed before publication and shown anonymously. Please do not include names, contact information, medical record numbers, or other identifying details.</p>
-      <form onSubmit={submit} className="mt-8 space-y-5">
+      <form onSubmit={submit} className="mt-8 space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5">
         <label className="block text-sm font-medium text-gray-700">Story<textarea name="body" required minLength={50} maxLength={5000} rows={8} className="mt-1 w-full rounded-lg border border-gray-300 p-3" /></label>
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block text-sm font-medium text-gray-700">Donation type<select name="donationType" required className="mt-1 w-full rounded-lg border border-gray-300 p-3"><option value="directed">Directed</option><option value="non-directed">Non-directed</option><option value="paired-exchange">Paired exchange</option></select></label>
@@ -49,6 +50,6 @@ export default function ShareStoryPage() {
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
         <button type="submit" className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">Submit for review</button>
       </form>
-    </main>
+    </div></PublicPageShell>
   );
 }

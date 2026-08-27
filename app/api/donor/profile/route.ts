@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireAuthWithUser } from "@/lib/api-auth";
+import { requireAuth, requireAuthWithUser } from "@/lib/api-auth";
 import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
@@ -54,9 +54,32 @@ function serialize(user: { firstName: string | null; lastName: string | null; em
 }
 
 export async function GET(req: NextRequest) {
-  const { userId, user, error } = await requireAuthWithUser();
-  if (error || !userId || !user) return error;
-  await recordAuditEvent(req, userId, "READ", "DonorProfile", user.donorProfile?.id);
+  const { userId, error } = await requireAuth();
+  if (error || !userId) return error;
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      donorProfile: {
+        select: {
+          id: true,
+          dateOfBirth: true,
+          donationStatus: true,
+          donatedAt: true,
+          donationType: true,
+          recipientRelation: true,
+          transplantCenterName: true,
+        },
+      },
+    },
+  });
+  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  // Do not hold the profile response open while the audit write completes.
+  void recordAuditEvent(req, userId, "READ", "DonorProfile", user.donorProfile?.id, {}, user.id);
   return NextResponse.json(serialize(user));
 }
 

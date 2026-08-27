@@ -39,7 +39,8 @@ export async function recordAuditEvent(
   action: AuditAction,
   resourceType: string,
   resourceId?: string,
-  metadata: AuditMetadata = {}
+  metadata: AuditMetadata = {},
+  actorUserId?: string
 ): Promise<AuditResult> {
   auditHealth.attempted += 1;
   const context = requestContext(req);
@@ -47,7 +48,9 @@ export async function recordAuditEvent(
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      const user = clerkId
+      const user = actorUserId
+        ? { id: actorUserId }
+        : clerkId
         ? await prisma.user.findUnique({ where: { clerkId }, select: { id: true } })
         : null;
 

@@ -8,6 +8,7 @@ type Goal = {
   targetValue: number;
   currentValue: number | null;
   targetDate: string | null;
+  status: "ACTIVE" | "ACHIEVED" | "PAUSED";
   progressLogs: { id: string; value: number; note: string | null; loggedAt: string }[];
 };
 
@@ -32,11 +33,6 @@ export default function ReadyCheckPage() {
       .then((data) => setGoals(Array.isArray(data) ? data : []))
       .catch(() => setGoals([]));
   }, []);
-
-  const goalProgress = (goal: Goal) => {
-    if (goal.currentValue == null || goal.targetValue <= 0) return 0;
-    return Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100));
-  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -205,7 +201,6 @@ export default function ReadyCheckPage() {
             <div className="space-y-4">
               {goals.map((goal) => {
                 const meta = GOAL_META[goal.metric] ?? { label: goal.metric, unit: "", color: "#6b7280" };
-                const progress = goalProgress(goal);
                 const latestLog = goal.progressLogs.at(-1);
                 const currentValue = goal.currentValue ?? latestLog?.value;
 
@@ -219,10 +214,7 @@ export default function ReadyCheckPage() {
                           {currentValue != null && <> · Current: <strong>{currentValue} {meta.unit}</strong></>}
                         </p>
                       </div>
-                      <span className="text-sm font-semibold text-gray-700">{progress}%</span>
-                    </div>
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={`${meta.label} progress`}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: meta.color }} />
+                      <span className={`rounded-full px-2 py-1 text-xs font-semibold ${goal.status === "ACHIEVED" ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700"}`}>{goal.status === "ACHIEVED" ? "Completed" : "Active"}</span>
                     </div>
                     {latestLog && (
                       <p className="mt-2 text-xs text-gray-500">

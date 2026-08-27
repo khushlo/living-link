@@ -17,15 +17,15 @@ export default async function PatientDashboard() {
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         {[
-          { label: "Days on waitlist", value: "", icon: Calendar, color: "text-green-600" },
-          { label: "Match score", value: "", icon: TrendingUp, color: "text-blue-600" },
-          { label: "Next appointment", value: "", icon: Heart, color: "text-red-600" },
+          { label: "Days on waitlist", value: "—", icon: Calendar, color: "text-emerald-700", bg: "bg-emerald-50" },
+          { label: "Match score", value: "—", icon: TrendingUp, color: "text-teal-700", bg: "bg-teal-50" },
+          { label: "Next appointment", value: "—", icon: Heart, color: "text-rose-700", bg: "bg-rose-50" },
         ].map((s) => {
           const Icon = s.icon;
           return (
-            <Card key={s.label}>
-              <CardContent className="p-4 flex items-center gap-3">
-                <Icon className={`h-8 w-8 ${s.color}`} />
+            <Card key={s.label} className="bg-white/80">
+              <CardContent className="flex items-center gap-3 p-5">
+                <span className={`grid h-10 w-10 place-items-center rounded-xl ${s.bg}`}><Icon className={`h-5 w-5 ${s.color}`} /></span>
                 <div>
                   <p className="text-2xl font-bold">{s.value}</p>
                   <p className="text-xs text-gray-500">{s.label}</p>
