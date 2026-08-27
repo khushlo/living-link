@@ -1,285 +1,73 @@
-﻿# LivingLink  Technical Architecture Reference
+# LivingLink Technical Architecture Reference
 
-## System Architecture Diagram
+> **Prototype notice:** This document separates repository-observable current state from intended target state. It is not evidence of production deployment, HIPAA compliance, Section 508/WCAG conformance, EHR-vendor integration, or clinical fitness. See `Documents/evidence-register.md`.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        LivingLink Platform                           │
-│                                                                     │
-│  ┌──────────┐  ┌───────────┐  ┌─────────────┐  ┌───────────────┐  │
-│  │  Donor   │  │  Patient  │  │ Coordinator │  │   Clinician   │  │
-│  │  Portal  │  │  Portal   │  │   Portal    │  │    Portal     │  │
-│  └────┬─────┘  └─────┬─────┘  └──────┬──────┘  └──────┬────────┘  │
-│       └──────────────┴───────────────┴─────────────────┘           │
-│                                  │                                  │
-│                   ┌──────────────▼───────────────┐                 │
-│                   │      LivingLink AI Engine      │                 │
-│                   │   GPT-4o + custom system prompts│                │
-│                   └──────────────┬───────────────┘                 │
-│                                  │                                  │
-│  ┌───────────────────────────────▼──────────────────────────────┐  │
-│  │                   Next.js 14 / Node.js API                    │  │
-│  │  MentorMatch | ReadyCheck | DonorShield | CenterFlow | LifeAfter│ │
-│  └───────────────────────────────┬──────────────────────────────┘  │
-│                                  │                                  │
-│  ┌───────────────────────────────▼──────────────────────────────┐  │
-│  │              PostgreSQL (3 schemas)                           │  │
-│  │  app_data (general) | phi_data (encrypted) | audit_log       │  │
-│  └───────────────────────────────┬──────────────────────────────┘  │
-│                                  │                                  │
-│  ┌───────────────────────────────▼──────────────────────────────┐  │
-│  │                  HAPI FHIR R4 Server                          │  │
-│  └───────────────────────────────┬──────────────────────────────┘  │
-└──────────────────────────────────┼──────────────────────────────────┘
-                                   │
-         ┌─────────────────────────┼──────────────────────┐
-         │                         │                      │
-    Epic / Cerner             OPTN / HRSA             ONC / HHS
-   (SMART on FHIR)       (Policy 18 reporting)   (Bulk FHIR export)
-         │
-   Cerner App Market
-   Epic App Orchard
+## Current Repository Architecture
+
+```text
+Browser
+  |
+  v
+Next.js 15 root application
+  |-- app/                 pages and layouts
+  |-- app/api/             Next.js route handlers
+  |-- middleware.ts        route middleware
+  |-- components/          UI components
+  |-- lib/                 auth, audit, encryption, consent, and FHIR helpers
+  `-- prisma/              schema and migrations
+          |
+          v
+      PostgreSQL
+
+Optional local/external dependencies:
+  Clerk authentication | OpenAI API | HAPI FHIR R4 | S3-compatible storage
 ```
 
----
+The executable repository is a single root Next.js application. There is no `apps/web`, `apps/api`, `packages/`, Turborepo pipeline, npm workspace configuration, or Express service. Next.js route handlers provide the server API.
 
 ## Repository Structure
 
-```
-D:\OpenSource\kidneyX\
-├── PLAN.md                     ← Full challenge + build plan
-├── ARCHITECTURE.md             ← This file
-├── PROGRESS.md                 ← Session resume guide
-├── PLAN.md                     ← Challenge plan, milestones, features
-├── package.json                ← Turborepo root
-├── turbo.json                  ← Turborepo pipeline config
-├── tsconfig.json               ← Root TypeScript config
-├── docker-compose.yml          ← HAPI FHIR + PostgreSQL containers
-├── .env.example                ← All required environment variables
-│
-├── apps/
-│   ├── web/                    ← Next.js 14 frontend (App Router)
-│   │   ├── app/
-│   │   │   ├── (donor)/        ← Donor portal routes
-│   │   │   │   ├── dashboard/
-│   │   │   │   ├── mentor-match/
-│   │   │   │   ├── ready-check/
-│   │   │   │   ├── donor-shield/
-│   │   │   │   └── life-after/
-│   │   │   ├── (clinician)/    ← Clinician portal routes
-│   │   │   │   ├── dashboard/
-│   │   │   │   └── center-flow/
-│   │   │   ├── (coordinator)/  ← Coordinator portal routes
-│   │   │   │   ├── dashboard/
-│   │   │   │   └── center-flow/
-│   │   │   ├── (patient)/      ← Patient/recipient portal routes
-│   │   │   │   └── dashboard/
-│   │   │   ├── layout.tsx      ← Root layout
-│   │   │   ├── page.tsx        ← Landing page
-│   │   │   └── globals.css     ← Global styles
-│   │   ├── components/
-│   │   │   ├── ui/             ← shadcn/ui components
-│   │   │   ├── mentor-match/
-│   │   │   ├── ready-check/
-│   │   │   ├── donor-shield/
-│   │   │   ├── center-flow/
-│   │   │   ├── life-after/
-│   │   │   └── shared/         ← Nav, layout, AI assistant widget
-│   │   ├── lib/
-│   │   └── public/
-│   │
-│   └── api/                    ← Node.js + Express + Prisma API
-│       ├── src/
-│       │   ├── routes/
-│       │   │   ├── mentor-match.ts
-│       │   │   ├── ready-check.ts
-│       │   │   ├── donor-shield.ts
-│       │   │   ├── center-flow.ts
-│       │   │   └── life-after.ts
-│       │   ├── middleware/
-│       │   │   ├── auth.ts
-│       │   │   └── audit.ts
-│       │   ├── fhir/
-│       │   │   ├── resources/
-│       │   │   └── export.ts
-│       │   └── index.ts
-│       └── prisma/
-│           └── schema.prisma
-│
-├── packages/
-│   ├── shared/                 ← Shared TypeScript types + utils
-│   ├── fhir-client/            ← fhirclient.js wrapper + resource mappers
-│   └── ai/                     ← OpenAI integration + module prompts
-│
-├── docker/
-│   └── hapi-fhir/
-│       └── application.yaml    ← HAPI FHIR config
-│
-└── .github/
-    └── workflows/
-        └── ci.yml              ← axe-core + FHIR validator on every PR
-```
+| Path | Current purpose |
+|---|---|
+| `app/` | App Router pages, layouts, and server route handlers |
+| `components/` | Shared and module UI |
+| `lib/` | Application utilities, authorization, audit, consent, encryption, and FHIR helpers |
+| `prisma/` | Root Prisma schema and migrations |
+| `docker-compose.yml` | Local PostgreSQL and HAPI FHIR services |
+| `docker/` | Local database/FHIR support files |
+| `tests/` | Existing test assets; presence does not establish complete coverage or conformance |
+| `scripts/generate-submission-pdf/` | Submission document generator |
+| `Documents/` | Plans, narrative, and evidence status |
 
----
+## Runtime And Setup
 
-## Database Schema Design
+- `npm run dev` starts one Next.js server on port 3000.
+- `npm run build` generates the Prisma client and builds Next.js.
+- `docker compose up -d postgres hapi-fhir` starts optional local dependencies on ports 5432 and 8080.
+- The Prisma schema is `prisma/schema.prisma`; migrations are applied from the repository root.
+- Environment-variable names and safe defaults are documented in `.env.example`.
 
-### schema: app_data (non-PHI)
-```sql
-users           (id, clerk_id, role, created_at)
-mentor_profiles (id, user_id, donation_year, languages, specialties)
-mentor_matches  (id, candidate_id, mentor_id, status, matched_at)
-messages        (id, thread_id, sender_id, content_encrypted, sent_at)
-protocols       (id, center_id, focus_area, title, content, published_at)
-forum_posts     (id, author_id, category, title, content, created_at)
-notifications   (id, user_id, type, payload, read_at, created_at)
-```
+## Current Prototype Boundaries
 
-### schema: phi_data (AES-256 encrypted at field level)
-```sql
-donor_profiles        (id, user_id, dob_enc, ssn_enc, health_summary_enc)
-eligibility_checks    (id, donor_id, bmi, bp_systolic, bp_diastolic,
-                       egfr, smoking_status, assessed_at)
-health_goals          (id, donor_id, metric, target_value, target_date,
-                       current_value, updated_at)
-financial_records     (id, donor_id, item_type, amount, receipt_s3_key,
-                       reimbursed, created_at)
-post_donation_checkins(id, donor_id, week_number, bp, weight, mood_score,
-                       energy_score, notes_enc, submitted_at)
-phq2_responses        (id, donor_id, q1_score, q2_score, total,
-                       escalated, completed_at)
-```
-
-### schema: audit_log (append-only via pgAudit)
-```sql
-audit_entries (id, user_id, action, resource_type, resource_id,
-               ip_address, user_agent, timestamp)
--- INSERT only. Never UPDATE or DELETE.
-```
-
----
-
-## FHIR Resource Mapping
-
-| Module | FHIR Resource | US Core Profile |
+| Area | Repository-observable state | Evidence still required |
 |---|---|---|
-| ReadyCheck | Patient | US Core Patient |
-| ReadyCheck | Observation (BMI) | US Core BMI Profile |
-| ReadyCheck | Observation (Blood Pressure) | US Core Blood Pressure Profile |
-| ReadyCheck | Observation (eGFR) | US Core Observation Lab |
-| ReadyCheck | Goal |  |
-| ReadyCheck | RiskAssessment |  |
-| DonorShield | Coverage | US Core Coverage |
-| DonorShield | ExplanationOfBenefit | Da Vinci PDex |
-| DonorShield | Claim |  |
-| Mentor Match | Patient (de-identified) | US Core Patient |
-| Mentor Match | Communication |  |
-| CenterFlow | Organization | US Core Organization |
-| CenterFlow | Task |  |
-| CenterFlow | ServiceRequest | US Core ServiceRequest |
-| LifeAfter | CarePlan |  |
-| LifeAfter | Observation | US Core Observation |
-| LifeAfter | Appointment |  |
-| LifeAfter | QuestionnaireResponse | SDC IG |
-| LifeAfter | DiagnosticReport | US Core DiagnosticReport |
+| Identity/access | Clerk integration and application authorization helpers exist | Deployed configuration, role/tenant tests, MFA/session evidence, security review |
+| Data protection | Selected field-encryption and audit mechanisms exist | Key-management, coverage, immutability, retention, monitoring, and deployment evidence |
+| FHIR | Resource mappers, write helper, export, SMART, and CDS Hooks routes exist | Conformance validation, authorized workflow testing, and production governance |
+| EHR integration | Generic SMART/CDS prototype routes exist | Epic and Oracle Health registration, sandbox results, security review, and approval |
+| Accessibility | Accessibility-oriented code and limited automated test assets exist | Full automated/manual audit, assistive-technology testing, remediation, and signed assessment |
+| AI | OpenAI route integration exists and PHI use has a configuration gate | Vendor/legal approval, safety evaluation, monitoring, and approved deployment evidence |
 
----
+## Intended Target Architecture
 
-## Security Architecture
+The intended pilot target retains the root Next.js application while adding approved managed PostgreSQL, controlled object storage, a validated FHIR endpoint, centralized audit delivery, monitoring, backups, and tenant-scoped identity. SMART on FHIR and CDS Hooks are targets for approved Epic and Oracle Health sandbox testing, not current vendor integrations. Hosting products, cloud regions, BAAs/DPAs, and security baselines remain deployment decisions until approved and evidenced.
 
-```
-Browser (HTTPS/TLS 1.3)
-    │
-    ▼
-Vercel Edge (HSTS, CSP headers)
-    │
-    ▼
-Next.js App
-    │
-    ├── Clerk (MFA/OIDC/PKCE)  ←── All auth flows
-    │
-    ▼
-Node.js API (Express)
-    ├── JWT validation middleware
-    ├── RBAC middleware (role check per route)
-    ├── Audit log middleware (every PHI access)
-    │
-    ▼
-PostgreSQL (AWS RDS)
-    ├── Encrypted volumes (KMS)
-    ├── phi_data fields: AES-256 column-level
-    ├── pgAudit extension (audit_log schema)
-    └── VPC isolated (no public access)
-    │
-    ▼
-HAPI FHIR Server (Docker / ECS)
-    └── Internal VPC only; API layer proxies all FHIR requests
-```
+## FHIR Target Mapping
 
-### RBAC Permissions Matrix
+The project intends to map module data to FHIR R4 resources including `Patient`, `Observation`, `Goal`, `RiskAssessment`, `Coverage`, `Communication`, `Organization`, `Task`, `ServiceRequest`, `CarePlan`, and `QuestionnaireResponse`. US Core, SDC, Da Vinci, SMART, CDS Hooks, and Bulk Data references describe intended alignment. They must not be read as profile conformance, certification, or production interoperability until validator and partner evidence is linked in the evidence register.
 
-| Feature | Donor | Patient | Coordinator | Clinician |
-|---|---|---|---|---|
-| Own health profile | RW | R | R | R |
-| Mentor Match | RW | R | R |  |
-| DonorShield | RW |  | R |  |
-| ReadyCheck | RW |  | R | R |
-| CenterFlow protocols | R |  | RW | R |
-| LifeAfter check-ins | RW |  | R | R |
-| PHI of other donors |  |  |  |  |
-| Audit logs |  |  |  | Admin only |
+## Security And Compliance Target
 
----
+The target state includes least-privilege access, MFA appropriate to risk, encryption in transit and at rest, managed keys, complete tamper-resistant audit delivery, incident response, retention controls, vendor agreements, risk analysis, and accessibility assessment. These are release requirements, not categorical current-state claims.
 
-## Environment Variables
-
-```bash
-# ── Auth (Clerk) ──────────────────────────────
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-
-# ── Database ──────────────────────────────────
-DATABASE_URL=postgresql://user:pass@host:5432/livinglink
-
-# ── FHIR ──────────────────────────────────────
-FHIR_SERVER_URL=http://localhost:8080/fhir
-SMART_CLIENT_ID=
-SMART_REDIRECT_URI=http://localhost:3000/api/fhir/callback
-
-# ── AI ────────────────────────────────────────
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4o
-
-# ── Storage (AWS S3) ──────────────────────────
-AWS_S3_BUCKET=livinglink-receipts
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=us-east-1
-
-# ── App ───────────────────────────────────────
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-API_URL=http://localhost:4000
-NODE_ENV=development
-
-# ── Encryption ────────────────────────────────
-PHI_ENCRYPTION_KEY=          # AES-256 key for field-level encryption
-```
-
----
-
-## CI/CD Pipeline (GitHub Actions)
-
-```yaml
-# On every PR:
-1. TypeScript type check (tsc --noEmit)
-2. ESLint
-3. Unit tests (Vitest)
-4. axe-core accessibility audit (against local dev server)
-5. FHIR resource validation (fhir-validator-cli against US Core IG)
-6. Docker build check
-
-# On merge to main:
-7. Deploy frontend → Vercel
-8. Deploy API → Railway
-9. HAPI FHIR server → Railway (Docker)
-```
+The provisional FIPS 199 impact values in `Documents/compliance-plan.md` are confidentiality **HIGH**, integrity **HIGH**, and availability **MODERATE**. Under the high-water-mark rule, the provisional overall impact is **HIGH**, subject to review by an authorized security owner.

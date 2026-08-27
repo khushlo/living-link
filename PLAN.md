@@ -1,6 +1,8 @@
 ﻿# LivingLink  KidneyX EMPOWER Prize Challenge
 ## Track B: Scalable Prototype Submission Plan
 
+> **Prototype notice:** This plan includes intended capabilities and post-award targets. It is not evidence of clinical effectiveness, HIPAA compliance, Section 508/WCAG conformance, completed co-design, or Epic/Oracle Health integration. Current claim status is tracked in `Documents/evidence-register.md`.
+
 > **Deadline:** June 15, 2026 | **Prize:** Up to $1.375M (Grand Prize + share)
 > **Submit at:** kidneyxempowerchallenge.org
 
@@ -8,11 +10,11 @@
 
 ## Vision Statement
 
-LivingLink is a FHIR-native, AI-powered platform that serves as the national
-infrastructure layer for living kidney donation  connecting donors, patients,
-transplant centers, and federal health systems in one unified ecosystem.
+LivingLink is intended to become a FHIR-aligned, AI-assisted platform connecting
+donors, patients, transplant centers, and federal health workflows. The current
+repository is a prototype and has not been validated as national infrastructure.
 
-No single tool currently addresses all 5 friction points. LivingLink does.
+LivingLink is designed to address all five selected friction points in one prototype; comparative market research remains pending.
 
 ---
 
@@ -46,7 +48,7 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 - Progress tracking with trend charts
 - Transplant center locator (OPTN data) triggered when readiness thresholds approached
 - CDS Hooks: authenticated alert prototype; center-scoped EHR validation remains pending
-- FHIR: `Patient`, `Observation` (BMI/BP/eGFR), `Condition`, `RiskAssessment`, `Goal`
+- FHIR target mapping: `Patient`, `Observation` (BMI/BP/eGFR), `Condition`, `RiskAssessment`, `Goal`; profile validation is pending
 
 ### Module 3: DonorShield (Donor Interventions)
 - Lost-wage calculator (employer type, hourly/salary, recovery weeks)
@@ -56,7 +58,7 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 - Expense log (travel, lodging, childcare, medical) with receipt upload
 - Insurance issue tracker with escalation to transplant coordinator
 - Total financial impact view: estimated out-of-pocket vs. recoverable
-- FHIR: `Coverage`, `Claim`, `ExplanationOfBenefit` (Da Vinci PDex)
+- FHIR target mapping: `Coverage`, `Claim`, `ExplanationOfBenefit`; Da Vinci PDex conformance is pending
 
 ### Module 4: CenterFlow (Center Practices & Decision Support)
 - Protocol knowledge base: searchable best-practice playbooks from high-performing centers
@@ -64,7 +66,7 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 - Admin delay dashboard: center avg vs. national benchmarks
 - CDS Hooks: stalled evaluation alerts (e.g., "Bloodwork pending >14 days")
 - Cross-center coordinator messaging
-- FHIR: `Organization`, `PractitionerRole`, `Task`, `ServiceRequest`, `Procedure`
+- FHIR target mapping: `Organization`, `PractitionerRole`, `Task`, `ServiceRequest`, `Procedure`; receiving-system validation is pending
 
 ### Module 5: LifeAfter (Donor-Centered Outcomes)
 - Post-donation timeline: Week 2, Month 1, Month 3, Month 6, Year 1, Year 2+
@@ -73,8 +75,8 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 - PHQ-2 psychological screener with mental health resource escalation
 - Parent-donor specific pathway (unique stress profile, tailored content)
 - FHIR export prototype for authorized follow-up-data testing; OPTN/HRSA submission is not automated
-- Donor data export (HIPAA Right of Access): JSON or PDF
-- FHIR: `CarePlan`, `Observation`, `Appointment`, `QuestionnaireResponse`, `DiagnosticReport`
+- Donor JSON/PDF export prototype; HIPAA Right of Access applicability and workflow validation are pending
+- FHIR target mapping: `CarePlan`, `Observation`, `Appointment`, `QuestionnaireResponse`, `DiagnosticReport`; profile validation is pending
 
 ---
 
@@ -84,7 +86,7 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 |---|---|---|
 | HL7 FHIR R4 | Core data exchange | All clinical modules |
 | US Core IG | Planned profile alignment; validation pending | Patient, Observation |
-| SMART on FHIR | EHR launch prototype; Epic/Cerner/Oracle validation pending | CenterFlow, ReadyCheck |
+| SMART on FHIR | Generic EHR launch prototype; Epic and Oracle Health validation pending | CenterFlow, ReadyCheck |
 | CDS Hooks | Real-time clinical decision support | ReadyCheck candidate alerts |
 | Da Vinci PDex | Payer data exchange | DonorShield insurance module |
 | FHIR Subscriptions R4B | Real-time push notifications | Evaluation stage updates |
@@ -94,7 +96,7 @@ No single tool currently addresses all 5 friction points. LivingLink does.
 ```
 LivingLink FHIR API
     ├── SMART on FHIR ──────► Future approved EHR sandbox validation
-    ├── US Core IG ──────────► ONC Certified Health IT (21st Century Cures)
+    ├── US Core IG ──────────► Target profile alignment; validation pending
     ├── FHIR R4 API ─────────► Future OPTN / HRSA workflow validation
     ├── Da Vinci PDex ────────► Payer / Insurance Systems
     └── FHIR Bulk Export ─────► HHS / CMS / ONC (national analytics)
@@ -106,17 +108,17 @@ LivingLink FHIR API
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 14 (App Router) + Tailwind CSS |
+| Application | Root Next.js 15 App Router application + Tailwind CSS |
 | UI Components | shadcn/ui + USWDS color tokens |
-| Backend API | Node.js + Express + Prisma ORM |
-| Database | PostgreSQL (3 schemas: app_data, phi_data, audit_log) |
-| FHIR Server | HAPI FHIR R4 (Docker container) |
+| Server API | Next.js route handlers (`app/api/`) + Prisma ORM; no Express service |
+| Database | PostgreSQL via the root Prisma schema; logical/schema controls require deployment verification |
+| FHIR Server | Optional local HAPI FHIR R4 Docker service; production endpoint pending |
 | FHIR Client | fhirclient.js |
 | AI Engine | OpenAI GPT-4o API (LivingLink Assistant) |
 | Auth | Clerk authentication; BAA and deployment configuration require verification |
 | File Storage | AWS S3 (encrypted, private) |
-| Hosting (demo) | Vercel (frontend) + Railway (backend + HAPI FHIR) |
-| Hosting (prod) | AWS GovCloud or Azure Government (FedRAMP) |
+| Hosting (demo) | Deployment-dependent; verify the current deployment before making hosting claims |
+| Hosting (target) | Approved hosting selected through security, legal, and procurement review |
 | Accessibility | axe-core prototype coverage; authenticated/manual and VPAT/ACR assessment pending |
 | CI/CD | GitHub Actions |
 
@@ -124,7 +126,8 @@ LivingLink FHIR API
 
 ## Compliance Plan
 
-### Section 508 (WCAG 2.1 AA)
+### Section 508 / WCAG 2.1 AA Target
+The following are intended release criteria, not current conformance claims:
 - Semantic HTML + ARIA roles on all components
 - Color contrast: 4.5:1 normal text, 3:1 large text
 - Full keyboard navigation; no mouse-only interactions
@@ -135,13 +138,14 @@ LivingLink FHIR API
 - axe-core in CI pipeline on every pull request
 - `<html lang="en">` and `<html lang="es">` for Spanish views
 
-### FIPS 199 Security Categorization
+### Provisional FIPS 199 Security Categorization
 - Confidentiality: **HIGH** (donor health + financial + psychosocial data)
-- Integrity: **MODERATE** (inaccurate eligibility could affect clinical decisions)
+- Integrity: **HIGH** (inaccurate eligibility or workflow data could affect clinical decisions)
 - Availability: **MODERATE** (disruptive but not immediately life-threatening)
 - Overall: **HIGH** (high water mark rule, FIPS 199 §2.1)
 
-### FIPS 199 HIGH Controls (NIST SP 800-53 Rev. 5)
+### Intended HIGH-Baseline Controls (NIST SP 800-53 Rev. 5)
+These controls require implementation and operating-effectiveness evidence:
 - MFA enforced for all accounts  IA-2
 - AES-256 encryption at rest (AWS RDS + KMS)  SC-28
 - TLS 1.3 on all endpoints; HSTS headers  SC-8
@@ -157,18 +161,19 @@ LivingLink FHIR API
 | Criterion | Points | Strategy |
 |---|---|---|
 | **Donor Experience** | **35** | 5 donor-facing modules; emotional design; financial calculator; peer mentorship; multilingual |
-| **Clinical Feasibility** | **25** | SMART on FHIR inside Epic/Cerner; no specialized hardware; OPTN Policy 18 automation |
+| **Clinical Feasibility** | **25** | Generic SMART/CDS prototypes; Epic/Oracle Health sandbox validation and OPTN Policy 18 workflow validation are target states |
 | **Technical Sustainability** | **25** | Open-source HAPI FHIR core; SaaS subscriptions post-prize; FHIR ensures EHR-agnostic longevity |
 | **Alignment** | **15** | All 5 EMPOWER focus areas; cites EO 13879; aligns with ONC interoperability mandate |
 
-**Grand Prize argument:** Only submission addressing all 5 friction points with
-a federal-grade FHIR interoperability layer. Directly supports ONC's stated goal
-of data standardization across the kidney care ecosystem. Positions LivingLink
-as national infrastructure, not a single-center tool.
+**Intended positioning:** A prototype addressing five friction points with a planned
+FHIR interoperability layer. Comparative uniqueness, federal-grade readiness, and
+national-infrastructure suitability require independent evidence.
 
 ---
 
 ## Human Co-Design Plan
+
+No completed co-design is claimed. The participant account in `Documents/co-design.md` remains unverified until primary records and review are linked in the evidence register.
 
 - Post in: r/transplant, r/kidney, r/LivingDonors on Reddit
 - Facebook Groups: "Kidney Donor Athletes", "Living Kidney Donors Support Group"
@@ -182,11 +187,11 @@ as national infrastructure, not a single-center tool.
 ## 25-Day Build Plan
 
 ### Days 1–5: Foundation (May 21–25)
-- [x] Initialize Next.js 14 monorepo with TypeScript (Turborepo)
-- [x] Set up PostgreSQL with 3-schema structure
-- [x] Configure Clerk auth with MFA and 4 user roles
+- [x] Initialize root Next.js 15 application with TypeScript
+- [x] Add root Prisma/PostgreSQL schema and local services; deployed controls remain unverified
+- [x] Add Clerk auth and application roles; MFA/deployment evidence remains pending
 - [x] Scaffold base layout with shadcn/ui
-- [x] Deploy HAPI FHIR R4 server in Docker
+- [x] Configure HAPI FHIR R4 as an optional local Docker service
 - [ ] AI-generate wireframes for all 5 modules (v0.dev)
 - [ ] Draft technical architecture diagram (Excalidraw)
 
@@ -235,7 +240,7 @@ as national infrastructure, not a single-center tool.
 | 1–2 | Beta testing with 2–3 transplant centers |
 | 3–4 | Iterate + full Section 508 remediation audit |
 | 5–6 | Pilot at 5 centers with OPTN outcomes data |
-| 7–9 | SMART on FHIR certification: Epic App Orchard + Cerner App Market |
+| 7–9 | Target: validate SMART/CDS workflows in approved Epic and Oracle Health sandboxes and pursue applicable marketplace review |
 | 10–11 | National rollout; onboard 20+ transplant centers |
 | 12 | Handoff to ASN/consortium; SaaS sustainability model active |
 

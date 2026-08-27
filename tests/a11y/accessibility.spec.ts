@@ -11,20 +11,20 @@ const PUBLIC_PAGES = [
   { name: "Conversation practice", path: "/start-conversation" },
 ];
 
-for (const page of PUBLIC_PAGES) {
-  test(`${page.name} — no accessibility violations`, async ({ page: playwright }) => {
-    await playwright.goto(`http://localhost:3000${page.path}`);
-    await playwright.waitForLoadState("networkidle");
+for (const publicPage of PUBLIC_PAGES) {
+  test(`${publicPage.name} has no accessibility violations`, async ({ page }) => {
+    await page.goto(publicPage.path);
+    await page.waitForLoadState("networkidle");
 
-    const results = await new AxeBuilder({ page: playwright })
+    const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
       .analyze();
 
     expect(
       results.violations,
-      `${page.name} has ${results.violations.length} axe violation(s):\n` +
+      `${publicPage.name} has ${results.violations.length} axe violation(s):\n` +
         results.violations
-          .map((v) => `  [${v.impact}] ${v.id}: ${v.description}\n    ${v.helpUrl}`)
+          .map((violation) => `  [${violation.impact}] ${violation.id}: ${violation.description}\n    ${violation.helpUrl}`)
           .join("\n")
     ).toHaveLength(0);
   });
@@ -32,7 +32,7 @@ for (const page of PUBLIC_PAGES) {
 
 test("public pages have one main landmark and unique ids", async ({ page }) => {
   for (const publicPage of PUBLIC_PAGES) {
-    await page.goto(`http://localhost:3000${publicPage.path}`);
+    await page.goto(publicPage.path);
     await expect(page.locator("main#main-content")).toHaveCount(1);
     expect(await page.locator("main").count()).toBe(1);
     const ids = await page.locator("[id]").evaluateAll((elements) => elements.map((element) => element.id));
@@ -42,7 +42,7 @@ test("public pages have one main landmark and unique ids", async ({ page }) => {
 
 test("public navigation supports Escape and returns focus to the menu button", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("http://localhost:3000/");
+  await page.goto("/");
   const menuButton = page.getByRole("button", { name: "Open menu" });
   await menuButton.click();
   await expect(page.getByRole("button", { name: "Close menu" })).toBeVisible();

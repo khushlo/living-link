@@ -15,7 +15,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { recordAuditEvent } from "@/lib/audit";
-import { hasLatestConsent } from "@/lib/consent";
 
 export const dynamic = "force-dynamic";
 
@@ -81,13 +80,17 @@ async function handleCDSRequest(req: NextRequest, forcedServiceId?: string) {
   if (!patientId) return NextResponse.json({ cards });
 
   try {
-    const connection = issuer ? await prisma.eHRConnection.findFirst({ where: { issuer, enabled: true }, select: { id: true } }) : null;
-    if (!connection) return NextResponse.json({ cards: [] });
-    const mapping = await prisma.externalPatientMapping.findUnique({
-      where: { connectionId_externalPatientId: { connectionId: connection.id, externalPatientId: patientId } },
+    const connection = issuer ? await prisma.eHRConnection.findFirst({ where: { issuer, enabled: true, organizationCenterId: { not: null } }, select: { id: true, organizationCenterId: true } }) : null;
+    if (!connection?.organizationCenterId) return NextResponse.json({ cards: [] });
+    const mapping = await prisma.externalPatientMapping.findFirst({
+      where: {
+        connectionId: connection.id,
+        externalPatientId: patientId,
+        donorProfile: { centerAuthorizations: { some: { centerId: connection.organizationCenterId, revokedAt: null } } },
+      },
       select: { donorProfileId: true },
     });
-    if (!mapping || !(await hasLatestConsent(mapping.donorProfileId, "ehr_exchange"))) return NextResponse.json({ cards: [] });
+    if (!mapping) return NextResponse.json({ cards: [] });
     const donorProfile = await prisma.donorProfile.findUnique({
       where: { id: mapping.donorProfileId },
       include: { eligibilityChecks: { orderBy: { assessedAt: "desc" }, take: 1 } },
@@ -120,6 +123,7 @@ async function handleCDSRequest(req: NextRequest, forcedServiceId?: string) {
       if (serviceId === "livinglink-stalled-evaluation") {
         const stalled = await prisma.donorEvaluation.findFirst({
           where: {
+            centerId: connection.organizationCenterId,
             donorRef: patientId,
             stage: { notIn: ["APPROVED", "DECLINED"] },
             updatedAt: { lt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },

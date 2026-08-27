@@ -1,60 +1,55 @@
-# LivingLink — Living Kidney Donor Platform
+# LivingLink - Living Kidney Donor Platform
 
-> AI-powered, FHIR-native platform supporting living kidney donors from evaluation through long-term follow-up.
-> Built for the **KidneyX EMPOWER Prize — Track B** (deadline June 15, 2026).
+> Prototype web application supporting living kidney donors from evaluation through long-term follow-up.
+> Built for the **KidneyX EMPOWER Prize - Track B**.
 
----
+> **Prototype notice:** LivingLink is not a medical device, diagnostic service, production clinical system, or verified EHR integration. Do not use real patient or donor data. HIPAA compliance, Section 508/WCAG conformance, Epic/Oracle Health connectivity, and clinical effectiveness have not been established. See `Documents/evidence-register.md` for evidence status.
 
 ## Modules
 
-| Module | Audience | Description |
+| Module | Audience | Prototype scope |
 |---|---|---|
-| **ReadyCheck** | Donor | AI-guided health goal tracker (BMI, BP, labs) with FHIR Observation sync |
-| **DonorShield** | Donor | NLDAC application wizard + wage replacement / expense log |
-| **MentorMatch** | Donor | Peer mentor matching with in-app messaging |
-| **CenterFlow** | Clinician / Coordinator | Protocol adherence tracker, evaluation stage pipeline |
-| **LifeAfter** | Donor | Post-donation wellbeing check-ins (PHQ-2, BP trends) |
+| **ReadyCheck** | Donor | Non-diagnostic health readiness and goal tracking with FHIR mapping support |
+| **DonorShield** | Donor | NLDAC guidance, wage estimates, and expense workflows |
+| **MentorMatch** | Donor | Peer mentor profiles and prototype messaging |
+| **CenterFlow** | Clinician / Coordinator | Evaluation-stage and protocol workflows |
+| **LifeAfter** | Donor | Post-donation check-ins and wellbeing tracking |
 
----
+## Current Architecture
 
-## Tech Stack
+- **Application:** One root Next.js 15 App Router application (`app/`), including UI and server route handlers (`app/api/`)
+- **Language/UI:** TypeScript, React 19, Tailwind CSS 3, shadcn/ui/Radix components
+- **Authentication:** Clerk integration with application role checks; production configuration and control evidence are pending
+- **Data:** Prisma ORM with the root schema at `prisma/schema.prisma`; PostgreSQL is used for local development
+- **FHIR:** FHIR R4 mapping, SMART launch, CDS Hooks, and export prototypes; profile, EHR-vendor, and production workflow validation are pending
+- **AI:** Optional OpenAI integration; authenticated health-data processing is disabled unless deployment configuration explicitly allows it
+- **Local services:** Docker Compose can run PostgreSQL and HAPI FHIR R4
 
-- **Frontend:** Next.js 15 (App Router), Tailwind CSS v3, shadcn/ui
-- **Auth:** Clerk (RBAC — donor / patient / clinician / coordinator)
-- **Backend:** Express + Prisma ORM
-- **Database:** PostgreSQL
-- **AI:** OpenAI GPT-4o (per-module system prompts)
-- **FHIR:** HAPI FHIR R4 (`@livinglink/fhir-client`)
-- **Monorepo:** Turborepo + npm workspaces
-
----
+This repository is not a Turborepo and does not contain a separate Express API.
 
 ## Project Structure
 
+```text
+app/                 # Next.js pages, layouts, and route handlers
+components/          # Shared and feature UI
+lib/                 # Server/application utilities and FHIR helpers
+prisma/              # Prisma schema and migrations
+docker/              # Local service configuration
+scripts/             # Submission PDF generation
+Documents/           # Planning, claims, and evidence documentation
+tests/               # Current test assets
 ```
-apps/
-  web/          # Next.js 15 frontend
-  api/          # Express REST API (port 4000)
-packages/
-  shared/       # TypeScript types shared across apps
-  ai/           # OpenAI chat wrapper with module prompts
-  fhir-client/  # FHIR R4 client + LOINC constants
-docker/
-  postgres/     # PostgreSQL init script
-```
-
----
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 20+
-- PostgreSQL running locally
-- Clerk account (free tier works)
-- OpenAI API key
+- Docker, if using the local PostgreSQL and HAPI FHIR services
+- Clerk development credentials for authenticated routes
+- OpenAI API credentials only if testing optional AI features
 
-### 1. Clone & Install
+### Install And Configure
 
 ```bash
 git clone https://github.com/khushlo/living-link.git
@@ -62,60 +57,26 @@ cd living-link
 npm install
 ```
 
-### 2. Environment Variables
+Copy `.env.example` to `.env.local`, fill in development values, and keep `FHIR_WRITE_ENABLED=false` and `ALLOW_PHI_TO_AI=false` unless an approved test configuration requires otherwise. Never use production PHI in this prototype.
 
-Create `apps/web/.env.local`:
-
-```env
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-OPENAI_API_KEY=sk-proj-...
-NEXT_PUBLIC_API_URL=http://localhost:4000
-```
-
-Create `apps/api/.env`:
-
-```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/kidney-x
-CLERK_SECRET_KEY=sk_test_...
-```
-
-### 3. Database Setup
+### Start Local Dependencies
 
 ```bash
-cd apps/api
-npx prisma db push
+docker compose up -d postgres hapi-fhir
+npx prisma migrate deploy
 ```
 
-### 4. Run Development Servers
+### Run The Application
 
 ```bash
-# From repo root — starts both Next.js (:3000) and Express (:4000)
 npm run dev
 ```
 
----
+The single Next.js development server runs at `http://localhost:3000`; there is no Express server on port 4000.
 
-## Routes
+## Status And Claims
 
-| Path | Role |
-|---|---|
-| `/` | Public landing page |
-| `/sign-in`, `/sign-up` | Clerk hosted auth |
-| `/donor/dashboard` | Donor home |
-| `/ready-check` | ReadyCheck module |
-| `/donor-shield` | DonorShield module |
-| `/mentor-match` | MentorMatch module |
-| `/life-after` | LifeAfter module |
-| `/clinician/dashboard` | Clinician home |
-| `/clinician/center-flow` | CenterFlow (clinician) |
-| `/coordinator/dashboard` | Coordinator home |
-| `/coordinator/center-flow` | CenterFlow (coordinator) |
-| `/patient/dashboard` | Patient home |
-
----
+Implemented source code is not, by itself, evidence of deployed behavior, regulatory compliance, accessibility conformance, vendor integration, clinical validity, or completed co-design. Current and target claims, evidence gaps, and revalidation fields are recorded in `Documents/evidence-register.md`.
 
 ## License
 

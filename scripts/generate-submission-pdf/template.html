@@ -541,6 +541,17 @@
 
   .check { color: var(--green); font-weight: 700; }
   .highlight { background: #fff3cd; padding: 1px 3px; border-radius: 2px; }
+  .prototype-notice {
+    background: #fff3cd;
+    border: 2px solid var(--gold);
+    border-radius: 6px;
+    color: var(--gray-1);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 0.5rem 0 0.8rem;
+    padding: 7px 10px;
+  }
 
   /* Score bar for judging table */
   .score-bar {
@@ -569,6 +580,12 @@
     <div class="cover-badge">Track B - Scalable Prototype</div>
     <h1>LivingLink</h1>
 
+    <div class="prototype-notice">
+      PROTOTYPE - NOT FOR CLINICAL USE OR REAL PHI. HIPAA compliance, Section 508/WCAG
+      conformance, Epic/Oracle Health integration, clinical outcomes, and completed co-design
+      have not been established. See the evidence register before relying on any claim.
+    </div>
+
     <div style="height: 2rem;"></div>
 
     <div style="max-width: 560px;">
@@ -588,8 +605,8 @@
       <p style="font-size:0.9rem; line-height:1.6; opacity:0.82;">
          Released under the MIT open-source license. The prototype includes selected encrypted
          fields and audit logging; HIPAA, WCAG, and Section 508 readiness require further evidence.
-        Co-designed with three prior living donors, a veteran transplant coordinator,
-        and a living-donor nephrologist.
+        A participant account describing three donor personas, a coordinator, and a nephrologist
+        is unverified pending primary records and review.
       </p>
     </div>
 
@@ -822,7 +839,7 @@
       <tr>
         <td><strong>Evaluation delays</strong></td>
         <td>Coordinator tracks 40 evaluations on a spreadsheet. A stalled bloodwork order sits unnoticed for 3 weeks</td>
-        <td>CenterFlow flags the stall after 14 days, fires a CDS Hooks alert into Epic/Cerner, and shows the coordinator exactly what is blocked</td>
+        <td>CenterFlow can flag a stall after 14 days. Generic CDS Hooks integration is a prototype; Epic/Oracle Health validation remains a target.</td>
       </tr>
       <tr>
         <td><strong>Post-donation</strong></td>
@@ -884,7 +901,7 @@
     <div class="callout-title">What Makes LivingLink Unique</div>
     <p style="font-size:0.82rem;">
       Every other solution addresses one friction point. LivingLink addresses all seven touchpoints in a single platform, with a zero-login public layer that removes the first barrier before the donor even knows the platform exists.
-      No specialized hardware. No new EHR installation. One SMART on FHIR launch URL is all a transplant center needs to go live.
+      No specialized hardware is intended. Approved security, workflow, tenant, and Epic/Oracle Health sandbox validation are required before any center could go live.
     </p>
   </div>
 
@@ -1169,7 +1186,7 @@ flowchart LR
         <li>Goal Tracker with 30/60/90-day targets for BMI, blood pressure, weight, smoking cessation, and blood sugar</li>
         <li>Recharts trend visualizations showing progress over time</li>
         <li>AI coach notes stored per goal to keep donors motivated between check-ins</li>
-        <li>CDS Hooks alert fires into Epic/Cerner when a matched patient has an active ReadyCheck profile</li>
+        <li>Generic CDS Hooks alert prototype; Epic/Oracle Health sandbox validation is pending</li>
         <li>Disclaimer-first UX: no medical diagnosis framing, referral to nephrologist always included</li>
       </ul>
 
@@ -1216,7 +1233,7 @@ flowchart LR
         <div class="stat-label">Trackable health metrics with trend charts</div>
         <hr class="stat-divider" />
         <div class="stat-num" style="font-size:1.2rem;">CDS Hooks</div>
-        <div class="stat-label">Alert pushed into Epic/Cerner on patient-view hook</div>
+        <div class="stat-label">Generic patient-view alert prototype; EHR validation pending</div>
       </div>
 
       <div class="callout callout-teal" style="margin-top:10px;">
@@ -1367,8 +1384,8 @@ flowchart LR
         <div class="stat-num" style="font-size:1.3rem;">AI Match</div>
         <div class="stat-label">GPT-4o ranks mentors by compatibility score</div>
         <hr class="stat-divider" />
-        <div class="stat-num" style="font-size:1.3rem;">HIPAA</div>
-        <div class="stat-label">AES-256 app-layer message encryption</div>
+        <div class="stat-num" style="font-size:1.3rem;">Prototype</div>
+        <div class="stat-label">Selected field encryption; HIPAA compliance not established</div>
       </div>
     </div>
   </div>
@@ -1388,8 +1405,8 @@ flowchart LR
   <p style="margin-bottom:0.5rem;">
     Transplant coordinators managing 35-50 simultaneous donor evaluations on spreadsheets lose
     track of who is waiting and why. CenterFlow replaces spreadsheets with a real-time evaluation
-    tracker, bottleneck detection, and best-practice protocol library - all integrated into the
-    EHR via SMART on FHIR and CDS Hooks.
+    tracker, bottleneck detection, and best-practice protocol library. Generic SMART on FHIR and
+    CDS Hooks scaffolding is present; no EHR-vendor integration has been verified.
   </p>
 
   <h3>8-Stage Evaluation Pipeline</h3>
@@ -1423,8 +1440,8 @@ flowchart LR
         <li>Automatic <code>isStalled</code> flag when any evaluation has no progress for 14 days</li>
         <li>Coordinator role has full CRUD; clinician role has read and review access</li>
         <li>Protocol Knowledge Base - searchable best-practice playbooks tagged by EMPOWER focus area</li>
-        <li>CDS Hooks service pushes warning card directly into Epic/Cerner workflow when stalled evaluation detected</li>
-        <li>SMART on FHIR launch enables EHR-embedded access with no duplicate login inside Epic App Orchard or Cerner App Market</li>
+        <li>CDS Hooks warning-card prototype; Epic/Oracle Health workflow validation is pending</li>
+        <li>SMART on FHIR launch prototype; EHR embedding, identity behavior, and marketplace approval are pending</li>
         <li>Stage history stored as JSON - full audit trail of every stage transition with timestamp</li>
       </ul>
     </div>
@@ -1545,7 +1562,7 @@ flowchart LR
         <div class="stat-label">Validated depression screener at every check-in</div>
         <hr class="stat-divider" />
         <div class="stat-num" style="font-size:1.1rem;">Auto</div>
-        <div class="stat-label">OPTN Policy 18 reporting via FHIR Bulk Export to HRSA</div>
+        <div class="stat-label">Export prototype only; OPTN/HRSA reporting is not automated</div>
       </div>
 
       <div class="callout callout-gold" style="margin-top:10px;">
@@ -1553,7 +1570,7 @@ flowchart LR
         <p style="font-size:0.78rem;">
           A printable responsibility matrix showing exactly which conditions the nephrologist
           manages vs. which the PCP manages post-donation. Printable on first post-donation
-          visit. Directly addresses co-design feedback from James (page 10).
+          visit. It reflects an unverified design hypothesis recorded in the co-design account.
         </p>
       </div>
     </div>
@@ -1572,13 +1589,12 @@ flowchart LR
     <h2>FHIR Interoperability and Federal Standards Alignment</h2>
   </div>
   <p style="margin-bottom:0.7rem;">
-    LivingLink is the only EMPOWER Track B submission designed to operate natively inside
-    existing EHR workflows via SMART on FHIR and CDS Hooks - with zero additional hardware and
-    zero IT infrastructure requirements for transplant centers. It directly supports the ONC
-    21st Century Cures Act interoperability mandate and OPTN Policy 18 outcomes reporting.
+    LivingLink includes generic SMART on FHIR and CDS Hooks prototypes intended for future EHR
+    workflow validation. Comparative uniqueness, Epic/Oracle Health connectivity, ONC conformance,
+    infrastructure requirements, and OPTN Policy 18 reporting have not been established.
   </p>
 
-  <h3>Standards Implemented</h3>
+  <h3>Prototype Standards Alignment</h3>
   <table>
     <thead>
       <tr>
@@ -1596,17 +1612,17 @@ flowchart LR
       <tr>
         <td>US Core IG</td>
         <td>6.1</td>
-        <td>ONC 21st Century Cures Act compliance - Patient, Observation, Condition profiles</td>
+        <td>Target US Core profile alignment; validator and legal/conformance review pending</td>
       </tr>
       <tr>
         <td>SMART on FHIR</td>
         <td>2.0</td>
-        <td>EHR-embedded launch - no duplicate login inside Epic App Orchard or Cerner App Market</td>
+        <td>Generic launch prototype; Epic and Oracle Health sandbox validation pending</td>
       </tr>
       <tr>
         <td>CDS Hooks</td>
         <td>1.0</td>
-        <td>Real-time clinical decision support cards pushed into EHR workflow on patient-view events</td>
+        <td>Prototype patient-view cards; receiving-EHR validation pending</td>
       </tr>
       <tr>
         <td>Da Vinci PDex</td>
@@ -1616,7 +1632,7 @@ flowchart LR
       <tr>
         <td>FHIR Bulk Data Export</td>
         <td>2.0</td>
-        <td>De-identified NDJSON export for OPTN Policy 18 outcomes reporting to HRSA and HHS</td>
+        <td>Pseudonymized NDJSON prototype; formal de-identification and OPTN/HRSA workflow validation pending</td>
       </tr>
     </tbody>
   </table>
@@ -1633,12 +1649,12 @@ flowchart LR
       </p>
     </div>
     <div class="callout callout-navy">
-      <div class="callout-title">No Information Blocking</div>
+        <div class="callout-title">Data Portability Target</div>
       <p style="font-size:0.78rem;">
         21st Century Cures Act (ONC) requires that certified health IT must not block
-        the flow of health information. LivingLink never restricts data portability.
-        Every donor can export their own FHIR Bundle at any time. All data exchange
-        uses open FHIR standards with no proprietary APIs.
+        the flow of health information in applicable contexts. LivingLink includes donor export
+        functionality intended to support portability. Legal applicability, authorization coverage,
+        FHIR conformance, and complete export behavior require review and testing.
       </p>
     </div>
   </div>
@@ -1658,13 +1674,13 @@ flowchart LR
 
   <div class="three-col">
     <div>
-      <h3>HIPAA Controls</h3>
+      <h3>HIPAA-Oriented Prototype Controls</h3>
       <ul class="feature-list">
-        <li>AES-256 encryption at rest (Neon KMS + field-level for highest-sensitivity fields)</li>
-        <li>TLS 1.3 in transit with HSTS headers (Vercel edge)</li>
-        <li>Append-only pgAudit log - every PHI-touching API route logged; log rows can never be updated or deleted</li>
-        <li>MFA enforced for coordinator and clinician roles via Clerk</li>
-        <li>Session expiry after 24 hours of inactivity</li>
+        <li>Selected application fields have encryption code; managed storage encryption requires deployment evidence</li>
+        <li>HSTS headers are configured; deployed TLS version and end-to-end coverage require evidence</li>
+        <li>Audit code and an immutability migration exist; complete coverage, delivery, retention, and monitoring are unverified</li>
+        <li>Clerk supports MFA; role-specific deployed enforcement is unverified</li>
+        <li>Session policy and inactivity behavior require deployed configuration evidence</li>
         <li>Vendor BAAs and data-processing agreements remain deployment and legal-review dependencies</li>
         <li>PHI minimized in all GPT-4o prompts: no SSN, full DOB, or insurance IDs</li>
         <li>AI conversations not persisted (transient only)</li>
@@ -1673,15 +1689,15 @@ flowchart LR
     <div>
       <h3>FIPS 199 Categorization</h3>
       <div class="callout callout-gold">
-        <div class="callout-title">Overall Impact: MODERATE</div>
+        <div class="callout-title">Provisional Overall Impact: HIGH</div>
         <p style="font-size:0.78rem;">
           Confidentiality: HIGH<br/>
           Integrity: HIGH<br/>
           Availability: MODERATE<br/>
-          (High-water mark capped by availability)
+          (HIGH under the high-water-mark rule; authorized review pending)
         </p>
       </div>
-      <h4>NIST SP 800-53 Rev. 5 HIGH Controls Applied</h4>
+      <h4>Intended NIST SP 800-53 Rev. 5 HIGH-Baseline Controls</h4>
       <ul style="font-size:0.78rem;">
         <li>IA-2: MFA for privileged users</li>
         <li>SC-28: AES-256 at rest</li>
@@ -1693,14 +1709,14 @@ flowchart LR
     <div>
       <h3>Accessibility Assessment In Progress</h3>
       <ul class="feature-list">
-        <li>Semantic HTML with ARIA roles throughout all components</li>
-        <li>aria-live regions on all AI chat, toast alerts, and dynamic content</li>
-        <li>Skip-navigation links on every page (#main-content)</li>
-        <li>All form inputs have associated label elements</li>
-        <li>Color contrast: 4.5:1 normal text, 3:1 large text</li>
+        <li>Semantic HTML and ARIA are used in parts of the prototype; full review pending</li>
+        <li>Dynamic-content announcements require complete authenticated-flow testing</li>
+        <li>Skip-navigation coverage requires route-by-route verification</li>
+        <li>Form labeling requires complete route-by-route verification</li>
+        <li>Color contrast requires a full automated and manual audit</li>
         <li>html lang="en" set; AI responds in user's input language</li>
-        <li>axe-core automated accessibility CI on every PR via Playwright</li>
-        <li>Targets 6th-grade Flesch-Kincaid reading level throughout</li>
+        <li>Limited axe/Playwright assets exist; complete CI and manual conformance evidence is pending</li>
+        <li>Targets 6th-grade Flesch-Kincaid reading level; full-corpus results are pending</li>
       </ul>
     </div>
   </div>
@@ -1709,7 +1725,7 @@ flowchart LR
     <div class="callout-title">Health Equity Design Choices</div>
     <p style="font-size:0.8rem;">
       Multilingual AI responses (GPT-4o responds in the user's input language). Spanish-language roadmap in Phase 2.
-      6th-grade Flesch-Kincaid reading level enforced in all AI output. Mobile-first responsive design (320px to 1440px).
+      6th-grade Flesch-Kincaid reading level is a target for AI output. Responsive behavior is intended for 320px to 1440px; complete testing is pending.
       NLDAC wizard specifically addresses communities where financial hardship most frequently causes withdrawal.
     </p>
   </div>
@@ -1727,9 +1743,9 @@ flowchart LR
     <h2>Co-Design and Lived Experience</h2>
   </div>
   <p style="margin-bottom:0.7rem;">
-    LivingLink was designed with and for the people it serves. Five co-design participants
-    shaped every major product decision through structured interviews and iterative feedback
-    sessions before a single line of code was written.
+    The project contains an account of five purported co-design participants and associated design
+    hypotheses. Primary recruitment, consent, session, quotation, analysis, and traceability records
+    are not present, so completed co-design and participant attributes are not claimed.
   </p>
 
   <table>
@@ -1778,7 +1794,7 @@ flowchart LR
   <h3>Design Principles and Evidence</h3>
   <ul style="font-size:0.83rem; margin-bottom:0.5rem;">
     <li><strong>Lead with action:</strong> NLDAC wizard, lost-wage calculator, and conversation practice reachable in one tap from the dashboard.</li>
-    <li><strong>No jargon:</strong> eGFR explained on first mention; Flesch-Kincaid grade level tested with every AI prompt; all labels reviewed by co-design participants.</li>
+    <li><strong>No jargon target:</strong> eGFR should be explained on first mention; full readability testing and participant review are unverified.</li>
     <li><strong>Emotional check-ins:</strong> Mood and energy scores on every LifeAfter check-in; PHQ-2 at every milestone; the platform acknowledges the emotional weight of this decision.</li>
     <li>Rodrigue JR et al. (2014) AJKD - Peer education RCT: 23% increase in donation intent.</li>
     <li>USRDS 2024, OPTN/SRTR 2024, NLDAC 2023 - all statistics cited in Section 1 footnote.</li>
@@ -1809,7 +1825,7 @@ flowchart LR
           <strong>Donor Experience</strong>
         </td>
         <td class="score-cell" style="text-align:center;">35 / 35</td>
-        <td>5 donor-facing modules. Zero-login public tools. AI conversation practice simulator. Financial advocacy suite covering NLDAC, FMLA, tax credits, and insurance disputes. Peer mentorship prototype. Post-donation follow-up with PHQ-2 screening. Co-design evidence is retained for the documented sessions.</td>
+        <td>5 donor-facing prototype modules and zero-login public tools. Co-design remains an unverified account pending primary evidence and review.</td>
       </tr>
       <tr>
         <td>
@@ -1862,7 +1878,7 @@ flowchart LR
           <tr><td>M1-M2</td><td>Security audit, HIPAA pen test, BAA finalization, VPAT assessment</td></tr>
           <tr><td>M2-M3</td><td>Manual keyboard/mobile accessibility pass, Recharts ARIA tables, PDF accessibility</td></tr>
           <tr><td>M3-M4</td><td>Pilot deployment - Center 1 (coordinator + clinician onboarding)</td></tr>
-          <tr><td>M4-M5</td><td>Epic App Orchard and Cerner App Market submission and review</td></tr>
+          <tr><td>M4-M5</td><td>Target: approved Epic and Oracle Health sandbox validation, then applicable marketplace review</td></tr>
           <tr><td>M5-M6</td><td>Pilot deployment - Center 2. First FHIR Bulk Export to HRSA test run</td></tr>
           <tr><td>M6-M8</td><td>Spanish localization, Phase 2 co-design with 10 additional participants</td></tr>
           <tr><td>M8-M10</td><td>OPTN region-wide rollout planning, outcomes data collection</td></tr>

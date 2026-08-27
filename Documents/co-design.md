@@ -1,12 +1,16 @@
 # LivingLink — Co-Design & Lived Experience Documentation
 
+> **UNVERIFIED RESEARCH ACCOUNT:** The repository does not contain primary evidence for the participant identities/statuses, recruitment, consent, dates, methods, quotations, analysis, or design traceability described below. Until those artifacts are reviewed and linked in `Documents/evidence-register.md`, LivingLink does not claim completed co-design. The entries are retained as hypotheses and an account requiring human verification, not as verified participant findings.
+
 ## Overview
 
-LivingLink was co-designed with living donors, transplant coordinators, and nephrologists across three iterative design sprints. This document records personas, key insights, and design decisions traced directly to participant feedback.
+This document preserves a previously drafted account of three design sprints involving donor personas, a coordinator, and a nephrologist. It is not currently traceable to primary evidence. Intended features and target states are preserved so that a human owner can verify, correct, or withdraw them.
 
 ---
 
 ## Research Methods
+
+The following methods were described but are unverified:
 
 - **Semi-structured interviews:** 45–60 min via video call; recorded with consent
 - **Usability sessions:** Think-aloud walkthroughs of lo-fi Figma prototypes
@@ -17,7 +21,7 @@ LivingLink was co-designed with living donors, transplant coordinators, and neph
 
 ## Participant Profiles
 
-*(Names changed; identifying details generalized)*
+*The names are presented as aliases/personas. It is not established whether each profile represents an actual participant, a composite, or a hypothetical persona. Quotations are unverified and must not be presented publicly as participant testimony without source records and consent.*
 
 ### Donor 1 — "Maria," 38, Non-Directed Donor
 - **Background:** Donated to stranger through paired exchange, 2021, Midwest
@@ -41,7 +45,7 @@ LivingLink was co-designed with living donors, transplant coordinators, and neph
 - **Background:** Managing 35–50 active evaluations simultaneously
 - **Key insight:** "I lose track of who's waiting on labs vs who I just haven't emailed. There's no dashboard — it's all spreadsheets."
 - **Design impact:** CenterFlow stage tracker with color-coded staleness indicators; coordinator dashboard sorted by days-since-last-update
-- **Additional feedback:** "I need something that plugs into Epic, not another login." → CDS Hooks integration; SMART launch endpoint
+- **Unverified additional feedback:** "I need something that plugs into Epic, not another login." → Target: generic CDS Hooks and SMART launch prototypes, followed by approved Epic/Oracle Health sandbox validation
 
 ### Nephrologist — "Dr. Chen," Living Donor Follow-Up Specialist
 - **Background:** 18 yrs experience; sees 120+ prior living donors annually
@@ -53,6 +57,8 @@ LivingLink was co-designed with living donors, transplant coordinators, and neph
 
 ## Design Principles Derived from Co-Design
 
+These are current design hypotheses, not verified co-design findings:
+
 1. **Tell me what I need to do, not just what exists.** → Module landing pages lead with action ("Start your NLDAC application") not information architecture
 2. **Don't make me feel stupid.** → No medical jargon without tooltip; 6th-grade reading level target; AI never uses condescending reassurances
 3. **I'm a whole person, not a kidney.** → Emotional check-ins integrated into every module; PHQ-2 available at all times; mentor connection not segregated
@@ -62,18 +68,18 @@ LivingLink was co-designed with living donors, transplant coordinators, and neph
 
 ---
 
-## Accessibility Co-Design Notes
+## Unverified Accessibility Notes
 
 - Donor 3 noted: "My mother uses a screen reader for Gujarati text — I worry about the images."
   → All meaningful images have descriptive alt text; decorative images are `aria-hidden`
 - David (coordinator) uses keyboard navigation due to repetitive strain: 
-  → Full keyboard accessibility tested across CenterFlow table and forms
+  → Target: complete keyboard and assistive-technology testing across CenterFlow tables and forms; evidence is pending
 
 ---
 
 ## Future Co-Design Commitments
 
-Post-award, we commit to:
+Post-award targets, subject to funding, governance, consent, and assigned ownership:
 - Quarterly lived-experience advisory board (3 prior donors paid $150/session)
 - Usability testing with 10 new participants per major release
 - Annual accessibility audit with disabled users recruited through National Disability Institute

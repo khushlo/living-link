@@ -1,0 +1,12 @@
+# Copy to backend.tf only after creating and securing the state resources.
+# Use a dedicated account or tightly controlled bucket and lock table.
+terraform {
+  backend "s3" {
+    bucket         = "REPLACE-secure-terraform-state"
+    key            = "kidneyx/production/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    kms_key_id     = "arn:aws:kms:us-east-1:111122223333:key/REPLACE"
+    dynamodb_table = "REPLACE-terraform-locks"
+  }
+}

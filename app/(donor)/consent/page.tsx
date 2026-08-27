@@ -60,12 +60,16 @@ You may opt out of research use at any time without affecting your access to Liv
   },
 ];
 
+type CenterConsent = { id: string; name: string; city: string; state: string; granted: boolean };
+
 export default function ConsentPage() {
   const router = useRouter();
   const [consented, setConsented] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+  const [centers, setCenters] = useState<CenterConsent[]>([]);
+  const [initialCenterGrants, setInitialCenterGrants] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetch("/api/consent")
@@ -84,6 +88,13 @@ export default function ConsentPage() {
         });
       })
       .catch(() => setError("Unable to load your current consent settings."));
+    fetch("/api/consent/center-access")
+      .then((response) => response.ok ? response.json() : [])
+      .then((data: CenterConsent[]) => {
+        setCenters(data);
+        setInitialCenterGrants(Object.fromEntries(data.map((center) => [center.id, center.granted])));
+      })
+      .catch(() => setError("Unable to load transplant centers."));
   }, []);
 
   const allRequired = CONSENT_SECTIONS.filter((s) => s.required).every(
@@ -105,6 +116,13 @@ export default function ConsentPage() {
         }),
       });
       if (!response.ok) throw new Error("Consent update failed");
+      const changedCenters = centers.filter((center) => center.granted !== Boolean(initialCenterGrants[center.id]));
+      const centerResponses = await Promise.all(changedCenters.map((center) => fetch("/api/consent/center-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ centerId: center.id, granted: center.granted }),
+      })));
+      if (centerResponses.some((centerResponse) => !centerResponse.ok)) throw new Error("Center consent update failed");
       setDone(true);
       setTimeout(() => router.push("/donor/dashboard"), 2000);
     } catch {
@@ -175,6 +193,34 @@ export default function ConsentPage() {
             );
           })}
         </div>
+
+        <Card className="mt-5 border-2 border-gray-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-3 text-base">
+              <Shield className="h-5 w-5 shrink-0 text-blue-600" />
+              Transplant Center Access
+              <span className="ml-auto rounded-full border bg-gray-100 px-2 py-0.5 text-xs font-normal text-gray-400">Optional</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-sm leading-relaxed text-gray-600">Only centers you explicitly select can find your account or link it to their patient record. Clearing a center removes its existing patient links.</p>
+            {centers.length === 0 ? <p className="text-sm text-gray-500">No transplant centers are currently available.</p> : (
+              <div className="space-y-3">
+                {centers.map((center) => (
+                  <label key={center.id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3">
+                    <input
+                      type="checkbox"
+                      checked={center.granted}
+                      onChange={(event) => setCenters((current) => current.map((item) => item.id === center.id ? { ...item, granted: event.target.checked } : item))}
+                      className="mt-1 h-4 w-4 shrink-0 accent-emerald-500"
+                    />
+                    <span className="text-sm text-gray-700"><strong className="block font-medium">{center.name}</strong>{center.city}, {center.state}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {!allRequired && (
           <div className="mt-6 flex items-center gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">

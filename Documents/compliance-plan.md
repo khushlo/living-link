@@ -13,13 +13,13 @@ This is a prototype planning document, not evidence of HIPAA, Section 508, or WC
 | Public educational content | LOW | LOW | LOW |
 | **Overall System Categorization** | **HIGH** | **HIGH** | **MODERATE** |
 
-FIPS 199 overall categorization: **MODERATE** (per high-water mark, availability caps at MODERATE).
+Provisional FIPS 199 overall categorization: **HIGH**. Under the high-water-mark rule, the system impact is the highest impact assigned to confidentiality, integrity, or availability; MODERATE availability does not cap the HIGH confidentiality and integrity impacts. The system boundary, information types, rationale, and categorization still require approval by an authorized security owner.
 
 ---
 
 ## 2. HIPAA Safeguards
 
-### Administrative Safeguards
+### Proposed Administrative Safeguards
 - **Security Officer:** Designated before pilot launch
 - **Workforce Training:** Annual HIPAA training required for all contributors with PHI access
 - **Risk Assessment:** Required before pilot; no completed HIPAA risk analysis is claimed here
@@ -29,13 +29,13 @@ FIPS 199 overall categorization: **MODERATE** (per high-water mark, availability
   - OpenAI (AI processing) — approved DPA/BAA and explicit AI PHI decision required; disabled by default
   - Clerk (authentication) — BAA and production configuration require verification
 
-### Technical Safeguards
+### Prototype And Proposed Technical Safeguards
 - **Access Control:** Clerk-issued JWTs; role-based (`donor`, `coordinator`, `clinician`, `patient`)
 - **Audit Logs:** Covered routes log `userId + action + timestamp`; full coverage, immutable retention, and delivery monitoring remain pending
-- **Encryption at Rest:** AES-256 (Neon managed encryption)
-- **Encryption in Transit:** TLS 1.2+ enforced; HSTS header on all responses
-- **Automatic Logoff:** Clerk session expires after 24 hours of inactivity
-- **Authentication:** MFA available via Clerk; required for coordinator/clinician roles
+- **Encryption at Rest:** Selected application fields have encryption code; managed database/storage encryption requires deployment evidence
+- **Encryption in Transit:** HSTS is configured in application headers; deployed TLS version and end-to-end coverage require evidence
+- **Automatic Logoff:** Intended Clerk session policy; deployed inactivity behavior requires configuration evidence and testing
+- **Authentication:** Clerk supports MFA; role-specific enforcement requires deployed configuration evidence and testing
 
 ### Physical Safeguards (Deployment Dependency)
 - Production hosting, region, physical safeguards, and SOC evidence require vendor and deployment verification
@@ -43,7 +43,7 @@ FIPS 199 overall categorization: **MODERATE** (per high-water mark, availability
 
 ---
 
-## 3. Section 508 / WCAG 2.1 AA Compliance
+## 3. Section 508 / WCAG 2.1 AA Conformance Target
 
 ### Planned Automated Testing
 - **axe-core** is present for limited public-page testing

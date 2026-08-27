@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/api-auth";
-import { hasLatestConsent } from "@/lib/consent";
 import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +33,7 @@ export async function GET(req: NextRequest) {
       vendor: true,
       environment: true,
       externalPatientMappings: {
+        where: { donorProfile: { centerAuthorizations: { some: { centerId: membership.centerId, revokedAt: null } } } },
         orderBy: { updatedAt: "desc" },
         include: { donorProfile: { select: { id: true, user: { select: { firstName: true, lastName: true, email: true } } } } },
       },
@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
   const donors = query.length >= 2
     ? await prisma.donorProfile.findMany({
         where: {
+          centerAuthorizations: { some: { centerId: membership.centerId, revokedAt: null } },
           user: {
             OR: [
               { email: { contains: query, mode: "insensitive" } },
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
             ],
           },
         },
-        select: { id: true, user: { select: { firstName: true, lastName: true, email: true } }, consentRecords: { where: { purpose: "ehr_exchange" }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 1, select: { granted: true, revokedAt: true } } },
+        select: { id: true, user: { select: { firstName: true, lastName: true, email: true } } },
         take: 20,
       })
     : [];
@@ -67,10 +68,7 @@ export async function GET(req: NextRequest) {
         updatedAt: mapping.updatedAt,
       })),
     })),
-    donors: donors.map(({ consentRecords, ...donor }) => ({
-      ...donor,
-      hasEhrConsent: Boolean(consentRecords[0]?.granted && !consentRecords[0]?.revokedAt),
-    })),
+    donors: donors.map((donor) => ({ ...donor, hasEhrConsent: true })),
   });
 }
 
@@ -87,9 +85,12 @@ export async function POST(req: NextRequest) {
   const connection = await prisma.eHRConnection.findFirst({ where: { id: parsed.data.connectionId, organizationCenterId: membership.centerId, enabled: true }, select: { id: true } });
   if (!connection) return NextResponse.json({ error: "EHR connection is not available to this center" }, { status: 404 });
 
-  const donor = await prisma.donorProfile.findUnique({ where: { id: parsed.data.donorProfileId }, select: { id: true } });
-  if (!donor || !(await hasLatestConsent(donor.id, "ehr_exchange"))) {
-    return NextResponse.json({ error: "Current EHR-exchange consent is required before linking this patient" }, { status: 403 });
+  const donor = await prisma.donorProfile.findFirst({
+    where: { id: parsed.data.donorProfileId, centerAuthorizations: { some: { centerId: membership.centerId, revokedAt: null } } },
+    select: { id: true },
+  });
+  if (!donor) {
+    return NextResponse.json({ error: "The donor has not authorized this center" }, { status: 403 });
   }
 
   try {
@@ -117,7 +118,7 @@ export async function DELETE(req: NextRequest) {
 
   const membership = await centerForUser(user.id);
   if (!membership) return NextResponse.json({ error: "Center membership required" }, { status: 403 });
-  const mapping = await prisma.externalPatientMapping.findFirst({ where: { id: mappingId, connection: { organizationCenterId: membership.centerId } }, select: { id: true, connectionId: true } });
+  const mapping = await prisma.externalPatientMapping.findFirst({ where: { id: mappingId, connection: { organizationCenterId: membership.centerId }, donorProfile: { centerAuthorizations: { some: { centerId: membership.centerId, revokedAt: null } } } }, select: { id: true, connectionId: true } });
   if (!mapping) return NextResponse.json({ error: "Patient link not found" }, { status: 404 });
   await prisma.externalPatientMapping.delete({ where: { id: mapping.id } });
   await recordAuditEvent(req, userId, "DELETE", "ExternalPatientMapping", mapping.id, { centerId: membership.centerId, connectionId: mapping.connectionId });

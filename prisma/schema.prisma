@@ -138,6 +138,7 @@ model DonorProfile {
   checkins          PostDonationCheckin[]
   phq2Responses     PHQ2Response[]
   consentRecords    ConsentRecord[]
+  centerAuthorizations DonorCenterAuthorization[]
   externalPatientMappings ExternalPatientMapping[]
   fhirPatientId     String?           @map("fhir_patient_id")
   consentedAt       DateTime?         @map("consented_at")
@@ -354,11 +355,15 @@ model MentorProfile {
 model DataDeletionRequest {
   id           String    @id @default(uuid())
   userId       String    @map("user_id")
-  status       String    @default("OPEN") // OPEN, UNDER_REVIEW, COMPLETED, DENIED
+  status       String    @default("OPEN") // OPEN, UNDER_REVIEW, FAILED, COMPLETED, DENIED
   requestedAt  DateTime  @default(now()) @map("requested_at")
   resolvedAt   DateTime? @map("resolved_at")
   resolvedById String?   @map("resolved_by_id")
   reason       String?
+  anonymizationAttemptedAt DateTime? @map("anonymization_attempted_at")
+  failureStep  String?   @map("failure_step")
+  failureMessage String? @map("failure_message")
+  evidencePseudonym String? @map("evidence_pseudonym")
 
   user         User @relation(fields: [userId], references: [id])
 
@@ -454,6 +459,7 @@ model TransplantCenter {
   members     CenterMembership[]
   protocols   Protocol[]
   evaluations DonorEvaluation[]
+  donorAuthorizations DonorCenterAuthorization[]
   ehrConnections EHRConnection[]
 
   @@map("transplant_centers")
@@ -524,6 +530,23 @@ model PostDonationCheckin {
 
   @@unique([donorProfileId, week])
   @@map("post_donation_checkins")
+}
+
+model DonorCenterAuthorization {
+  id             String    @id @default(uuid())
+  donorProfileId String    @map("donor_profile_id")
+  centerId       String    @map("center_id")
+  grantedAt      DateTime  @map("granted_at")
+  revokedAt      DateTime? @map("revoked_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  donorProfile DonorProfile    @relation(fields: [donorProfileId], references: [id])
+  center       TransplantCenter @relation(fields: [centerId], references: [id])
+
+  @@unique([donorProfileId, centerId])
+  @@index([centerId, revokedAt])
+  @@map("donor_center_authorizations")
 }
 
 model PHQ2Response {

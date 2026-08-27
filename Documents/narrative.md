@@ -1,5 +1,7 @@
 # LivingLink — KidneyX EMPOWER Prize Track B Submission Narrative
 
+> **PROTOTYPE - NOT FOR CLINICAL USE OR REAL PHI.** LivingLink is not a medical device, diagnostic service, production clinical system, or verified EHR integration. HIPAA compliance, Section 508/WCAG conformance, Epic/Oracle Health connectivity, clinical outcomes, and completed co-design have not been established. Claims and evidence gaps are tracked in `Documents/evidence-register.md`.
+
 **Team:** LivingLink  
 **Track:** Track B — Living Organ Donor Economic and Emotional Platform  
 **Prize:** Up to $1,375,000  
@@ -9,7 +11,7 @@
 
 ## Executive Summary
 
-LivingLink is an open-source, FHIR-native digital health platform that addresses the most persistent barriers to living kidney donation: financial uncertainty, emotional isolation, fragmented post-donation care, and labyrinthine transplant center workflows. By integrating five purpose-built modules into a single, trauma-informed web application, LivingLink transforms the living donor journey from a solitary, stressful process into a supported, navigable experience.
+LivingLink is an open-source prototype designed around FHIR R4 concepts to address persistent barriers to living kidney donation: financial uncertainty, emotional isolation, fragmented post-donation care, and transplant center workflows. Five purpose-built modules explore how a web application could make the donor journey more supported and navigable; effectiveness has not been clinically evaluated.
 
 ---
 
@@ -62,7 +64,7 @@ Structured monthly check-ins (BP, eGFR, weight, symptoms) with trend charts. PHQ
 
 ## FHIR & Interoperability
 
-LivingLink implements FHIR R4 throughout:
+LivingLink includes prototype FHIR R4 mappings and endpoints; conformance and receiving-system validation are pending:
 
 - **SMART on FHIR:** Launch sequence (`/api/fhir/smart/launch`) provides an EHR-launch prototype; approved sandbox validation remains pending
 - **CDS Hooks:** Authenticated `patient-view` alert prototype; unscoped stalled-evaluation alerts remain disabled
@@ -73,21 +75,15 @@ LivingLink implements FHIR R4 throughout:
 
 ## Co-Design & Lived Experience
 
-LivingLink was designed with input from:
-- Three living donors (non-directed, directed-paired, directed-related) recruited through NKF Chapter forums
-- One transplant coordinator (UNOS center, 12 years experience)
-- One nephrologist specializing in living donor follow-up
-- Plain language review: all donor-facing copy targets ≤6th grade Flesch-Kincaid score
-
-Personas informed by this research are documented in `Documents/co-design.md`.
+`Documents/co-design.md` contains an account of proposed or previously described participant input from three donor personas, one coordinator, and one nephrologist. The repository does not contain primary recruitment, consent, session, analysis, or traceability records, so completed co-design and participant attributes are not claimed. Human verification and ethical/privacy review are required before this account is used externally. Donor-facing copy targets a sixth-grade reading level; a complete readability review is pending.
 
 ---
 
 ## Health Equity
 
 - **Language:** Spanish interface in roadmap (Q1 2027); current AI assistant responds in user's input language
-- **Digital literacy:** 6th-grade reading level, no jargon, tooltip-rich UI
-- **Device access:** Fully responsive for mobile (primary access device for 67% of low-income users per Pew 2023)
+- **Digital literacy target:** 6th-grade reading level and plain language; full-corpus testing is pending
+- **Device access target:** Responsive mobile access; complete device and assistive-technology testing is pending
 - **Financial access:** Free to donors; open-source MIT license enables transplant centers to self-host at zero software cost
 - **Geographic equity:** State tax credit guide and NLDAC wizard surface resources for all 50 states
 
@@ -100,8 +96,8 @@ Personas informed by this research are documented in `Documents/co-design.md`.
 | HIPAA Security Rule | Selected AES-256-GCM fields, application audit logging, and deployment-dependent transport/storage controls; compliance is not claimed |
 | HIPAA Privacy Rule | Consent management at `/consent`; legal/privacy review and operational policies remain pending |
 | Section 508 | Accessibility is in progress; limited axe-core coverage exists, with authenticated/manual testing and VPAT/ACR assessment pending |
-| FIPS 199 | MODERATE impact baseline; see `Documents/compliance-plan.md` |
-| 21st Century Cures Act | No information blocking; FHIR export on demand |
+| FIPS 199 | Provisional HIGH impact categorization under the documented high-water mark; authorized review pending |
+| 21st Century Cures Act | FHIR export prototype; legal applicability and conformance are not established |
 
 ---
 
