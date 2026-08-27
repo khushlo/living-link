@@ -6,6 +6,7 @@ import { mapBMIToFHIRObservation, mapBPToFHIRObservation, mapDonorToFHIRPatient,
 import { writeFHIRResources } from "@/lib/fhir/write";
 import { z } from "zod";
 import OpenAI from "openai";
+import { hasLatestConsent } from "@/lib/consent";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await prisma.user.findUnique({
       where: { clerkId: userId! },
-      include: { donorProfile: { include: { consentRecords: { where: { purpose: "ehr_exchange", granted: true }, orderBy: { createdAt: "desc" }, take: 1 } } } },
+       include: { donorProfile: true },
     });
     if (!user?.donorProfile) return NextResponse.json({ error: "Donor profile not found" }, { status: 404 });
 
@@ -75,7 +76,8 @@ Keep response under 150 words. Be warm and encouraging. End with one specific ne
 
     // Health metrics are PHI when linked to an authenticated donor. Keep the
     // default deployment deterministic until an approved AI PHI configuration exists.
-    const useApprovedAI = process.env.ALLOW_PHI_TO_AI === "true" && Boolean(process.env.OPENAI_API_KEY);
+    const useApprovedAI = process.env.ALLOW_PHI_TO_AI === "true" && Boolean(process.env.OPENAI_API_KEY) &&
+      await hasLatestConsent(user.donorProfile.id, "ai_processing");
     const aiSummary = useApprovedAI
       ? (await new OpenAI({ apiKey: process.env.OPENAI_API_KEY }).chat.completions.create({
           model: process.env.OPENAI_MODEL || "gpt-4o",
@@ -96,7 +98,7 @@ Keep response under 150 words. Be warm and encouraging. End with one specific ne
     }
     if (check.egfr != null) fhirResources.push(mapEGFRToFHIRObservation(user.donorProfile.id, check.egfr, check.assessedAt));
     let fhirWrite: { attempted: boolean; written: boolean; reason?: string } = { attempted: false, written: false };
-    if (user.donorProfile.consentRecords.length === 0) {
+    if (!(await hasLatestConsent(user.donorProfile.id, "ehr_exchange"))) {
       fhirWrite.reason = "ehr_exchange_consent_required";
     } else try {
       fhirWrite = await writeFHIRResources(fhirResources);

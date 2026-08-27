@@ -33,7 +33,7 @@ export function PublicPageShell({ children }: PublicPageShellProps) {
     return (
       <div className="min-h-screen bg-white">
         <PublicNav />
-        {children}
+        <main id="main-content" tabIndex={-1}>{children}</main>
       </div>
     );
   }

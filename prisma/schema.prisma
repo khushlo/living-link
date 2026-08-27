@@ -20,6 +20,11 @@ enum UserRole {
   ADMIN
 }
 
+enum SmartLaunchType {
+  EHR
+  STANDALONE
+}
+
 enum DonationStatus {
   EXPLORING
   IN_EVALUATION
@@ -84,6 +89,7 @@ model User {
   email           String    @unique
   firstName       String?   @map("first_name")
   lastName        String?   @map("last_name")
+  phone           String?
   role            UserRole  @default(DONOR)
   preferredLang   String    @default("en") @map("preferred_lang")
   createdAt       DateTime  @default(now()) @map("created_at")
@@ -102,6 +108,7 @@ model User {
   mentorReports     MentorSafetyReport[]
   storySubmissions  StorySubmission[]
   center            CenterMembership?
+  smartSessions     SmartSession[]
 
   @@map("users")
 }
@@ -114,7 +121,10 @@ model DonorProfile {
   donationStatus    DonationStatus  @default(EXPLORING)
   isParentDonor     Boolean         @default(false) @map("is_parent_donor")
   donatedAt         DateTime?       @map("donated_at")
+  dateOfBirth       DateTime?       @map("date_of_birth")
+  donationType      String?         @map("donation_type")
   recipientRelation String?         @map("recipient_relation")
+  transplantCenterName String?      @map("transplant_center_name")
   createdAt         DateTime        @default(now()) @map("created_at")
   updatedAt         DateTime        @updatedAt @map("updated_at")
 
@@ -128,6 +138,7 @@ model DonorProfile {
   checkins          PostDonationCheckin[]
   phq2Responses     PHQ2Response[]
   consentRecords    ConsentRecord[]
+  externalPatientMappings ExternalPatientMapping[]
   fhirPatientId     String?           @map("fhir_patient_id")
   consentedAt       DateTime?         @map("consented_at")
   consentVersion    String?           @map("consent_version")
@@ -157,6 +168,13 @@ model SmartSession {
   id                   String    @id @default(uuid())
   state                String    @unique
   issuer               String
+  connectionId         String?              @map("connection_id")
+  launchType           SmartLaunchType      @default(EHR) @map("launch_type")
+  localUserId          String?              @map("local_user_id")
+  localCenterId        String?              @map("local_center_id")
+  authorizedPatientContext String?          @map("authorized_patient_context")
+  grantedScopes        String[]             @default([]) @map("granted_scopes")
+  tokenMetadata        Json                 @default("{}") @map("token_metadata")
   tokenEndpoint        String    @map("token_endpoint")
   pkceVerifier         String    @map("pkce_verifier")
   accessTokenEncrypted String?   @map("access_token_encrypted")
@@ -165,7 +183,47 @@ model SmartSession {
   createdAt            DateTime  @default(now()) @map("created_at")
   consumedAt           DateTime? @map("consumed_at")
 
+  connection            EHRConnection? @relation(fields: [connectionId], references: [id])
+  localUser             User? @relation(fields: [localUserId], references: [id])
+
   @@map("smart_sessions")
+}
+
+model EHRConnection {
+  id                     String   @id @default(uuid())
+  issuer                 String
+  vendor                 String
+  environment            String
+  organizationCenterId   String?  @map("organization_center_id")
+  enabled                Boolean  @default(true)
+  clientConfigurationRef String?  @map("client_configuration_ref")
+  allowedCapabilities    Json     @default("[]") @map("allowed_capabilities")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  center                  TransplantCenter? @relation(fields: [organizationCenterId], references: [id])
+  smartSessions           SmartSession[]
+  externalPatientMappings ExternalPatientMapping[]
+
+  @@unique([issuer, environment])
+  @@index([organizationCenterId, enabled])
+  @@map("ehr_connections")
+}
+
+model ExternalPatientMapping {
+  id                String   @id @default(uuid())
+  connectionId      String   @map("connection_id")
+  donorProfileId    String   @map("donor_profile_id")
+  externalPatientId String   @map("external_patient_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  connection   EHRConnection @relation(fields: [connectionId], references: [id])
+  donorProfile DonorProfile   @relation(fields: [donorProfileId], references: [id])
+
+  @@unique([connectionId, externalPatientId])
+  @@unique([connectionId, donorProfileId])
+  @@map("external_patient_mappings")
 }
 
 model EligibilityCheck {
@@ -395,6 +453,7 @@ model TransplantCenter {
   members     CenterMembership[]
   protocols   Protocol[]
   evaluations DonorEvaluation[]
+  ehrConnections EHRConnection[]
 
   @@map("transplant_centers")
 }

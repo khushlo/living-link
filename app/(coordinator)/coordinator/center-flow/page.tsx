@@ -26,19 +26,10 @@ const STAGE_META: Record<string, { label: string; color: string }> = {
   DECLINED:        { label: "Declined",         color: "bg-red-100 text-red-700" },
 };
 
-const DEMO: Evaluation[] = [
-  { id: "demo-1", donorName: "Candidate A", stage: "BLOODWORK",       daysElapsed: 18, isStalled: true,  stalledReason: "Bloodwork pending >14 days", updatedAt: new Date().toISOString() },
-  { id: "demo-2", donorName: "Candidate B", stage: "PSYCH_EVAL",      daysElapsed: 7,  isStalled: false, updatedAt: new Date().toISOString() },
-  { id: "demo-3", donorName: "Candidate C", stage: "INITIAL_INQUIRY", daysElapsed: 3,  isStalled: false, updatedAt: new Date().toISOString() },
-  { id: "demo-4", donorName: "Candidate D", stage: "CARDIAC_EVAL",    daysElapsed: 24, isStalled: true,  stalledReason: "Cardiac eval pending >21 days", updatedAt: new Date().toISOString() },
-  { id: "demo-5", donorName: "Candidate E", stage: "FINAL_REVIEW",    daysElapsed: 5,  isStalled: false, updatedAt: new Date().toISOString() },
-  { id: "demo-6", donorName: "Candidate F", stage: "APPROVED",        daysElapsed: 0,  isStalled: false, updatedAt: new Date().toISOString() },
-];
-
 export default function CoordinatorCenterFlowPage() {
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "stalled" | "active">("all");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -46,22 +37,22 @@ export default function CoordinatorCenterFlowPage() {
 
   async function load() {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetch("/api/center-flow/evaluations");
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) { setEvaluations(data); setIsDemo(false); }
-      else { setEvaluations(DEMO); setIsDemo(true); }
-    } catch { setEvaluations(DEMO); setIsDemo(true); }
+      if (!res.ok) throw new Error(typeof data?.error === "string" ? data.error : "Unable to load evaluations.");
+      setEvaluations(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setEvaluations([]);
+      setLoadError(error instanceof Error ? error.message : "Unable to load evaluations.");
+    }
     finally { setLoading(false); }
   }
 
   useEffect(() => { load(); }, []);
 
   async function updateStage(id: string, stage: string) {
-    if (isDemo) {
-      setEvaluations((prev) => prev.map((e) => e.id === id ? { ...e, stage, isStalled: false } : e));
-      setExpandedId(null); return;
-    }
     setUpdatingId(id);
     try {
       await fetch(`/api/center-flow/evaluations`, {
@@ -97,12 +88,7 @@ export default function CoordinatorCenterFlowPage() {
         </button>
       </div>
 
-      {isDemo && (
-        <div className="flex items-start gap-2 rounded-lg bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
-          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
-          Showing demo data. Connect a transplant center account to see live evaluations.
-        </div>
-      )}
+      {loadError && <div role="alert" className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"><AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />{loadError}</div>}
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -130,8 +116,8 @@ export default function CoordinatorCenterFlowPage() {
       </div>
 
       {/* Evaluation rows */}
-      {loading ? <p className="text-sm text-gray-400">Loading…</p> : shown.length === 0 ? (
-        <p className="text-sm text-gray-400">No evaluations match this filter.</p>
+      {loading ? <p className="text-sm text-gray-600">Loading evaluations...</p> : shown.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-gray-300 p-6 text-sm text-gray-600">{evaluations.length === 0 ? "No live evaluations are available for this center." : "No evaluations match this filter."}</p>
       ) : (
         <div className="space-y-3">
           {shown.map((ev) => {

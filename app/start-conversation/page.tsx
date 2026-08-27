@@ -212,7 +212,7 @@ export default function StartConversationPage() {
             {/* Messages */}
             <div
               className="min-h-64 max-h-96 overflow-y-auto p-5 space-y-4"
-              role="log"
+               role="log"
               aria-label="Conversation messages"
               aria-live="polite"
             >
@@ -242,7 +242,7 @@ export default function StartConversationPage() {
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-gray-100 rounded-2xl rounded-bl-none px-4 py-3">
-                    <div className="flex gap-1.5 items-center" aria-label="Thinking...">
+                    <div className="flex gap-1.5 items-center" role="status" aria-label="Assistant is thinking">
                       {[0, 150, 300].map((delay) => (
                         <span
                           key={delay}

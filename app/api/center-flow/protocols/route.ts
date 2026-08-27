@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/api-auth";
+import { requirePermission } from "@/lib/api-auth";
 import { z } from "zod";
 import { recordAuditEvent } from "@/lib/audit";
 
@@ -14,7 +14,7 @@ const protocolSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const { error } = await requireAuth();
+  const { error } = await requirePermission("center:evaluations:read");
   if (error) return error;
 
   const { searchParams } = req.nextUrl;
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId, error } = await requireAuth();
+  const { userId, error, user } = await requirePermission("center:protocols:write");
   if (error) return error;
 
   const body = await req.json();
@@ -45,18 +45,12 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 });
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId! },
-      include: { center: true },
-    });
-    if (!user || !["COORDINATOR", "ADMIN"].includes(user.role)) {
-      return NextResponse.json({ error: "Coordinator access required" }, { status: 403 });
-    }
+    const member = user!.role === "ADMIN" ? null : await prisma.centerMembership.findUnique({ where: { userId: user!.id } });
     const protocol = await prisma.protocol.create({
       data: {
         ...parsed.data,
         focusArea: parsed.data.focusArea as any,
-        centerId: (user?.center as any)?.centerId ?? null,
+        centerId: member?.centerId ?? null,
         isPublished: false,
       } as any,
     });

@@ -54,7 +54,7 @@ export default async function DonorDashboard() {
     <div className="max-w-5xl mx-auto">
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {firstName} 👋</h1>
+        <h1 className="text-3xl ml-10 font-bold text-gray-900">Welcome back, {firstName}</h1>
         <p className="mt-1 text-gray-500">
           Your kidney donation journey at a glance. You&apos;re making a difference.
         </p>

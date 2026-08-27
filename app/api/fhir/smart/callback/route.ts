@@ -36,6 +36,10 @@ export async function GET(req: NextRequest) {
   if (!session || session.consumedAt || session.expiresAt <= new Date() || !isAllowedIssuer(session.issuer)) {
     return NextResponse.json({ error: "Expired SMART callback state" }, { status: 400 });
   }
+  const connection = session.connectionId
+    ? await prisma.eHRConnection.findFirst({ where: { id: session.connectionId, issuer: session.issuer, enabled: true }, select: { id: true } })
+    : null;
+  if (!connection) return NextResponse.json({ error: "SMART connection is not enabled" }, { status: 403 });
   const verifier = decryptField(session.pkceVerifier);
 
   // Exchange code for token
@@ -60,7 +64,6 @@ export async function GET(req: NextRequest) {
   const {
     access_token,
     patient,
-    id_token,
     expires_in,
   } = tokenData;
   if (typeof access_token !== "string" || access_token.length < 1 || access_token.length > 10_000) {
@@ -70,17 +73,30 @@ export async function GET(req: NextRequest) {
   if (!Number.isFinite(tokenLifetime) || tokenLifetime <= 0) {
     return NextResponse.json({ error: "Invalid token expiry" }, { status: 502 });
   }
+  if (tokenData.token_type && tokenData.token_type.toLowerCase() !== "bearer") {
+    return NextResponse.json({ error: "Unsupported token type" }, { status: 502 });
+  }
+  if (patient !== undefined && (typeof patient !== "string" || patient.length > 256)) {
+    return NextResponse.json({ error: "Invalid patient context" }, { status: 502 });
+  }
 
   const sessionExpiry = new Date(Date.now() + Math.min(tokenLifetime, 3600) * 1_000);
-  await prisma.smartSession.update({
-    where: { id: session.id },
+  // Consume state atomically so two concurrent callbacks cannot reuse the same code.
+  const consumed = await prisma.smartSession.updateMany({
+    where: { id: session.id, consumedAt: null, expiresAt: { gt: new Date() } },
     data: {
       accessTokenEncrypted: encryptField(access_token) as string,
       patientIdEncrypted: patient ? encryptField(patient) : null,
+      authorizedPatientContext: patient ? encryptField(patient) as string : null,
+      grantedScopes: typeof tokenData.scope === "string" ? tokenData.scope.split(/\s+/).filter(Boolean) : [],
+      tokenMetadata: { tokenType: tokenData.token_type ?? "Bearer", hasRefreshToken: typeof tokenData.refresh_token === "string" },
       expiresAt: sessionExpiry,
       consumedAt: new Date(),
     },
   });
+  if (consumed.count !== 1) {
+    return NextResponse.json({ error: "SMART callback state was already consumed" }, { status: 400 });
+  }
 
   const response = NextResponse.redirect(new URL("/clinician/center-flow", req.nextUrl.origin));
   response.cookies.set("smart_session_id", session.id, {

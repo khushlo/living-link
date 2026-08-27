@@ -76,9 +76,6 @@ const stats = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Skip nav target */}
-      <a id="main-content" className="sr-only" aria-label="Main content start" />
-
       <PublicNav />
 
       <main>

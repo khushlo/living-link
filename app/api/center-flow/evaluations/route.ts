@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/api-auth";
+import { requirePermission } from "@/lib/api-auth";
 import { recordAuditEvent } from "@/lib/audit";
 import { z } from "zod";
 
@@ -18,24 +18,21 @@ const createSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const { userId, error } = await requireAuth();
+  const { userId, error, user } = await requirePermission("center:evaluations:read");
   if (error) return error;
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId! },
-      include: { center: true },
-    });
-    if (!(user?.center as any)?.centerId) {
+    const member = await prisma.centerMembership.findUnique({ where: { userId: user!.id } });
+    if (!member?.centerId) {
       return NextResponse.json({ error: "Not associated with a center" }, { status: 403 });
     }
     const evaluations = await prisma.donorEvaluation.findMany({
-      where: { centerId: (user!.center as any).centerId },
+      where: { centerId: member.centerId },
       orderBy: { updatedAt: "desc" },
     });
     const now = Date.now();
     await recordAuditEvent(req, userId!, "READ", "DonorEvaluation", undefined, {
-      centerId: (user!.center as any).centerId,
+      centerId: member.centerId,
     });
     return NextResponse.json(evaluations.map((evaluation) => ({
       ...evaluation,
@@ -48,23 +45,23 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId, error } = await requireAuth();
+  const { userId, error, user } = await requirePermission("center:evaluations:write");
   if (error || !userId) return error;
   const parsed = createSchema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 });
   try {
-    const user = await prisma.user.findUnique({ where: { clerkId: userId }, include: { center: true } });
-    if (!user?.center || user.role !== "COORDINATOR") return NextResponse.json({ error: "Coordinator access required" }, { status: 403 });
+    const member = await prisma.centerMembership.findUnique({ where: { userId: user!.id } });
+    if (!member?.centerId) return NextResponse.json({ error: "Center membership required" }, { status: 403 });
     const evaluation = await prisma.donorEvaluation.create({
       data: {
-        centerId: user.center.centerId,
+        centerId: member.centerId,
         donorRef: parsed.data.donorRef,
         stage: parsed.data.stage ?? "INITIAL_INQUIRY",
         notes: parsed.data.notes,
         stageHistory: [{ from: null, to: parsed.data.stage ?? "INITIAL_INQUIRY", changedAt: new Date().toISOString(), changedBy: userId }],
       },
     });
-    await recordAuditEvent(req, userId, "CREATE", "DonorEvaluation", evaluation.id, { centerId: user.center.centerId });
+    await recordAuditEvent(req, userId, "CREATE", "DonorEvaluation", evaluation.id, { centerId: member.centerId });
     return NextResponse.json(evaluation, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create evaluation" }, { status: 500 });
@@ -74,7 +71,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(
   req: NextRequest
 ) {
-  const { userId, error } = await requireAuth();
+  const { userId, error, user } = await requirePermission("center:evaluations:write");
   if (error || !userId) return error;
 
   const body = await req.json();
@@ -83,16 +80,13 @@ export async function PATCH(
 
   try {
     const { id, ...changes } = parsed.data;
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-      include: { center: true },
-    });
-    if (!user?.center || user.role !== "COORDINATOR") {
+    const member = await prisma.centerMembership.findUnique({ where: { userId: user!.id } });
+    if (!member?.centerId) {
       return NextResponse.json({ error: "Coordinator access required" }, { status: 403 });
     }
 
     const existing = await prisma.donorEvaluation.findFirst({
-      where: { id, centerId: user.center.centerId },
+      where: { id, centerId: member.centerId },
       select: { id: true },
     });
     if (!existing) return NextResponse.json({ error: "Evaluation not found" }, { status: 404 });
@@ -109,7 +103,7 @@ export async function PATCH(
       },
     });
     await recordAuditEvent(req, userId, "UPDATE", "DonorEvaluation", evaluation.id, {
-      centerId: user.center.centerId,
+      centerId: member.centerId,
       stage: changes.stage,
     });
     return NextResponse.json(evaluation);

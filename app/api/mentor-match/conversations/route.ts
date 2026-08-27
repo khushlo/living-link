@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/api-auth";
+import { requirePermission } from "@/lib/api-auth";
+import { hasLatestConsent } from "@/lib/consent";
 import { decryptField } from "@/lib/field-encryption";
 import { recordAuditEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const { userId, error } = await requireAuth();
+  const { userId, error, user } = await requirePermission("mentor:message");
   if (error) return error;
 
   try {
-    const user = await prisma.user.findUnique({ where: { clerkId: userId! }, select: { id: true } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!user || !(await hasLatestConsent(user.donorProfile?.id ?? "", "mentor_messaging"))) return NextResponse.json({ error: "Current mentor-messaging consent is required" }, { status: 403 });
 
     const conversations = await prisma.mentorMatch.findMany({
       where: { candidateId: user.id, status: { in: ["pending", "active"] } },

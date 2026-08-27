@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { recordAuditEvent } from "@/lib/audit";
+import { hasLatestConsent } from "@/lib/consent";
 
 export const dynamic = "force-dynamic";
 
@@ -53,16 +54,26 @@ export async function GET() {
 
 // ─── Hook Handler ─────────────────────────────────────────────────────────────
 
-export async function POST(req: NextRequest) {
+async function handleCDSRequest(req: NextRequest, forcedServiceId?: string) {
   if (!hasAuthorizedServiceToken(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await req.json().catch(() => null);
-  if (!body) return NextResponse.json({ cards: [] });
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ error: "Invalid CDS Hooks request" }, { status: 400 });
+  }
 
-  const hookId    = body.hookInstance as string | undefined;
-  const serviceId = body.service as string | undefined;
-  const patientId = body.context?.patientId as string | undefined;
+  const hookId = typeof body.hookInstance === "string" ? body.hookInstance : undefined;
+  const serviceId = forcedServiceId ?? (typeof body.service === "string" ? body.service : undefined);
+  const context = body.context && typeof body.context === "object" ? body.context : null;
+  const patientId = context && typeof context.patientId === "string" ? context.patientId : undefined;
+  const issuer = typeof body.fhirServer === "string" ? body.fhirServer.replace(/\/$/, "") : undefined;
+  if (body.hook !== "patient-view" || !hookId || !patientId || !issuer) {
+    return NextResponse.json({ error: "hook, hookInstance, context.patientId, and fhirServer are required" }, { status: 400 });
+  }
+  if (serviceId !== "livinglink-readycheck-alert" && serviceId !== "livinglink-stalled-evaluation") {
+    return NextResponse.json({ error: "Unknown CDS service" }, { status: 404 });
+  }
   await recordAuditEvent(req, null, "READ", "CDSHook", undefined, { hookReceived: true });
 
   const cards: object[] = [];
@@ -70,9 +81,15 @@ export async function POST(req: NextRequest) {
   if (!patientId) return NextResponse.json({ cards });
 
   try {
-    // Look up donor by FHIR patient ID (stored as externalId on DonorProfile)
-    const donorProfile = await prisma.donorProfile.findFirst({
-      where: { fhirPatientId: patientId },
+    const connection = issuer ? await prisma.eHRConnection.findFirst({ where: { issuer, enabled: true }, select: { id: true } }) : null;
+    if (!connection) return NextResponse.json({ cards: [] });
+    const mapping = await prisma.externalPatientMapping.findUnique({
+      where: { connectionId_externalPatientId: { connectionId: connection.id, externalPatientId: patientId } },
+      select: { donorProfileId: true },
+    });
+    if (!mapping || !(await hasLatestConsent(mapping.donorProfileId, "ehr_exchange"))) return NextResponse.json({ cards: [] });
+    const donorProfile = await prisma.donorProfile.findUnique({
+      where: { id: mapping.donorProfileId },
       include: { eligibilityChecks: { orderBy: { assessedAt: "desc" }, take: 1 } },
     }).catch(() => null);
 
@@ -126,4 +143,8 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ cards });
+}
+
+export async function POST(req: NextRequest) {
+  return handleCDSRequest(req, req.headers.get("x-livinglink-service-id") ?? undefined);
 }

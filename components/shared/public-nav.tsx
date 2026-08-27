@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const PUBLIC_LINKS = [
@@ -28,6 +28,19 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
   const pathname = usePathname();
   const active = currentPath ?? pathname;
   const [mobileOpen, setMobileOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
 
   return (
     <>
@@ -45,7 +58,8 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
               <Link
                 key={href}
                 href={href}
-                className={cn(
+                   aria-current={active === href ? "page" : undefined}
+                   className={cn(
                   "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                   active === href
                     ? "bg-blue-50 text-blue-700"
@@ -82,10 +96,12 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
 
             {/* Mobile menu toggle — always visible on small screens */}
             <button
-              className="md:hidden rounded-lg border border-gray-200 p-1.5 ml-1 bg-white"
+               ref={menuButtonRef}
+               className="md:hidden rounded-lg border border-gray-200 p-1.5 ml-1 bg-white"
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
-              aria-expanded={mobileOpen}
+               aria-label={mobileOpen ? "Close menu" : "Open menu"}
+               aria-expanded={mobileOpen}
+               aria-controls="public-mobile-menu"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -94,13 +110,14 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
 
         {/* Mobile dropdown */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1">
+          <div id="public-mobile-menu" className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1" aria-label="Mobile public tools menu">
             {PUBLIC_LINKS.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMobileOpen(false)}
-                className={cn(
+                   aria-current={active === href ? "page" : undefined}
+                   className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   active === href
                     ? "bg-blue-50 text-blue-700"

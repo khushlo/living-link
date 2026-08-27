@@ -1,8 +1,10 @@
-﻿import { auth } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { recordAuditEvent } from "@/lib/audit";
 import { z } from "zod";
+import { requirePermission } from "@/lib/api-auth";
+import { hasLatestConsent } from "@/lib/consent";
+import { prisma } from "@/lib/prisma";
 
 const chatRequestSchema = z.object({
   message: z.string().trim().min(1).max(1_000),
@@ -51,9 +53,11 @@ function buildModuleContext(module?: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { userId, user, error } = await requirePermission("ai:process");
+  if (error || !userId || !user) return error;
+  const profile = await prisma.donorProfile.findUnique({ where: { userId: user.id }, select: { id: true } });
+  if (!profile || !(await hasLatestConsent(profile.id, "ai_processing"))) {
+    return NextResponse.json({ error: "Current AI-processing consent is required" }, { status: 403 });
   }
 
   try {

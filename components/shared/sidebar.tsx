@@ -10,6 +10,7 @@ import {
   CheckCircle,
   Shield,
   Activity,
+  Link2,
   Calendar,
   MessageCircle,
   TrendingUp,
@@ -17,6 +18,7 @@ import {
   BookOpen,
   Menu,
   X,
+  UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Fragment, useState } from "react";
@@ -170,6 +172,7 @@ export function Sidebar({ navItems, role, isMentor = false, includeAdmin = false
 // Pre-built nav item sets per role
 export const donorNavItems: NavItem[] = [
   { href: "/donor/dashboard",      label: "Dashboard",          icon: LayoutDashboard },
+  { href: "/donor/profile",        label: "Donor profile",       icon: UserCircle },
   { href: "/ready-check",          label: "ReadyCheck",          icon: CheckCircle },
   { href: "/donor-shield",         label: "DonorShield",         icon: Shield },
   { href: "/mentor-match",         label: "Mentor Match",        icon: Users },
@@ -186,11 +189,13 @@ export const donorNavItems: NavItem[] = [
 export const clinicianNavItems: NavItem[] = [
   { href: "/clinician/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/clinician/center-flow", label: "CenterFlow", icon: Activity },
+  { href: "/clinician/patient-links", label: "Link EHR patients", icon: Link2 },
 ];
 
 export const coordinatorNavItems: NavItem[] = [
   { href: "/coordinator/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/coordinator/center-flow", label: "CenterFlow", icon: Activity },
+  { href: "/coordinator/patient-links", label: "Link EHR patients", icon: Link2 },
 ];
 
 export const patientNavItems: NavItem[] = [

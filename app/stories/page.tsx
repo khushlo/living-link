@@ -165,7 +165,7 @@ export default function StoriesPage() {
 
   return (
     <PublicPageShell>
-      <main>
+      <div>
         {/* Hero */}
         <section className="mx-auto max-w-4xl px-6 py-16 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -227,7 +227,7 @@ export default function StoriesPage() {
           </div>
 
           {!loading && (
-            <p className="mt-3 text-sm text-gray-500">
+             <p className="mt-3 text-sm text-gray-500" aria-live="polite" aria-atomic="true">
               Showing {filtered.length} stor{filtered.length !== 1 ? "ies" : "y"}
               {searchTerm && ` matching "${searchTerm}"`}
             </p>
@@ -237,8 +237,9 @@ export default function StoriesPage() {
         {/* Stories */}
         <section className="mx-auto max-w-4xl px-6 pb-16">
           {loading && (
-            <div className="flex justify-center py-20">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" aria-label="Loading stories" />
+             <div className="flex justify-center py-20" role="status" aria-live="polite">
+               <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" aria-hidden="true" />
+               <span className="sr-only">Loading stories</span>
             </div>
           )}
 
@@ -308,7 +309,7 @@ export default function StoriesPage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
       <footer className="border-t border-gray-100 py-6">
         <div className="mx-auto max-w-5xl px-6 flex flex-col md:flex-row items-center justify-between gap-3">

@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Heart, ArrowRight, CheckCircle, XCircle, AlertCircle, ChevronRight, ArrowLeft } from "lucide-react";
 import { SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
@@ -47,11 +47,16 @@ const steps: Step[] = ["welcome", "q1", "q2", "q3", "q4", "q5", "result"];
 export default function CouldIQualifyPage() {
   const [step, setStep] = useState<Step>("welcome");
   const [answers, setAnswers] = useState<Answers>(initialAnswers);
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   function next(nextStep: Step) {
     setStep(nextStep);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
+
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, [step]);
 
   const discussionTopics = [
     answers.age === "under18" || answers.age === "over70" ? "Age requirements and center-specific policies" : null,
@@ -64,14 +69,14 @@ export default function CouldIQualifyPage() {
 
   return (
     <PublicPageShell>
-      <main className="mx-auto max-w-2xl px-6 py-12">
+      <div className="mx-auto max-w-2xl px-6 py-12">
         {step !== "welcome" && step !== "result" && (
           <div className="mb-8">
             <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
               <span>Question {steps.indexOf(step)} of 5</span>
               <span>{Math.round(progress)}% complete</span>
             </div>
-            <div className="h-2 w-full rounded-full bg-gray-100" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
+            <div className="h-2 w-full rounded-full bg-gray-100" role="progressbar" aria-label="Screener progress" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
               <div
                 className="h-2 rounded-full bg-blue-600 transition-all duration-500"
                 style={{ width: `${progress}%` }}
@@ -86,7 +91,7 @@ export default function CouldIQualifyPage() {
             <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-200 px-4 py-1.5 text-sm font-medium text-blue-700">
               60-second check · No account needed
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 leading-tight">
+             <h1 ref={headingRef} tabIndex={-1} className="text-4xl font-bold text-gray-900 leading-tight">
               Could you be a<br />
               <span className="text-blue-600">living kidney donor?</span>
             </h1>
@@ -124,7 +129,7 @@ export default function CouldIQualifyPage() {
           <div className="space-y-6">
             <div>
               <p className="text-sm font-medium text-blue-600 mb-1">Question 1 of 5</p>
-              <h2 className="text-2xl font-bold text-gray-900">How old are you?</h2>
+               <h2 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-gray-900">How old are you?</h2>
               <p className="text-gray-500 mt-1 text-sm">Transplant centers generally consider donors between 18–70 years old.</p>
             </div>
             <div className="space-y-3">
@@ -155,7 +160,7 @@ export default function CouldIQualifyPage() {
             </button>
             <div>
               <p className="text-sm font-medium text-blue-600 mb-1">Question 2 of 5</p>
-              <h2 className="text-2xl font-bold text-gray-900">What's your approximate BMI?</h2>
+               <h2 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-gray-900">What's your approximate BMI?</h2>
               <p className="text-gray-500 mt-1 text-sm">BMI = weight (lbs) ÷ height (in)² × 703. Most centers prefer BMI under 35. Not sure? Pick your best estimate.</p>
             </div>
             <div className="space-y-3">
@@ -186,7 +191,7 @@ export default function CouldIQualifyPage() {
             </button>
             <div>
               <p className="text-sm font-medium text-blue-600 mb-1">Question 3 of 5</p>
-              <h2 className="text-2xl font-bold text-gray-900">How would you describe your overall health?</h2>
+               <h2 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-gray-900">How would you describe your overall health?</h2>
             </div>
             <div className="space-y-3">
               {[
@@ -216,7 +221,7 @@ export default function CouldIQualifyPage() {
             </button>
             <div>
               <p className="text-sm font-medium text-blue-600 mb-1">Question 4 of 5</p>
-              <h2 className="text-2xl font-bold text-gray-900">Do you have any of these conditions?</h2>
+               <h2 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-gray-900">Do you have any of these conditions?</h2>
               <p className="text-gray-500 mt-1 text-sm">Diabetes, kidney disease, high blood pressure, or cancer.</p>
             </div>
             <div className="space-y-3">
@@ -246,7 +251,7 @@ export default function CouldIQualifyPage() {
             </button>
             <div>
               <p className="text-sm font-medium text-blue-600 mb-1">Question 5 of 5</p>
-              <h2 className="text-2xl font-bold text-gray-900">What best describes you right now?</h2>
+               <h2 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-gray-900">What best describes you right now?</h2>
             </div>
             <div className="space-y-3">
               {[
@@ -275,7 +280,7 @@ export default function CouldIQualifyPage() {
               <>
                 <div className="rounded-2xl bg-green-50 border-2 border-green-300 p-8 text-center">
                   <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" aria-hidden="true" />
-                   <h2 className="text-2xl font-bold text-green-900 mb-2">You may be a potential donor</h2>
+                   <h2 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-green-900 mb-2">You may be a potential donor</h2>
                   <p className="text-green-800">
                      Your answers line up with several common starting factors transplant teams consider. This is
                      only an initial screen, not an eligibility decision. A transplant center evaluation is the only way to know.
@@ -301,7 +306,7 @@ export default function CouldIQualifyPage() {
               <>
                 <div className="rounded-2xl bg-blue-50 border-2 border-blue-300 p-8 text-center">
                   <AlertCircle className="h-12 w-12 text-blue-600 mx-auto mb-4" aria-hidden="true" />
-                   <h2 className="text-2xl font-bold text-blue-900 mb-2">Donation may be possible</h2>
+                    <h2 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-blue-900 mb-2">Donation may be possible</h2>
                   <p className="text-blue-800">
                      Your answers suggest that donation may be worth exploring, with some topics to review with a
                      transplant team. This screen cannot confirm eligibility or predict an evaluation outcome.
@@ -328,7 +333,7 @@ export default function CouldIQualifyPage() {
               <>
                 <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-8 text-center">
                   <XCircle className="h-12 w-12 text-amber-600 mx-auto mb-4" aria-hidden="true" />
-                   <h2 className="text-2xl font-bold text-amber-900 mb-2">You may need more review first</h2>
+                    <h2 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-amber-900 mb-2">You may need more review first</h2>
                   <p className="text-amber-800">
                      Your answers point to age or health topics that may need closer review. This does not mean
                      donation is impossible, and you should not change treatment based on this screen.
@@ -389,7 +394,7 @@ export default function CouldIQualifyPage() {
             </p>
           </div>
         )}
-      </main>
+      </div>
 
       <footer className="border-t border-gray-100 py-6 mt-8">
         <div className="mx-auto max-w-3xl px-6 flex flex-col md:flex-row items-center justify-between gap-3">

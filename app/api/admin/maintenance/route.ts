@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/api-auth";
+import { requireRole } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { recordAuditEvent } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
-  const { userId, error } = await requireAuth();
+  const { userId, error } = await requireRole("ADMIN");
   if (error || !userId) return error;
-  const admin = await prisma.user.findUnique({ where: { clerkId: userId }, select: { id: true, role: true } });
-  if (!admin || admin.role !== "ADMIN") return NextResponse.json({ error: "Administrator access required" }, { status: 403 });
 
   const expiredSessions = await prisma.smartSession.deleteMany({ where: { expiresAt: { lt: new Date() } } });
   const dueReminders = await prisma.lifeAfterReminder.findMany({

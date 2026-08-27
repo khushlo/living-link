@@ -15,6 +15,9 @@ const isPublicRoute = createRouteMatcher([
   "/api/stories(.*)",
   "/api/waitlist-stats(.*)",
   "/api/ai/conversation-practice",
+  // EHR entry points authenticate with SMART/CDS credentials in their handlers.
+  "/api/fhir/smart(.*)",
+  "/api/cds-hooks(.*)",
 ]);
 
 // Role-specific route matchers

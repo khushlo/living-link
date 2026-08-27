@@ -104,7 +104,7 @@ export default function WaitlistMapPage() {
 
   return (
     <PublicPageShell>
-      <main>
+      <div>
         {/* Hero */}
         <section className="bg-gray-900 text-white py-16">
           <div className="mx-auto max-w-4xl px-6 text-center">
@@ -160,12 +160,12 @@ export default function WaitlistMapPage() {
                 </select>
               </div>
 
-              <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2" role="list" aria-label="States by kidney waitlist">
+              <ul className="space-y-2 max-h-[600px] overflow-y-auto pr-2" aria-label="States by kidney waitlist">
                 {sorted.map(([abbr, data]) => {
                   const urg = getUrgency(data.avgWaitMonths);
                   return (
+                    <li key={abbr}>
                     <button
-                      key={abbr}
                       onClick={() => setSelected(abbr === selected ? null : abbr)}
                       className={`w-full flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         selected === abbr
@@ -173,7 +173,6 @@ export default function WaitlistMapPage() {
                           : "border-gray-100 bg-white hover:border-gray-300"
                       }`}
                       aria-pressed={selected === abbr}
-                      role="listitem"
                     >
                       {/* State abbr colored dot */}
                       <div
@@ -197,9 +196,10 @@ export default function WaitlistMapPage() {
                         {urg.label}
                       </span>
                     </button>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </div>
 
             {/* Detail panel */}
@@ -342,7 +342,7 @@ export default function WaitlistMapPage() {
             </button>
           </SignUpButton>
         </section>
-      </main>
+      </div>
 
       <footer className="border-t border-gray-100 py-6">
         <div className="mx-auto max-w-6xl px-6 flex flex-col md:flex-row items-center justify-between gap-3">

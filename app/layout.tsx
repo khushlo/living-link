@@ -31,9 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Skip to main content
           </a>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-            <main id="main-content" tabIndex={-1}>
-              {children}
-            </main>
+            {children}
             <Toaster />
           </ThemeProvider>
         </body>

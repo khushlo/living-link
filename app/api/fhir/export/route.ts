@@ -17,7 +17,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/api-auth";
+import { requirePermission } from "@/lib/api-auth";
 import { recordAuditEvent } from "@/lib/audit";
 import {
   mapDonorToFHIRPatient,
@@ -39,15 +39,11 @@ function pseudonymizePatient(patient: ReturnType<typeof mapDonorToFHIRPatient>) 
 }
 
 export async function POST(req: NextRequest) {
-  const { userId, error } = await requireAuth();
+  const { userId, error } = await requirePermission("fhir:export");
   if (error) return error;
 
   // Cross-center export remains restricted to an explicitly provisioned system administrator
   // until donor-to-center data scoping is implemented.
-  const user = await prisma.user.findUnique({ where: { clerkId: userId! } });
-  if (!user || user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Insufficient permissions for bulk export" }, { status: 403 });
-  }
 
   const { searchParams } = req.nextUrl;
   const outputFormat = searchParams.get("_outputFormat") ?? "application/fhir+ndjson";

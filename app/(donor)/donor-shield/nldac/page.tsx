@@ -240,12 +240,12 @@ export default function NLDACWizardPage() {
                   {saved ? "Application saved" : "Save application progress"}
                 </button>
                 <a
-                  href="https://nldac.org/apply"
+                  href="https://www.livingdonorassistance.org/Get-Help/Application-Request"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                 >
-                  Apply on NLDAC.org <ExternalLink className="h-4 w-4" />
+                  Apply on NLDAC <ExternalLink className="h-4 w-4" />
                 </a>
                 <a
                   href="tel:18776962110"

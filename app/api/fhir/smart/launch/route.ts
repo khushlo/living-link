@@ -64,6 +64,11 @@ export async function GET(req: NextRequest) {
   if (!isAllowedIssuer(iss)) {
     return NextResponse.json({ error: "FHIR issuer is not registered" }, { status: 403 });
   }
+  const connection = await prisma.eHRConnection.findFirst({
+    where: { issuer: iss.replace(/\/$/, ""), enabled: true },
+    select: { id: true },
+  });
+  if (!connection) return NextResponse.json({ error: "FHIR issuer is not enabled" }, { status: 403 });
 
   // Discover the EHR's OAuth endpoints from the SMART well-known config
   let authEndpoint: string;
@@ -101,7 +106,8 @@ export async function GET(req: NextRequest) {
     await prisma.smartSession.create({
       data: {
         state,
-        issuer: iss,
+        issuer: iss.replace(/\/$/, ""),
+        connectionId: connection.id,
         tokenEndpoint,
         pkceVerifier: encryptField(verifier) as string,
         expiresAt: new Date(Date.now() + 10 * 60_000),

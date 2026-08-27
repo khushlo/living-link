@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/api-auth";
+import { requirePermission } from "@/lib/api-auth";
+import { hasLatestConsent } from "@/lib/consent";
 import { recordAuditEvent } from "@/lib/audit";
 import { decryptField, encryptField } from "@/lib/field-encryption";
 
@@ -10,14 +11,14 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ matchId: string }> }
 ) {
-  const { userId, error } = await requireAuth();
+  const { userId, error, user } = await requirePermission("mentor:message");
   if (error) return error;
 
   const { matchId } = await params;
 
   try {
-    const viewer = await prisma.user.findUnique({ where: { clerkId: userId! }, select: { id: true } });
-    if (!viewer) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const viewer = user;
+    if (!viewer || !(await hasLatestConsent(viewer.donorProfile?.id ?? "", "mentor_messaging"))) return NextResponse.json({ error: "Current mentor-messaging consent is required" }, { status: 403 });
 
     const thread = await prisma.messageThread.findUnique({
       where: { matchId },
@@ -54,7 +55,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ matchId: string }> }
 ) {
-  const { userId, error } = await requireAuth();
+  const { userId, error, user } = await requirePermission("mentor:message");
   if (error) return error;
 
   const { matchId } = await params;
@@ -68,8 +69,9 @@ export async function POST(
     });
     if (!thread) return NextResponse.json({ error: "Thread not found" }, { status: 404 });
 
-    const sender = await prisma.user.findUnique({ where: { clerkId: userId! } });
+    const sender = user;
     if (!sender) return NextResponse.json({ error: "Sender not found" }, { status: 404 });
+    if (!(await hasLatestConsent(sender.donorProfile?.id ?? "", "mentor_messaging"))) return NextResponse.json({ error: "Current mentor-messaging consent is required" }, { status: 403 });
     if (![thread.match.candidateId, thread.match.mentorId].includes(sender.id)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

@@ -74,18 +74,20 @@ function AnimatedNumber({ target, duration = 1500 }: { target: number; duration?
 export default function RipplePage() {
   const [stats, setStats] = useState<Stats>({ waitYears: 5, recipientAge: 45 });
   const [hasCalculated, setHasCalculated] = useState(false);
+  const resultsRef = useRef<HTMLElement>(null);
   const ripple = calcRipple(stats);
 
   function handleCalculate() {
     setHasCalculated(true);
     setTimeout(() => {
-      document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
+       resultsRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+       resultsRef.current?.querySelector("h2")?.focus();
     }, 100);
   }
 
   return (
     <PublicPageShell>
-      <main>
+      <div>
         {/* Hero */}
         <section className="mx-auto max-w-4xl px-6 py-20 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-red-50 border border-red-200 px-4 py-1.5 text-sm font-medium text-red-700 mb-6">
@@ -168,9 +170,9 @@ export default function RipplePage() {
 
         {/* Results */}
         {hasCalculated && (
-          <section id="results" className="bg-gray-900 py-20">
+           <section ref={resultsRef} id="results" className="bg-gray-900 py-20" aria-live="polite">
             <div className="mx-auto max-w-4xl px-6">
-              <h2 className="text-center text-3xl font-bold text-white mb-3">
+               <h2 tabIndex={-1} className="text-center text-3xl font-bold text-white mb-3">
                 Your donation's ripple effect
               </h2>
               <p className="text-center text-gray-400 mb-12">
@@ -298,7 +300,7 @@ export default function RipplePage() {
             </SignUpButton>
           </div>
         </section>
-      </main>
+      </div>
 
       <footer className="border-t border-gray-100 py-6">
         <div className="mx-auto max-w-5xl px-6 flex flex-col md:flex-row items-center justify-between gap-3">

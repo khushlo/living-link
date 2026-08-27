@@ -40,3 +40,6 @@ apps/api/prisma/migrations/
 
 
 Documents/
+!Documents/
+Documents/*
+!Documents/prototype-claims-implementation-plan.md
