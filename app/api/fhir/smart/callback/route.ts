@@ -9,7 +9,7 @@ import { decryptField, encryptField } from "@/lib/field-encryption";
 
 export const dynamic = "force-dynamic";
 
-const SMART_CLIENT_ID = process.env.SMART_CLIENT_ID ?? "livinglink-app";
+const DEFAULT_SMART_CLIENT_ID = process.env.SMART_CLIENT_ID ?? "livinglink-app";
 const REDIRECT_URI    = process.env.SMART_REDIRECT_URI ?? "http://localhost:3000/api/fhir/smart/callback";
 
 function isAllowedIssuer(iss: string) {
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Expired SMART callback state" }, { status: 400 });
   }
   const connection = session.connectionId
-    ? await prisma.eHRConnection.findFirst({ where: { id: session.connectionId, issuer: session.issuer, enabled: true }, select: { id: true } })
+    ? await prisma.eHRConnection.findFirst({ where: { id: session.connectionId, issuer: session.issuer, enabled: true }, select: { id: true, smartClientId: true } })
     : null;
   if (!connection) return NextResponse.json({ error: "SMART connection is not enabled" }, { status: 403 });
   const verifier = decryptField(session.pkceVerifier);
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
       grant_type:   "authorization_code",
       code,
       redirect_uri: REDIRECT_URI,
-      client_id:    SMART_CLIENT_ID,
+      client_id:    connection.smartClientId ?? DEFAULT_SMART_CLIENT_ID,
       code_verifier: verifier,
     }),
     signal: AbortSignal.timeout(10_000),

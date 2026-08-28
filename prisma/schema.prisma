@@ -109,6 +109,7 @@ model User {
   storySubmissions  StorySubmission[]
   center            CenterMembership?
   smartSessions     SmartSession[]
+  reviewedEhrRegistrations EHRRegistration[] @relation("EHRRegistrationReviewer")
 
   @@map("users")
 }
@@ -197,6 +198,7 @@ model EHRConnection {
   environment            String
   organizationCenterId   String?  @map("organization_center_id")
   enabled                Boolean  @default(true)
+  smartClientId          String?  @map("smart_client_id")
   clientConfigurationRef String?  @map("client_configuration_ref")
   allowedCapabilities    Json     @default("[]") @map("allowed_capabilities")
   createdAt              DateTime @default(now()) @map("created_at")
@@ -205,10 +207,46 @@ model EHRConnection {
   center                  TransplantCenter? @relation(fields: [organizationCenterId], references: [id])
   smartSessions           SmartSession[]
   externalPatientMappings ExternalPatientMapping[]
+  registration             EHRRegistration?
 
   @@unique([issuer, environment])
   @@index([organizationCenterId, enabled])
   @@map("ehr_connections")
+}
+
+model EHRRegistration {
+  id                     String    @id @default(uuid())
+  organizationName       String    @map("organization_name")
+  organizationWebsite    String?   @map("organization_website")
+  contactName             String    @map("contact_name")
+  contactEmail            String    @map("contact_email")
+  contactPhone            String?   @map("contact_phone")
+  vendor                  String
+  productName             String    @map("product_name")
+  environment             String
+  fhirIssuer              String    @map("fhir_issuer")
+  fhirVersion             String    @default("R4") @map("fhir_version")
+  smartSupported          Boolean   @default(false) @map("smart_supported")
+  smartClientId           String?   @map("smart_client_id")
+  cdsHooksSupported       Boolean   @default(false) @map("cds_hooks_supported")
+  requestedScopes         String[]  @default([]) @map("requested_scopes")
+  notes                   String?
+  approved                Boolean   @default(false)
+  approvedAt              DateTime? @map("approved_at")
+  rejectedAt              DateTime? @map("rejected_at")
+  rejectionReason         String?   @map("rejection_reason")
+  reviewedAt              DateTime? @map("reviewed_at")
+  reviewedById            String?   @map("reviewed_by_id")
+  ehrConnectionId         String?   @unique @map("ehr_connection_id")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+
+  reviewedBy    User?          @relation("EHRRegistrationReviewer", fields: [reviewedById], references: [id])
+  ehrConnection EHRConnection? @relation(fields: [ehrConnectionId], references: [id])
+
+  @@index([approved, rejectedAt, createdAt])
+  @@index([fhirIssuer, environment])
+  @@map("ehr_registrations")
 }
 
 model ExternalPatientMapping {

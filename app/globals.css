@@ -120,14 +120,12 @@
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
 }
 
-.portal-content h1,
-.public-content h1 {
+:where(.portal-content, .public-content) h1 {
   color: rgb(15 23 42);
   letter-spacing: -0.035em;
 }
 
-.portal-content h2,
-.public-content h2 {
+:where(.portal-content, .public-content) h2 {
   letter-spacing: -0.015em;
 }
 

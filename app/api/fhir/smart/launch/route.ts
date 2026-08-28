@@ -17,7 +17,7 @@ import { encryptField } from "@/lib/field-encryption";
 
 export const dynamic = "force-dynamic";
 
-const SMART_CLIENT_ID = process.env.SMART_CLIENT_ID ?? "livinglink-app";
+const DEFAULT_SMART_CLIENT_ID = process.env.SMART_CLIENT_ID ?? "livinglink-app";
 const REDIRECT_URI    = process.env.SMART_REDIRECT_URI ?? "http://localhost:3000/api/fhir/smart/callback";
 const SCOPES          = "openid fhirUser launch patient/*.read";
 
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
   }
   const connection = await prisma.eHRConnection.findFirst({
     where: { issuer: iss.replace(/\/$/, ""), enabled: true },
-    select: { id: true },
+    select: { id: true, smartClientId: true },
   });
   if (!connection) return NextResponse.json({ error: "FHIR issuer is not enabled" }, { status: 403 });
 
@@ -120,7 +120,7 @@ export async function GET(req: NextRequest) {
   // Build authorization URL
   const params = new URLSearchParams({
     response_type: "code",
-    client_id:     SMART_CLIENT_ID,
+    client_id:     connection.smartClientId ?? DEFAULT_SMART_CLIENT_ID,
     redirect_uri:  REDIRECT_URI,
     scope:         SCOPES,
     state,

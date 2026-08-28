@@ -22,6 +22,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Sparkles,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Fragment, useState } from "react";
@@ -32,6 +33,7 @@ export interface NavItem {
   label: string;
   icon: React.ElementType;
   badge?: string;
+  children?: NavItem[];
 }
 
 interface SidebarProps {
@@ -55,6 +57,9 @@ export function Sidebar({
   const resolvedNavItems = includeAdmin
     ? [...(navItems ?? donorNavItems), ...adminNavItems]
     : navItems ?? donorNavItems;
+  const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(resolvedNavItems.filter((item) => item.children?.some((child) => pathname === child.href || pathname.startsWith(`${child.href}/`))).map((item) => [item.href, true]))
+  );
 
   const roleBadgeColor: Record<string, string> = {
     donor: "bg-teal-400/15 text-teal-200 ring-teal-400/20",
@@ -90,8 +95,9 @@ export function Sidebar({
         <ul className="space-y-1">
           {resolvedNavItems.map((item, index) => {
             const Icon = item.icon;
-            const isActive =
-              pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            const childIsActive = item.children?.some((child) => pathname === child.href || pathname.startsWith(`${child.href}/`)) ?? false;
+            const isActive = childIsActive || pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            const submenuOpen = openSubmenus[item.href] ?? childIsActive;
             return (
               <Fragment key={item.href}>
                 {item.badge && resolvedNavItems[index - 1]?.badge !== item.badge && (
@@ -101,24 +107,49 @@ export function Sidebar({
                   </li>
                 )}
                 <li>
-                  <Link
-                    href={item.href}
-                    title={compact ? item.label : undefined}
-                    className={cn(
-                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
-                      "focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-slate-950",
-                      compact && "justify-center px-2",
-                      isActive
-                        ? "bg-teal-400 text-slate-950 shadow-md shadow-black/15"
-                        : "text-slate-400 hover:bg-white/[0.07] hover:text-white"
-                    )}
-                    aria-current={isActive ? "page" : undefined}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-                    {!compact && <span className="truncate">{item.label}</span>}
-                    {compact && <span className="sr-only">{item.label}</span>}
-                  </Link>
+                  {item.children ? <>
+                    <button
+                      type="button"
+                      title={compact ? item.label : undefined}
+                      aria-expanded={!compact && submenuOpen}
+                      aria-controls={`sidebar-submenu-${item.href.replace(/[^a-z0-9]/gi, "-")}`}
+                      onClick={() => {
+                        if (compact) onCollapsedChange?.(false);
+                        setOpenSubmenus((current) => ({ ...current, [item.href]: !submenuOpen }));
+                      }}
+                      className={cn(
+                        "group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-slate-950",
+                        compact && "justify-center px-2",
+                        isActive ? "bg-teal-400 text-slate-950 shadow-md shadow-black/15" : "text-slate-400 hover:bg-white/[0.07] hover:text-white"
+                      )}
+                    >
+                      <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                      {!compact && <><span className="truncate">{item.label}</span><ChevronDown className={cn("ml-auto h-4 w-4 transition-transform", submenuOpen && "rotate-180")} aria-hidden="true" /></>}
+                      {compact && <span className="sr-only">{item.label}</span>}
+                    </button>
+                    {!compact && submenuOpen && <ul id={`sidebar-submenu-${item.href.replace(/[^a-z0-9]/gi, "-")}`} className="ml-5 mt-1 space-y-1 border-l border-white/10 pl-3">
+                      {item.children.map((child) => {
+                        const ChildIcon = child.icon;
+                        const childActive = pathname === child.href || pathname.startsWith(`${child.href}/`);
+                        return <li key={child.href}><Link href={child.href} aria-current={childActive ? "page" : undefined} onClick={() => setMobileOpen(false)} className={cn("flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-teal-400", childActive ? "bg-white/10 text-teal-200" : "text-slate-400 hover:bg-white/[0.06] hover:text-white")}><ChildIcon className="h-4 w-4 shrink-0" aria-hidden="true" /><span>{child.label}</span></Link></li>;
+                      })}
+                    </ul>}
+                  </> : <Link
+                      href={item.href}
+                      title={compact ? item.label : undefined}
+                      className={cn(
+                        "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+                        "focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-slate-950",
+                        compact && "justify-center px-2",
+                        isActive ? "bg-teal-400 text-slate-950 shadow-md shadow-black/15" : "text-slate-400 hover:bg-white/[0.07] hover:text-white"
+                      )}
+                      aria-current={isActive ? "page" : undefined}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                      {!compact && <span className="truncate">{item.label}</span>}
+                      {compact && <span className="sr-only">{item.label}</span>}
+                    </Link>}
                 </li>
               </Fragment>
             );
@@ -205,11 +236,13 @@ export const donorNavItems: NavItem[] = [
   { href: "/life-after",           label: "LifeAfter",           icon: Heart },
   { href: "/privacy",              label: "Privacy & Data",      icon: Shield },
   { href: "/fhir-export",          label: "My FHIR export",       icon: Activity },
-  { href: "/could-i-qualify",      label: "Eligibility Check",   icon: CheckCircle,  badge: "Public" },
-  { href: "/ripple",               label: "Ripple Effect",       icon: TrendingUp,   badge: "Public" },
-  { href: "/waitlist-map",         label: "Waitlist Map",        icon: Map,          badge: "Public" },
-  { href: "/stories",              label: "Donor Stories",       icon: BookOpen,     badge: "Public" },
-  { href: "/start-conversation",   label: "Conversation Guide",  icon: MessageCircle, badge: "Public" },
+  { href: "/explore", label: "Explore", icon: Sparkles, badge: "Public", children: [
+    { href: "/could-i-qualify", label: "Eligibility Check", icon: CheckCircle },
+    { href: "/ripple", label: "Ripple Effect", icon: TrendingUp },
+    { href: "/waitlist-map", label: "Waitlist Map", icon: Map },
+    { href: "/stories", label: "Donor Stories", icon: BookOpen },
+    { href: "/start-conversation", label: "Conversation Guide", icon: MessageCircle },
+  ] },
 ];
 
 export const clinicianNavItems: NavItem[] = [
@@ -234,4 +267,6 @@ export const adminNavItems: NavItem[] = [
   { href: "/admin/review", label: "Review queues", icon: BookOpen, badge: "Admin" },
   { href: "/admin/escalations", label: "Safety escalations", icon: Activity, badge: "Admin" },
   { href: "/admin/audit", label: "Audit log", icon: Shield, badge: "Admin" },
+  { href: "/admin/ehr-registrations", label: "EHR registrations", icon: Link2, badge: "Admin" },
+  { href: "/admin/transplant-centers", label: "Transplant centers", icon: Activity, badge: "Admin" },
 ];
