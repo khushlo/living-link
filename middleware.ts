@@ -12,6 +12,7 @@ const isPublicRoute = createRouteMatcher([
   "/waitlist-map",
   "/stories",
   "/start-conversation",
+  "/contact-us",
   "/api/stories(.*)",
   "/api/waitlist-stats(.*)",
   "/api/ai/conversation-practice",
@@ -21,6 +22,7 @@ const isPublicRoute = createRouteMatcher([
   "/ehr/register",
   "/ehr/documentation",
   "/api/ehr/registrations",
+  "/api/contact",
 ]);
 
 // Role-specific route matchers

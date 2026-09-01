@@ -14,6 +14,7 @@ import {
   ChevronDown,
   FileText,
   Network,
+  Handshake,
 } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
@@ -109,6 +110,7 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
               )}
             </div>
             <Link href="/stories" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white hover:text-slate-950">Stories</Link>
+            <Link href="/contact-us" aria-current={active === "/contact-us" ? "page" : undefined} className={cn("rounded-lg px-3 py-2 text-sm font-medium transition-colors", active === "/contact-us" ? "bg-teal-50 text-teal-800" : "text-slate-600 hover:bg-white hover:text-slate-950")}>Contact us</Link>
             <div className="relative" ref={ehrRef}>
               <button type="button" onClick={() => setEhrOpen((open) => !open)} aria-expanded={ehrOpen} aria-controls="ehr-menu" className={cn("flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors", isEhrActive ? "bg-teal-50 text-teal-800" : "text-slate-600 hover:bg-white hover:text-slate-950")}>For EHRs <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", ehrOpen && "rotate-180")} aria-hidden="true" /></button>
               {ehrOpen && <div id="ehr-menu" className="absolute right-0 top-full mt-3 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-900/10">
@@ -179,6 +181,7 @@ export function PublicNav({ currentPath }: { currentPath?: string }) {
             <p className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">For EHRs</p>
             <Link href="/ehr/register" onClick={() => setMobileOpen(false)} aria-current={active === "/ehr/register" ? "page" : undefined} className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors", active === "/ehr/register" ? "bg-teal-50 text-teal-800" : "text-slate-600 hover:bg-slate-50")}><Network className="h-4 w-4 shrink-0" aria-hidden="true" /><span><span className="block">Registration</span><span className="block text-xs font-normal text-slate-400">Submit a health-system connection</span></span></Link>
             <Link href="/ehr/documentation" onClick={() => setMobileOpen(false)} aria-current={active === "/ehr/documentation" ? "page" : undefined} className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors", active === "/ehr/documentation" ? "bg-teal-50 text-teal-800" : "text-slate-600 hover:bg-slate-50")}><FileText className="h-4 w-4 shrink-0" aria-hidden="true" /><span><span className="block">Documentation</span><span className="block text-xs font-normal text-slate-400">SMART, FHIR, and CDS guide</span></span></Link>
+            <Link href="/contact-us" onClick={() => setMobileOpen(false)} aria-current={active === "/contact-us" ? "page" : undefined} className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors", active === "/contact-us" ? "bg-teal-50 text-teal-800" : "text-slate-600 hover:bg-slate-50")}><Handshake className="h-4 w-4 shrink-0" aria-hidden="true" /><span><span className="block">Contact us</span><span className="block text-xs font-normal text-slate-400">Talk with our team about a partnership</span></span></Link>
 
             {/* Auth buttons inside mobile menu */}
             <div className="pt-2 mt-2 border-t border-gray-100 flex flex-col gap-2">

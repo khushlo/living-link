@@ -249,6 +249,22 @@ model EHRRegistration {
   @@map("ehr_registrations")
 }
 
+model ContactInquiry {
+  id             String   @id @default(uuid())
+  name           String
+  organization   String
+  email          String
+  phone          String?
+  inquiryType    String   @map("inquiry_type")
+  message        String
+  status         String   @default("NEW")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@map("contact_inquiries")
+}
+
 model ExternalPatientMapping {
   id                String   @id @default(uuid())
   connectionId      String   @map("connection_id")

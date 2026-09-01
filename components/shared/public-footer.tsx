@@ -18,6 +18,7 @@ export function PublicFooter() {
           <Link href="/waitlist-map" className="hover:text-teal-700">Waitlist</Link>
           <Link href="/stories" className="hover:text-teal-700">Stories</Link>
           <Link href="/start-conversation" className="hover:text-teal-700">Practice</Link>
+          <Link href="/contact-us" className="hover:text-teal-700">Contact us</Link>
         </nav>
       </div>
       <div className="border-t border-slate-100 px-5 py-4 text-center text-xs text-slate-400">LivingLink is not a medical service. Always consult your transplant team. © 2026 LivingLink.</div>
