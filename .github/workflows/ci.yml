@@ -30,20 +30,10 @@ jobs:
   migration:
     name: Prisma migrations
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: ci
-          POSTGRES_PASSWORD: ci
-          POSTGRES_DB: livinglink_ci
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U ci -d livinglink_ci"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    # Configure PRODUCTION_DATABASE_URL in the repository's GitHub Actions secrets.
+    # Keep production isolated to this migration job; tests use disposable Postgres below.
+    env:
+      DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -117,7 +107,6 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx prisma migrate deploy
       - name: Wait for HAPI FHIR
         run: |
           for attempt in {1..90}; do
